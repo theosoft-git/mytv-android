@@ -27,6 +27,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
@@ -43,7 +44,7 @@ import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 fun DashboardScreen(
     modifier: Modifier = Modifier,
     currentIptvSourceProvider: () -> IptvSource = { IptvSource() },
-    favoriteChannelListProvider: () -> ChannelList = { ChannelList() },
+    channelFavoriteListProvider: () -> ChannelFavoriteList = { ChannelFavoriteList() },
     onChannelSelected: (Channel) -> Unit = {},
     onChannelFavoriteToggle: (Channel) -> Unit = {},
     epgListProvider: () -> EpgList = { EpgList() },
@@ -91,7 +92,7 @@ fun DashboardScreen(
 
             item {
                 DashboardFavoriteList(
-                    channelListProvider = favoriteChannelListProvider,
+                    channelFavoriteListProvider = channelFavoriteListProvider,
                     onChannelSelected = onChannelSelected,
                     onChannelUnFavorite = onChannelFavoriteToggle,
                     epgListProvider = epgListProvider,
@@ -152,7 +153,7 @@ private fun DashboardScreenScreen() {
     MyTvTheme {
         DashboardScreen(
             currentIptvSourceProvider = { IptvSource(name = "默认直播源1") },
-            favoriteChannelListProvider = { ChannelList.EXAMPLE },
+            channelFavoriteListProvider = { ChannelFavoriteList.EXAMPLE },
             epgListProvider = { EpgList.example(ChannelList.EXAMPLE) },
         )
         // PreviewWithLayoutGrids { }

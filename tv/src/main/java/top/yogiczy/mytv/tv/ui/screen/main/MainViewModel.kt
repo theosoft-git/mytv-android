@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelLineList
@@ -24,6 +25,7 @@ import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList.Companion.match
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSource
+import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
 import top.yogiczy.mytv.core.data.network.HttpException
 import top.yogiczy.mytv.core.data.repositories.epg.EpgRepository
 import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
@@ -42,12 +44,13 @@ class MainViewModel : ViewModel() {
 
     private var _lastJob: Job? = null
 
-    var onCloudSyncDone: () -> Unit = {}
+    var needRefresh: () -> Unit = {}
 
     init {
         viewModelScope.launch {
             pullCloudSyncData()
             init()
+            refreshOtherIptvSource()
         }
     }
 
@@ -70,7 +73,7 @@ class MainViewModel : ViewModel() {
 
             if (syncData != CloudSyncDate.EMPTY) {
                 syncData.apply()
-                onCloudSyncDone()
+                needRefresh()
             }
         }
     }
@@ -99,6 +102,7 @@ class MainViewModel : ViewModel() {
             .map { mergeSimilarChannel(it) }
             .map { hybridChannel(it) }
             .map { groupList ->
+                refreshChannelFavoriteList(Configs.iptvSourceCurrent, groupList)
                 _uiState.value = MainUiState.Ready(
                     channelGroupList = groupList,
                     filteredChannelGroupList = withContext(Dispatchers.Default) {
@@ -240,6 +244,39 @@ class MainViewModel : ViewModel() {
                 epgList = epgList,
             )
         }
+    }
+
+    private suspend fun refreshOtherIptvSource() {
+        val needRefreshNames = Configs.iptvChannelFavoriteList.map { it.iptvSourceName }.distinct()
+            .filter { it != Configs.iptvSourceCurrent.name }
+
+        (Constants.IPTV_SOURCE_LIST + Configs.iptvSourceList)
+            .filter { it.name in needRefreshNames }
+            .forEach { iptvSource ->
+                runCatching {
+                    val channelGroupList =
+                        IptvRepository(iptvSource).getChannelGroupList(Configs.iptvSourceCacheTime)
+
+                    refreshChannelFavoriteList(iptvSource, channelGroupList)
+                }
+            }
+    }
+
+    private suspend fun refreshChannelFavoriteList(
+        iptvSource: IptvSource,
+        channelGroupList: ChannelGroupList,
+    ) = withContext(Dispatchers.Default) {
+        Configs.iptvChannelFavoriteList =
+            ChannelFavoriteList(Configs.iptvChannelFavoriteList.map { channelFavorite ->
+                if (iptvSource.name != channelFavorite.iptvSourceName) return@map channelFavorite
+
+                val newChannel = channelGroupList
+                    .firstOrNull { group -> group.name == channelFavorite.groupName }?.channelList
+                    ?.firstOrNull { channel -> channel.name == channelFavorite.channel.name }
+
+                channelFavorite.copy(channel = newChannel ?: channelFavorite.channel)
+            })
+        needRefresh()
     }
 
     companion object {

@@ -2,6 +2,8 @@ package top.yogiczy.mytv.tv.ui.utils
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
+import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.epg.EpgProgrammeReserveList
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSource
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
@@ -43,12 +45,6 @@ object Configs {
         DEBUG_SHOW_LAYOUT_GRIDS,
 
         /** ==================== 直播源 ==================== */
-        /** 上一次频道序号 */
-        IPTV_LAST_CHANNEL_IDX,
-
-        /** 换台反转 */
-        IPTV_CHANNEL_CHANGE_FLIP,
-
         /** 当前直播源 */
         IPTV_SOURCE_CURRENT,
 
@@ -57,24 +53,6 @@ object Configs {
 
         /** 直播源缓存时间（毫秒） */
         IPTV_SOURCE_CACHE_TIME,
-
-        /** 直播源可播放host列表 */
-        IPTV_PLAYABLE_HOST_LIST,
-
-        /** 是否启用数字选台 */
-        IPTV_CHANNEL_NO_SELECT_ENABLE,
-
-        /** 换台列表首尾循环 **/
-        IPTV_CHANNEL_CHANGE_LIST_LOOP,
-
-        /** 是否启用直播源频道收藏 */
-        IPTV_CHANNEL_FAVORITE_ENABLE,
-
-        /** 显示直播源频道收藏列表 */
-        IPTV_CHANNEL_FAVORITE_LIST_VISIBLE,
-
-        /** 直播源频道收藏列表 */
-        IPTV_CHANNEL_FAVORITE_LIST,
 
         /** 直播源分组隐藏列表 */
         IPTV_CHANNEL_GROUP_HIDDEN_LIST,
@@ -90,6 +68,30 @@ object Configs {
 
         /** 频道图标覆盖 */
         IPTV_CHANNEL_LOGO_OVERRIDE,
+
+        /** 是否启用直播源频道收藏 */
+        IPTV_CHANNEL_FAVORITE_ENABLE,
+
+        /** 显示直播源频道收藏列表 */
+        IPTV_CHANNEL_FAVORITE_LIST_VISIBLE,
+
+        /** 直播源频道收藏列表 */
+        IPTV_CHANNEL_FAVORITE_LIST,
+
+        /** 上一次播放频道 */
+        IPTV_CHANNEL_LAST_PLAY,
+
+        /** 直播源可播放host列表 */
+        IPTV_PLAYABLE_HOST_LIST,
+
+        /** 换台反转 */
+        IPTV_CHANNEL_CHANGE_FLIP,
+
+        /** 是否启用数字选台 */
+        IPTV_CHANNEL_NO_SELECT_ENABLE,
+
+        /** 换台列表首尾循环 **/
+        IPTV_CHANNEL_CHANGE_LIST_LOOP,
 
         /** ==================== 节目单 ==================== */
         /** 启用节目单 */
@@ -232,11 +234,6 @@ object Configs {
         set(value) = SP.putBoolean(KEY.DEBUG_SHOW_LAYOUT_GRIDS.name, value)
 
     /** ==================== 直播源 ==================== */
-    /** 上一次直播源序号 */
-    var iptvLastChannelIdx: Int
-        get() = SP.getInt(KEY.IPTV_LAST_CHANNEL_IDX.name, 0)
-        set(value) = SP.putInt(KEY.IPTV_LAST_CHANNEL_IDX.name, value)
-
     /** 当前直播源 */
     var iptvSourceCurrent: IptvSource
         get() = Globals.json.decodeFromString(SP.getString(KEY.IPTV_SOURCE_CURRENT.name, "")
@@ -254,26 +251,6 @@ object Configs {
     var iptvSourceCacheTime: Long
         get() = SP.getLong(KEY.IPTV_SOURCE_CACHE_TIME.name, Constants.IPTV_SOURCE_CACHE_TIME)
         set(value) = SP.putLong(KEY.IPTV_SOURCE_CACHE_TIME.name, value)
-
-    /** 直播源可播放host列表 */
-    var iptvPlayableHostList: Set<String>
-        get() = SP.getStringSet(KEY.IPTV_PLAYABLE_HOST_LIST.name, emptySet())
-        set(value) = SP.putStringSet(KEY.IPTV_PLAYABLE_HOST_LIST.name, value)
-
-    /** 是否启用直播源频道收藏 */
-    var iptvChannelFavoriteEnable: Boolean
-        get() = SP.getBoolean(KEY.IPTV_CHANNEL_FAVORITE_ENABLE.name, true)
-        set(value) = SP.putBoolean(KEY.IPTV_CHANNEL_FAVORITE_ENABLE.name, value)
-
-    /** 显示直播源频道收藏列表 */
-    var iptvChannelFavoriteListVisible: Boolean
-        get() = SP.getBoolean(KEY.IPTV_CHANNEL_FAVORITE_LIST_VISIBLE.name, false)
-        set(value) = SP.putBoolean(KEY.IPTV_CHANNEL_FAVORITE_LIST_VISIBLE.name, value)
-
-    /** 直播源频道收藏列表 */
-    var iptvChannelFavoriteList: Set<String>
-        get() = SP.getStringSet(KEY.IPTV_CHANNEL_FAVORITE_LIST.name, emptySet())
-        set(value) = SP.putStringSet(KEY.IPTV_CHANNEL_FAVORITE_LIST.name, value)
 
     /** 直播源分组隐藏列表 */
     var iptvChannelGroupHiddenList: Set<String>
@@ -301,6 +278,47 @@ object Configs {
     var iptvChannelLogoOverride: Boolean
         get() = SP.getBoolean(KEY.IPTV_CHANNEL_LOGO_OVERRIDE.name, false)
         set(value) = SP.putBoolean(KEY.IPTV_CHANNEL_LOGO_OVERRIDE.name, value)
+
+    /** 是否启用直播源频道收藏 */
+    var iptvChannelFavoriteEnable: Boolean
+        get() = SP.getBoolean(KEY.IPTV_CHANNEL_FAVORITE_ENABLE.name, true)
+        set(value) = SP.putBoolean(KEY.IPTV_CHANNEL_FAVORITE_ENABLE.name, value)
+
+    /** 显示直播源频道收藏列表 */
+    var iptvChannelFavoriteListVisible: Boolean
+        get() = SP.getBoolean(KEY.IPTV_CHANNEL_FAVORITE_LIST_VISIBLE.name, false)
+        set(value) = SP.putBoolean(KEY.IPTV_CHANNEL_FAVORITE_LIST_VISIBLE.name, value)
+
+    /** 直播源频道收藏列表 */
+    var iptvChannelFavoriteList: ChannelFavoriteList
+        get() = Globals.json.decodeFromString(
+            SP.getString(
+                KEY.IPTV_CHANNEL_FAVORITE_LIST.name,
+                Globals.json.encodeToString(ChannelFavoriteList())
+            )
+        )
+        set(value) = SP.putString(
+            KEY.IPTV_CHANNEL_FAVORITE_LIST.name,
+            Globals.json.encodeToString(value)
+        )
+
+    /** 上一次播放频道 */
+    var iptvChannelLastPlay: Channel
+        get() = Globals.json.decodeFromString(
+            SP.getString(
+                KEY.IPTV_CHANNEL_LAST_PLAY.name,
+                Globals.json.encodeToString(Channel.EMPTY)
+            )
+        )
+        set(value) = SP.putString(
+            KEY.IPTV_CHANNEL_LAST_PLAY.name,
+            Globals.json.encodeToString(value)
+        )
+
+    /** 直播源可播放host列表 */
+    var iptvPlayableHostList: Set<String>
+        get() = SP.getStringSet(KEY.IPTV_PLAYABLE_HOST_LIST.name, emptySet())
+        set(value) = SP.putStringSet(KEY.IPTV_PLAYABLE_HOST_LIST.name, value)
 
     /** 换台反转 */
     var iptvChannelChangeFlip: Boolean
@@ -585,19 +603,19 @@ object Configs {
             debugShowFps = debugShowFps,
             debugShowVideoPlayerMetadata = debugShowVideoPlayerMetadata,
             debugShowLayoutGrids = debugShowLayoutGrids,
-            iptvLastChannelIdx = iptvLastChannelIdx,
             iptvSourceCacheTime = iptvSourceCacheTime,
             iptvSourceCurrent = iptvSourceCurrent,
             iptvSourceList = iptvSourceList,
-            iptvPlayableHostList = iptvPlayableHostList,
-            iptvChannelFavoriteEnable = iptvChannelFavoriteEnable,
-            iptvChannelFavoriteListVisible = iptvChannelFavoriteListVisible,
-            iptvChannelFavoriteList = iptvChannelFavoriteList,
             iptvChannelGroupHiddenList = iptvChannelGroupHiddenList,
             iptvHybridMode = iptvHybridMode,
             iptvSimilarChannelMerge = iptvSimilarChannelMerge,
             iptvChannelLogoProvider = iptvChannelLogoProvider,
             iptvChannelLogoOverride = iptvChannelLogoOverride,
+            iptvChannelFavoriteEnable = iptvChannelFavoriteEnable,
+            iptvChannelFavoriteListVisible = iptvChannelFavoriteListVisible,
+            iptvChannelFavoriteList = iptvChannelFavoriteList,
+            iptvChannelLastPlay = iptvChannelLastPlay,
+            iptvPlayableHostList = iptvPlayableHostList,
             iptvChannelChangeFlip = iptvChannelChangeFlip,
             iptvChannelNoSelectEnable = iptvChannelNoSelectEnable,
             iptvChannelChangeListLoop = iptvChannelChangeListLoop,
@@ -644,19 +662,19 @@ object Configs {
         configs.debugShowFps?.let { debugShowFps = it }
         configs.debugShowVideoPlayerMetadata?.let { debugShowVideoPlayerMetadata = it }
         configs.debugShowLayoutGrids?.let { debugShowLayoutGrids = it }
-        configs.iptvLastChannelIdx?.let { iptvLastChannelIdx = it }
         configs.iptvSourceCacheTime?.let { iptvSourceCacheTime = it }
         configs.iptvSourceCurrent?.let { iptvSourceCurrent = it }
         configs.iptvSourceList?.let { iptvSourceList = it }
-        configs.iptvPlayableHostList?.let { iptvPlayableHostList = it }
-        configs.iptvChannelFavoriteEnable?.let { iptvChannelFavoriteEnable = it }
-        configs.iptvChannelFavoriteListVisible?.let { iptvChannelFavoriteListVisible = it }
-        configs.iptvChannelFavoriteList?.let { iptvChannelFavoriteList = it }
         configs.iptvChannelGroupHiddenList?.let { iptvChannelGroupHiddenList = it }
         configs.iptvHybridMode?.let { iptvHybridMode = it }
         configs.iptvSimilarChannelMerge?.let { iptvSimilarChannelMerge = it }
         configs.iptvChannelLogoProvider?.let { iptvChannelLogoProvider = it }
         configs.iptvChannelLogoOverride?.let { iptvChannelLogoOverride = it }
+        configs.iptvChannelFavoriteEnable?.let { iptvChannelFavoriteEnable = it }
+        configs.iptvChannelFavoriteListVisible?.let { iptvChannelFavoriteListVisible = it }
+        configs.iptvChannelFavoriteList?.let { iptvChannelFavoriteList = it }
+        configs.iptvChannelLastPlay?.let { iptvChannelLastPlay = it }
+        configs.iptvPlayableHostList?.let { iptvPlayableHostList = it }
         configs.iptvChannelChangeFlip?.let { iptvChannelChangeFlip = it }
         configs.iptvChannelNoSelectEnable?.let { iptvChannelNoSelectEnable = it }
         configs.iptvChannelChangeListLoop?.let { iptvChannelChangeListLoop = it }
@@ -705,19 +723,19 @@ object Configs {
         val debugShowFps: Boolean? = null,
         val debugShowVideoPlayerMetadata: Boolean? = null,
         val debugShowLayoutGrids: Boolean? = null,
-        val iptvLastChannelIdx: Int? = null,
         val iptvSourceCacheTime: Long? = null,
         val iptvSourceCurrent: IptvSource? = null,
         val iptvSourceList: IptvSourceList? = null,
-        val iptvPlayableHostList: Set<String>? = null,
-        val iptvChannelFavoriteEnable: Boolean? = null,
-        val iptvChannelFavoriteListVisible: Boolean? = null,
-        val iptvChannelFavoriteList: Set<String>? = null,
         val iptvChannelGroupHiddenList: Set<String>? = null,
         val iptvHybridMode: IptvHybridMode? = null,
         val iptvSimilarChannelMerge: Boolean? = null,
         val iptvChannelLogoProvider: String? = null,
         val iptvChannelLogoOverride: Boolean? = null,
+        val iptvChannelFavoriteEnable: Boolean? = null,
+        val iptvChannelFavoriteListVisible: Boolean? = null,
+        val iptvChannelFavoriteList: ChannelFavoriteList? = null,
+        val iptvChannelLastPlay: Channel? = null,
+        val iptvPlayableHostList: Set<String>? = null,
         val iptvChannelChangeFlip: Boolean? = null,
         val iptvChannelNoSelectEnable: Boolean? = null,
         val iptvChannelChangeListLoop: Boolean? = null,

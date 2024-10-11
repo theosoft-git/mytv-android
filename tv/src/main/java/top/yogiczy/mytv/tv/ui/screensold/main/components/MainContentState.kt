@@ -115,11 +115,12 @@ class MainContentState(
     init {
         val channelGroupList = channelGroupListProvider()
 
-        changeCurrentChannel(channelGroupList.channelList.getOrElse(settingsViewModel.iptvLastChannelIdx) {
-            channelGroupList.channelList.firstOrNull() ?: Channel()
+        changeCurrentChannel(settingsViewModel.iptvChannelLastPlay.isEmptyOrElse {
+            channelGroupList.channelFirstOrNull() ?: Channel.EMPTY
         })
 
         videoPlayerState.onReady {
+            settingsViewModel.iptvChannelLastPlay = _currentChannel
             settingsViewModel.iptvPlayableHostList += currentChannelLine.url.urlHost()
         }
 
@@ -247,9 +248,6 @@ class MainContentState(
         _isTempChannelScreenVisible = true
 
         _currentChannel = channel
-        settingsViewModel.iptvLastChannelIdx =
-            channelGroupListProvider().channelIdx(_currentChannel)
-
         _currentChannelLineIdx = getLineIdx(_currentChannel.lineList, lineIdx)
 
         _currentPlaybackEpgProgramme = playbackEpgProgramme

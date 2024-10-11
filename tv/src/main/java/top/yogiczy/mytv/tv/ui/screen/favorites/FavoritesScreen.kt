@@ -18,6 +18,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.tv.ui.screen.channels.components.ChannelsChannelGrid
@@ -28,7 +29,7 @@ import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
-    channelListProvider: () -> ChannelList = { ChannelList() },
+    channelFavoriteListProvider: () -> ChannelFavoriteList = { ChannelFavoriteList() },
     onChannelSelected: (Channel) -> Unit = {},
     onChannelFavoriteToggle: (Channel) -> Unit = {},
     onChannelFavoriteClear: () -> Unit = {},
@@ -49,14 +50,14 @@ fun FavoritesScreen(
         onBackPressed = onBackPressed,
     ) {
         ChannelsChannelGrid(
-            channelListProvider = channelListProvider,
+            channelListProvider = { ChannelList(channelFavoriteListProvider().map { it.channel }) },
             onChannelSelected = onChannelSelected,
             onChannelFavoriteToggle = onChannelFavoriteToggle,
             epgListProvider = epgListProvider,
             inFavoriteMode = true,
         )
 
-        if (channelListProvider().isEmpty()) {
+        if (channelFavoriteListProvider().isEmpty()) {
             FavoritesScreenEmpty()
         }
     }
@@ -85,7 +86,7 @@ private fun FavoritesScreenEmpty(modifier: Modifier = Modifier) {
 private fun FavoritesScreenPreview() {
     MyTvTheme {
         FavoritesScreen(
-            channelListProvider = { ChannelList.EXAMPLE },
+            channelFavoriteListProvider = { ChannelFavoriteList.EXAMPLE },
             epgListProvider = { EpgList.example(ChannelList.EXAMPLE) },
         )
     }

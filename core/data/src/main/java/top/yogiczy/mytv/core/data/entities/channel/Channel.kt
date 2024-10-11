@@ -1,11 +1,11 @@
 package top.yogiczy.mytv.core.data.entities.channel
 
-import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
 /**
  * 频道
  */
-@Immutable
+@Serializable
 data class Channel(
     /**
      * 频道名称
@@ -47,8 +47,12 @@ data class Channel(
             ),
             logo = "https://live.fanmingming.com/tv/CCTV1.png",
         )
+
+        val EMPTY = Channel()
     }
 
     val no: String
         get() = (index + 1).toString().padStart(2, '0')
+
+    fun isEmptyOrElse(defaultValue: () -> Channel) = if (this == EMPTY) defaultValue() else this
 }

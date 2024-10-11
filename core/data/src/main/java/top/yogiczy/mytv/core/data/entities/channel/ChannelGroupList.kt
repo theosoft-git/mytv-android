@@ -27,6 +27,8 @@ data class ChannelGroupList(
         fun ChannelGroupList.channelGroupIdx(channel: Channel) =
             this.indexOfFirst { group -> group.channelList.any { it == channel } }
 
+        fun ChannelGroupList.chanelGroup(channel: Channel) = this[channelGroupIdx(channel)]
+
         fun ChannelGroupList.channelIdx(channel: Channel) =
             this.flatMap { it.channelList }.indexOfFirst { it == channel }
 

@@ -1,10 +1,12 @@
 package top.yogiczy.mytv.core.data.entities.channel
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
 /**
  * 频道线路列表
  */
+@Serializable
 @Immutable
 data class ChannelLineList(
     val value: List<ChannelLine> = emptyList(),

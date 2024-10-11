@@ -9,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.epg.EpgProgrammeReserveList
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSource
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
@@ -84,15 +86,6 @@ class SettingsViewModel : ViewModel() {
             afterSetWhenCloudSyncAutoPull()
         }
 
-    private var _iptvLastChannelIdx by mutableIntStateOf(0)
-    var iptvLastChannelIdx: Int
-        get() = _iptvLastChannelIdx
-        set(value) {
-            _iptvLastChannelIdx = value
-            Configs.iptvLastChannelIdx = value
-            afterSetWhenCloudSyncAutoPull()
-        }
-
     private var _iptvSourceCacheTime by mutableLongStateOf(0)
     var iptvSourceCacheTime: Long
         get() = _iptvSourceCacheTime
@@ -117,42 +110,6 @@ class SettingsViewModel : ViewModel() {
         set(value) {
             _iptvSourceList = value
             Configs.iptvSourceList = value
-            afterSetWhenCloudSyncAutoPull()
-        }
-
-    private var _iptvPlayableHostList by mutableStateOf(emptySet<String>())
-    var iptvPlayableHostList: Set<String>
-        get() = _iptvPlayableHostList
-        set(value) {
-            _iptvPlayableHostList = value
-            Configs.iptvPlayableHostList = value
-            afterSetWhenCloudSyncAutoPull()
-        }
-
-    private var _iptvChannelFavoriteEnable by mutableStateOf(false)
-    var iptvChannelFavoriteEnable: Boolean
-        get() = _iptvChannelFavoriteEnable
-        set(value) {
-            _iptvChannelFavoriteEnable = value
-            Configs.iptvChannelFavoriteEnable = value
-            afterSetWhenCloudSyncAutoPull()
-        }
-
-    private var _iptvChannelFavoriteListVisible by mutableStateOf(false)
-    var iptvChannelFavoriteListVisible: Boolean
-        get() = _iptvChannelFavoriteListVisible
-        set(value) {
-            _iptvChannelFavoriteListVisible = value
-            Configs.iptvChannelFavoriteListVisible = value
-            afterSetWhenCloudSyncAutoPull()
-        }
-
-    private var _iptvChannelFavoriteList by mutableStateOf(emptySet<String>())
-    var iptvChannelFavoriteList: Set<String>
-        get() = _iptvChannelFavoriteList
-        set(value) {
-            _iptvChannelFavoriteList = value
-            Configs.iptvChannelFavoriteList = value
             afterSetWhenCloudSyncAutoPull()
         }
 
@@ -198,6 +155,52 @@ class SettingsViewModel : ViewModel() {
         set(value) {
             _iptvChannelLogoOverride = value
             Configs.iptvChannelLogoOverride = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _iptvChannelFavoriteEnable by mutableStateOf(false)
+    var iptvChannelFavoriteEnable: Boolean
+        get() = _iptvChannelFavoriteEnable
+        set(value) {
+            _iptvChannelFavoriteEnable = value
+            Configs.iptvChannelFavoriteEnable = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _iptvChannelFavoriteListVisible by mutableStateOf(false)
+    var iptvChannelFavoriteListVisible: Boolean
+        get() = _iptvChannelFavoriteListVisible
+        set(value) {
+            _iptvChannelFavoriteListVisible = value
+            Configs.iptvChannelFavoriteListVisible = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _iptvChannelFavoriteList by mutableStateOf(ChannelFavoriteList())
+    var iptvChannelFavoriteList: ChannelFavoriteList
+        get() = _iptvChannelFavoriteList
+        set(value) {
+            _iptvChannelFavoriteList = value
+            Configs.iptvChannelFavoriteList = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _iptvChannelLastPlay by mutableStateOf(Channel.EMPTY)
+    var iptvChannelLastPlay: Channel
+        get() = _iptvChannelLastPlay
+        set(value) {
+            _iptvChannelLastPlay = value
+            Configs.iptvChannelLastPlay = value
+            afterSetWhenCloudSyncAutoPull()
+
+        }
+
+    private var _iptvPlayableHostList by mutableStateOf(emptySet<String>())
+    var iptvPlayableHostList: Set<String>
+        get() = _iptvPlayableHostList
+        set(value) {
+            _iptvPlayableHostList = value
+            Configs.iptvPlayableHostList = value
             afterSetWhenCloudSyncAutoPull()
         }
 
@@ -532,19 +535,19 @@ class SettingsViewModel : ViewModel() {
         _debugShowFps = Configs.debugShowFps
         _debugShowVideoPlayerMetadata = Configs.debugShowVideoPlayerMetadata
         _debugShowLayoutGrids = Configs.debugShowLayoutGrids
-        _iptvLastChannelIdx = Configs.iptvLastChannelIdx
         _iptvSourceCacheTime = Configs.iptvSourceCacheTime
         _iptvSourceCurrent = Configs.iptvSourceCurrent
         _iptvSourceList = Configs.iptvSourceList
-        _iptvPlayableHostList = Configs.iptvPlayableHostList
-        _iptvChannelFavoriteEnable = Configs.iptvChannelFavoriteEnable
-        _iptvChannelFavoriteListVisible = Configs.iptvChannelFavoriteListVisible
-        _iptvChannelFavoriteList = Configs.iptvChannelFavoriteList
         _iptvChannelGroupHiddenList = Configs.iptvChannelGroupHiddenList
         _iptvHybridMode = Configs.iptvHybridMode
         _iptvSimilarChannelMerge = Configs.iptvSimilarChannelMerge
         _iptvChannelLogoProvider = Configs.iptvChannelLogoProvider
         _iptvChannelLogoOverride = Configs.iptvChannelLogoOverride
+        _iptvChannelFavoriteEnable = Configs.iptvChannelFavoriteEnable
+        _iptvChannelFavoriteListVisible = Configs.iptvChannelFavoriteListVisible
+        _iptvChannelFavoriteList = Configs.iptvChannelFavoriteList
+        _iptvChannelLastPlay = Configs.iptvChannelLastPlay
+        _iptvPlayableHostList = Configs.iptvPlayableHostList
         _iptvChannelChangeFlip = Configs.iptvChannelChangeFlip
         _iptvChannelNoSelectEnable = Configs.iptvChannelNoSelectEnable
         _iptvChannelChangeListLoop = Configs.iptvChannelChangeListLoop

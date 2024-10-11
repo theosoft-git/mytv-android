@@ -25,6 +25,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList.Companion.recentProgramme
@@ -41,12 +42,12 @@ import top.yogiczy.mytv.tv.ui.utils.ifElse
 @Composable
 fun DashboardFavoriteList(
     modifier: Modifier = Modifier,
-    channelListProvider: () -> ChannelList = { ChannelList() },
+    channelFavoriteListProvider: () -> ChannelFavoriteList = { ChannelFavoriteList() },
     onChannelSelected: (Channel) -> Unit = {},
     onChannelUnFavorite: (Channel) -> Unit = {},
     epgListProvider: () -> EpgList = { EpgList() },
 ) {
-    val channelList = channelListProvider()
+    val channelFavoriteList = channelFavoriteListProvider()
 
     val coroutineScope = rememberCoroutineScope()
     val childPadding = rememberChildPadding()
@@ -81,7 +82,7 @@ fun DashboardFavoriteList(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(start = childPadding.start, end = childPadding.end),
         ) {
-            itemsIndexed(channelList) { index, channel ->
+            itemsIndexed(channelFavoriteList) { index, channelFavorite ->
                 ChannelsChannelItem(
                     modifier = Modifier
                         .ifElse(
@@ -90,10 +91,10 @@ fun DashboardFavoriteList(
                                 .focusRequester(firstItemFocusRequester)
                                 .onFocusChanged { isFirstItemFocused = it.isFocused },
                         ),
-                    channelProvider = { channel },
-                    onChannelSelected = { onChannelSelected(channel) },
-                    onChannelFavoriteToggle = { onChannelUnFavorite(channel) },
-                    recentEpgProgrammeProvider = { epgListProvider().recentProgramme(channel) },
+                    channelProvider = { channelFavorite.channel },
+                    onChannelSelected = { onChannelSelected(channelFavorite.channel) },
+                    onChannelFavoriteToggle = { onChannelUnFavorite(channelFavorite.channel) },
+                    recentEpgProgrammeProvider = { epgListProvider().recentProgramme(channelFavorite.channel) },
                 )
             }
         }
@@ -107,7 +108,7 @@ private fun DashboardFavoriteListPreview() {
         AppScreen {
             DashboardFavoriteList(
                 modifier = Modifier.padding(vertical = 20.dp),
-                channelListProvider = { ChannelList.EXAMPLE },
+                channelFavoriteListProvider = { ChannelFavoriteList.EXAMPLE },
                 epgListProvider = { EpgList.example(ChannelList.EXAMPLE) },
             )
         }

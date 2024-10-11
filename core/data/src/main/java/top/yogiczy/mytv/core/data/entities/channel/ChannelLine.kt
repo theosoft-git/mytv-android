@@ -1,11 +1,11 @@
 package top.yogiczy.mytv.core.data.entities.channel
 
-import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
 /**
  * 频道线路
  */
-@Immutable
+@Serializable
 data class ChannelLine(
     val url: String = "",
     val httpUserAgent: String? = null,

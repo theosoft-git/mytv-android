@@ -13,9 +13,11 @@ import androidx.navigation.navArgument
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavorite
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavorite.Companion.isSame
+import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelIdx
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelList
+import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.chanelGroup
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.tv.BuildConfig
@@ -51,7 +53,7 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
     val uiState by mainViewModel.uiState.collectAsState()
 
-    mainViewModel.onCloudSyncDone = { settingsViewModel.refresh() }
+    mainViewModel.needRefresh = { settingsViewModel.refresh() }
 
     val channelGroupListProvider = {
         (uiState as? MainUiState.Ready)?.channelGroupList ?: ChannelGroupList()
@@ -61,27 +63,36 @@ fun MainScreen(
     }
     val epgListProvider = { (uiState as? MainUiState.Ready)?.epgList ?: EpgList() }
     val favoriteChannelListProvider = {
-        val favoriteChannelNameList = settingsViewModel.iptvChannelFavoriteList
-        ChannelList(filteredChannelGroupListProvider().channelList
-            .filter { favoriteChannelNameList.contains(it.name) })
+        ChannelList(settingsViewModel.iptvChannelFavoriteList.map { it.channel })
     }
 
     val navController = rememberNavController()
 
     fun onChannelSelected(channel: Channel) {
-        settingsViewModel.iptvLastChannelIdx =
-            filteredChannelGroupListProvider().channelIdx(channel)
+        settingsViewModel.iptvChannelLastPlay = channel
         navController.navigateSingleTop(Screens.Live())
     }
 
     fun onChannelFavoriteToggle(channel: Channel) {
         if (!settingsViewModel.iptvChannelFavoriteEnable) return
 
-        if (settingsViewModel.iptvChannelFavoriteList.contains(channel.name)) {
-            settingsViewModel.iptvChannelFavoriteList -= channel.name
+        val favoriteChannel = ChannelFavorite(
+            channel = channel,
+            iptvSourceName = settingsViewModel.iptvSourceCurrent.name,
+            groupName = filteredChannelGroupListProvider().chanelGroup(channel).name,
+        )
+
+        if (settingsViewModel.iptvChannelFavoriteList.any { it.isSame(favoriteChannel) }) {
+            settingsViewModel.iptvChannelFavoriteList =
+                ChannelFavoriteList(settingsViewModel.iptvChannelFavoriteList.filter {
+                    !it.isSame(favoriteChannel)
+                })
+
             Snackbar.show("取消收藏：${channel.name}")
         } else {
-            settingsViewModel.iptvChannelFavoriteList += channel.name
+            settingsViewModel.iptvChannelFavoriteList =
+                ChannelFavoriteList(settingsViewModel.iptvChannelFavoriteList + favoriteChannel)
+
             Snackbar.show("已收藏：${channel.name}")
         }
     }
@@ -89,7 +100,7 @@ fun MainScreen(
     fun onChannelFavoriteClear() {
         if (!settingsViewModel.iptvChannelFavoriteEnable) return
 
-        settingsViewModel.iptvChannelFavoriteList = emptySet()
+        settingsViewModel.iptvChannelFavoriteList = ChannelFavoriteList()
         Snackbar.show("已清空所有收藏")
     }
 
@@ -149,7 +160,7 @@ fun MainScreen(
             composable(Screens.Dashboard()) {
                 DashboardScreen(
                     currentIptvSourceProvider = { settingsViewModel.iptvSourceCurrent },
-                    favoriteChannelListProvider = favoriteChannelListProvider,
+                    channelFavoriteListProvider = { settingsViewModel.iptvChannelFavoriteList },
                     onChannelSelected = { onChannelSelected(it) },
                     epgListProvider = epgListProvider,
                     toLiveScreen = { navController.navigateSingleTop(Screens.Live()) },
@@ -207,7 +218,7 @@ fun MainScreen(
 
             composable(Screens.Favorites()) {
                 FavoritesScreen(
-                    channelListProvider = favoriteChannelListProvider,
+                    channelFavoriteListProvider = { settingsViewModel.iptvChannelFavoriteList },
                     onChannelSelected = { onChannelSelected(it) },
                     onChannelFavoriteToggle = { onChannelFavoriteToggle(it) },
                     onChannelFavoriteClear = { onChannelFavoriteClear() },
