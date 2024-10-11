@@ -209,10 +209,11 @@ class MainViewModel : ViewModel() {
                     Snackbar.show("节目单获取失败，请检查网络连接", type = SnackbarType.ERROR)
                 }
                 .map { epgList ->
-                    val filteredChannels =
-                        channelGroupList.channelList.map { it.epgName.lowercase() }
+                    withContext(Dispatchers.Default) {
+                        val filteredChannels = channelGroupList.channelList.map { it.epgName }
 
-                    EpgList(epgList.filter { epg -> epg.channelList.any { it.lowercase() in filteredChannels } })
+                        EpgList(epgList.filter { epg -> epg.channelList.any { it in filteredChannels } })
+                    }
                 }
                 .map { epgList ->
                     _uiState.value = (_uiState.value as MainUiState.Ready).copy(epgList = epgList)

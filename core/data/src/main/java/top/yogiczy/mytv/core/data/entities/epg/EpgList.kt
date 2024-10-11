@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.Epg.Companion.recentProgramme
+import top.yogiczy.mytv.core.data.utils.LruMutableMap
 
 /**
  * 频道节目单列表
@@ -19,12 +20,7 @@ data class EpgList(
     val value: List<Epg> = emptyList(),
 ) : List<Epg> by value {
     companion object {
-        private val matchCache =
-            object : LinkedHashMap<String, Epg?>(128, 0.75f, true) {
-                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Epg?>?): Boolean {
-                    return size > 1024
-                }
-            }
+        private val matchCache = LruMutableMap<String, Epg?>(128, 1024)
 
         fun EpgList.recentProgramme(channel: Channel): EpgProgrammeRecent? {
             if (isEmpty()) return null

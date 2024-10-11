@@ -8,6 +8,7 @@ import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelLine
 import top.yogiczy.mytv.core.data.entities.channel.ChannelLineList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
+import top.yogiczy.mytv.core.data.utils.ChannelAlias
 
 /**
  * m3u直播源解析
@@ -63,7 +64,7 @@ class M3uIptvParser : IptvParser {
                             .map { (channelName, channelList) ->
                                 Channel(
                                     name = channelName,
-                                    epgName = channelList.first().epgName,
+                                    epgName = ChannelAlias.standardChannelName(channelList.first().epgName),
                                     lineList = ChannelLineList(
                                         channelList.distinctBy { it.url }
                                             .map {

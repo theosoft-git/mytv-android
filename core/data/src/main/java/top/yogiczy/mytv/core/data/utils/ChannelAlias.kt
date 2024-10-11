@@ -11,18 +11,25 @@ object ChannelAlias : Loggable("ChannelAlias") {
     private var _aliasMap = mapOf<String, List<String>>()
     val aliasMap get() = _aliasMap
 
+    private val nameCache = LruMutableMap<String, String>(1024, 4096)
+
     suspend fun refresh() = withContext(Dispatchers.IO) {
+        nameCache.clear()
         _aliasMap = runCatching {
             Globals.json.decodeFromString<Map<String, List<String>>>(aliasFile.readText())
         }.getOrElse { emptyMap() }
     }
 
     fun standardChannelName(name: String): String {
-        val normalizedSuffixes = getNormalizedSuffixes()
-        val nameWithoutSuffix =
-            normalizedSuffixes.fold(name) { acc, suffix -> acc.removeSuffix(suffix) }.trim()
+        return nameCache.getOrPut(name) {
+            val normalizedSuffixes = getNormalizedSuffixes()
+            val nameWithoutSuffix =
+                normalizedSuffixes.fold(name) { acc, suffix -> acc.removeSuffix(suffix) }.trim()
 
-        return findAliasName(nameWithoutSuffix) ?: name
+            findAliasName(nameWithoutSuffix)?.also {
+                if (it != name) log.d("standardChannelName(${nameCache.size}): $name -> $it")
+            } ?: name
+        }
     }
 
     private fun getNormalizedSuffixes(): List<String> {

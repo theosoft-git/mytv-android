@@ -14,6 +14,7 @@ import top.yogiczy.mytv.core.data.network.HttpException
 import top.yogiczy.mytv.core.data.network.request
 import top.yogiczy.mytv.core.data.repositories.FileCacheRepository
 import top.yogiczy.mytv.core.data.repositories.epg.fetcher.EpgFetcher
+import top.yogiczy.mytv.core.data.utils.ChannelAlias
 import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.data.utils.Logger
 import java.io.StringReader
@@ -73,7 +74,8 @@ class EpgRepository(
                         "display-name" -> {
                             lastChannel?.let {
                                 runCatching {
-                                    val displayName = parser.nextText()
+                                    val displayName =
+                                        ChannelAlias.standardChannelName(parser.nextText())
                                     lastChannel.displayNames.add(displayName)
                                 }
                             }
