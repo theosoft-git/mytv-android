@@ -17,6 +17,7 @@ import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelIdx
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
+import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.tv.BuildConfig
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.rememberDoubleBackPressedExitState
@@ -58,7 +59,7 @@ fun MainScreen(
     val filteredChannelGroupListProvider = {
         (uiState as? MainUiState.Ready)?.filteredChannelGroupList ?: ChannelGroupList()
     }
-    val epgListProvider = { (uiState as MainUiState.Ready).epgList }
+    val epgListProvider = { (uiState as? MainUiState.Ready)?.epgList ?: EpgList() }
     val favoriteChannelListProvider = {
         val favoriteChannelNameList = settingsViewModel.iptvChannelFavoriteList
         ChannelList(filteredChannelGroupListProvider().channelList

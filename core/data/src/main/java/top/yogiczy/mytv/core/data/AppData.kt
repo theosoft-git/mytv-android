@@ -12,15 +12,17 @@ object AppData {
         Globals.resources = context.resources
         Globals.deviceName = runCatching {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
-                Settings.Secure.getString(context.contentResolver, "bluetooth_name")
+                Settings.Secure.getString(context.contentResolver, "bluetooth_name")!!
             } else {
-                Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+                Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)!!
             }
-        }.getOrElse {
-            val manufacturer = Build.MANUFACTURER
-            val model = Build.MODEL
-            "$manufacturer ${model.removePrefix(manufacturer)}"
         }
+            .recover {
+                val manufacturer = Build.MANUFACTURER!!
+                val model = Build.MODEL!!
+                "$manufacturer ${model.removePrefix(manufacturer)}"
+            }
+            .getOrDefault("未知设备")
 
         SP.init(context)
     }
