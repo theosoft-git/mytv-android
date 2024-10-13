@@ -14,8 +14,6 @@ class XmlGzEpgFetcher : EpgFetcher {
     }
 
     override suspend fun fetch(body: ResponseBody) = withContext(Dispatchers.IO) {
-        GZIPInputStream(body.byteStream()).bufferedReader().use { reader ->
-            reader.readText()
-        }
+        GZIPInputStream(body.byteStream())
     }
 }
