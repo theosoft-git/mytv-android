@@ -11,6 +11,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSource
@@ -270,7 +271,7 @@ object HttpServer : Loggable("HttpServer") {
     private fun handleCloudSyncDataGet(response: AsyncHttpServerResponse) {
         wrapResponse(response).apply {
             setContentType("application/json")
-            send(Globals.json.encodeToString(CloudSync.getData()))
+            send(Globals.json.encodeToString(runBlocking { CloudSync.getData() }))
         }
     }
 

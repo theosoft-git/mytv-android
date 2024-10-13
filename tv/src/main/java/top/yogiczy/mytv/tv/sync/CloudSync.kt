@@ -33,9 +33,9 @@ object CloudSync : Loggable("CloudSync") {
         }
     }
 
-    fun getData(): CloudSyncDate {
+    suspend fun getData(): CloudSyncDate = withContext(Dispatchers.IO) {
         val configs = Configs.toPartial()
-        return CloudSyncDate(
+        CloudSyncDate(
             version = BuildConfig.VERSION_NAME,
             syncAt = System.currentTimeMillis(),
             syncFrom = Globals.deviceName,
@@ -43,18 +43,17 @@ object CloudSync : Loggable("CloudSync") {
             extraLocalIptvSourceList = configs.iptvSourceList
                 ?.filter { it.isLocal && it.url.startsWith(Globals.cacheDir.path) }
                 ?.associate { it.url to runCatching { File(it.url).readText() }.getOrDefault("") },
-            extraChannelNameAlias = runCatching { ChannelAlias.aliasFile.readText() }
-                .getOrDefault(""),
+            extraChannelNameAlias = runCatching { ChannelAlias.aliasFile.readText() }.getOrDefault(""),
         )
     }
 
     suspend fun push(): Boolean {
-        log.i("推送云端数据")
+        log.i("推送云端数据(${Configs.cloudSyncProvider.label})")
         return getRepository().push(getData())
     }
 
     suspend fun pull(): CloudSyncDate {
-        log.i("拉取云端数据")
+        log.i("拉取云端数据(${Configs.cloudSyncProvider.label})")
         return getRepository().pull().let {
             it.copy(configs = it.configs.desensitized())
         }
