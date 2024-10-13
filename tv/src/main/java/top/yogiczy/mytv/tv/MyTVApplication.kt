@@ -7,6 +7,7 @@ import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
+import coil.util.DebugLogger
 import io.sentry.Hint
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -25,18 +26,22 @@ class MyTVApplication : Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader(this).newBuilder()
+            .logger(DebugLogger())
             .components {
                 add(SvgDecoder.Factory())
             }
             .crossfade(true)
             .memoryCachePolicy(CachePolicy.ENABLED)
             .memoryCache {
-                MemoryCache.Builder(this).build()
+                MemoryCache.Builder(this)
+                    .maxSizePercent(0.25)
+                    .build()
             }
             .diskCachePolicy(CachePolicy.ENABLED)
             .diskCache {
                 DiskCache.Builder()
                     .directory(cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(1024 * 1024 * 100)
                     .build()
             }
             .build()

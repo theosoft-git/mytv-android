@@ -2,13 +2,6 @@ package top.yogiczy.mytv.core.data.repositories.iptv.parser
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.yogiczy.mytv.core.data.entities.channel.Channel
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroup
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
-import top.yogiczy.mytv.core.data.entities.channel.ChannelLine
-import top.yogiczy.mytv.core.data.entities.channel.ChannelLineList
-import top.yogiczy.mytv.core.data.entities.channel.ChannelList
-import top.yogiczy.mytv.core.data.utils.ChannelAlias
 
 /**
  * m3u直播源解析
@@ -19,10 +12,10 @@ class M3uIptvParser : IptvParser {
         return data.startsWith("#EXTM3U")
     }
 
-    override suspend fun parse(data: String): ChannelGroupList =
+    override suspend fun parse(data: String) =
         withContext(Dispatchers.Default) {
             val lines = data.split("\r\n", "\n")
-            val iptvList = mutableListOf<ChannelItem>()
+            val channelList = mutableListOf<IptvParser.ChannelItem>()
 
             lines.forEachIndexed { index, line ->
                 if (!line.startsWith("#EXTINF")) return@forEachIndexed
@@ -41,9 +34,9 @@ class M3uIptvParser : IptvParser {
                 val url = lines.getOrNull(index + 1)?.trim()
 
                 url?.let {
-                    iptvList.addAll(
+                    channelList.addAll(
                         groupNames.map { groupName ->
-                            ChannelItem(
+                            IptvParser.ChannelItem(
                                 name = name,
                                 epgName = epgName,
                                 groupName = groupName,
@@ -56,32 +49,7 @@ class M3uIptvParser : IptvParser {
                 }
             }
 
-            return@withContext ChannelGroupList(iptvList.groupBy { it.groupName }
-                .map { (groupName, channelList) ->
-                    ChannelGroup(
-                        name = groupName,
-                        channelList = ChannelList(channelList.groupBy { it.name }
-                            .map { (channelName, channelList) ->
-                                val first = channelList.first()
-
-                                Channel(
-                                    name = channelName,
-                                    standardName = ChannelAlias.standardChannelName(channelName),
-                                    epgName = ChannelAlias.standardChannelName(first.epgName),
-                                    lineList = ChannelLineList(
-                                        channelList.distinctBy { it.url }
-                                            .map {
-                                                ChannelLine(
-                                                    url = it.url,
-                                                    httpUserAgent = it.httpUserAgent,
-                                                )
-                                            }
-                                    ),
-                                    logo = first.logo,
-                                )
-                            })
-                    )
-                })
+            channelList
         }
 
     override suspend fun getEpgUrl(data: String): String? {
@@ -93,13 +61,4 @@ class M3uIptvParser : IptvParser {
                 ?.trim()
         }
     }
-
-    private data class ChannelItem(
-        val name: String,
-        val epgName: String,
-        val groupName: String,
-        val url: String,
-        val logo: String?,
-        val httpUserAgent: String?,
-    )
 }

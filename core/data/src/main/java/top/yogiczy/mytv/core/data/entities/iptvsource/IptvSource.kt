@@ -22,6 +22,16 @@ data class IptvSource(
      * 是否本地
      */
     val isLocal: Boolean = false,
+
+    /**
+     * 分组名称映射
+     */
+    val groupNameMap: Map<String, String> = mapOf(),
+
+    /**
+     * 分组排序
+     */
+    val groupSort: List<String> = listOf(),
 ) {
     companion object {
         val EXAMPLE = IptvSource(

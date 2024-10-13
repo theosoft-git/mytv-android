@@ -1,12 +1,5 @@
 package top.yogiczy.mytv.core.data.repositories.iptv.parser
 
-import top.yogiczy.mytv.core.data.entities.channel.Channel
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroup
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
-import top.yogiczy.mytv.core.data.entities.channel.ChannelLine
-import top.yogiczy.mytv.core.data.entities.channel.ChannelLineList
-import top.yogiczy.mytv.core.data.entities.channel.ChannelList
-
 /**
  * 缺省直播源解析
  */
@@ -16,27 +9,18 @@ class DefaultIptvParser : IptvParser {
         return true
     }
 
-    override suspend fun parse(data: String): ChannelGroupList {
-        val channelList = ChannelList(
-            listOf(
-                Channel(
-                    name = "支持m3u",
-                    epgName = "m3u",
-                    lineList = ChannelLineList(listOf(ChannelLine("http://1.2.3.4"))),
-                ),
-                Channel(
-                    name = "支持txt",
-                    epgName = "txt",
-                    lineList = ChannelLineList(listOf(ChannelLine("http://1.2.3.4"))),
-                ),
-            )
-        )
-
-        return ChannelGroupList(
-            listOf(
-                ChannelGroup(name = "不支持当前直播源格式", channelList = channelList),
-                ChannelGroup(name = "不支持当前直播源格式", channelList = channelList),
-            )
+    override suspend fun parse(data: String): List<IptvParser.ChannelItem> {
+        return listOf(
+            IptvParser.ChannelItem(
+                groupName = "未知直播源格式",
+                name = "支持m3u（以#EXTM3U开头）",
+                url = "http://1.2.3.4",
+            ),
+            IptvParser.ChannelItem(
+                groupName = "未知直播源格式",
+                name = "支持txt（包含#genre#）",
+                url = "http://1.2.3.4",
+            ),
         )
     }
 }

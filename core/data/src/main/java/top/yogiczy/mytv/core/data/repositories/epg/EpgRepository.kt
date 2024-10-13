@@ -25,22 +25,25 @@ class EpgRepository(
     private val log = Logger.create("EpgRepository")
     private val epgXmlRepository = EpgXmlRepository(source.url)
 
+    private fun isExpired(lastModified: Long): Boolean {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return dateFormat.format(System.currentTimeMillis()) != dateFormat.format(lastModified)
+    }
+
+    private suspend fun refresh(): String {
+        val xml = epgXmlRepository.getXml()
+        val epgList = EpgParser.fromXml(xml)
+        if (epgList.isEmpty()) throw Exception("获取节目单为空")
+
+        return Globals.json.encodeToString(epgList)
+    }
+
     /**
      * 获取节目单列表
      */
     suspend fun getEpgList(): EpgList = withContext(Dispatchers.Default) {
         try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-            val xmlJson = getOrRefresh({ lastModified, _ ->
-                dateFormat.format(System.currentTimeMillis()) != dateFormat.format(lastModified)
-            }) {
-                val xml = epgXmlRepository.getXml()
-                val epgList = EpgParser.fromXml(xml)
-                if (epgList.isEmpty()) throw Exception("获取节目单为空")
-
-                Globals.json.encodeToString(epgList)
-            }
+            val xmlJson = getOrRefresh({ lastModified, _ -> isExpired(lastModified) }) { refresh() }
 
             return@withContext Globals.json.decodeFromString<EpgList>(xmlJson).also { epgList ->
                 log.i("加载节目单（${source.name}）：${epgList.size}个频道，${epgList.sumOf { it.programmeList.size }}个节目")

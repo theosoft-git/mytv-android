@@ -7,6 +7,7 @@ import top.yogiczy.mytv.core.data.network.HttpException
 import top.yogiczy.mytv.core.data.network.request
 import top.yogiczy.mytv.core.data.repositories.FileCacheRepository
 import top.yogiczy.mytv.core.data.repositories.iptv.parser.IptvParser
+import top.yogiczy.mytv.core.data.repositories.iptv.parser.IptvParser.ChannelItem.Companion.toChannelGroupList
 import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.data.utils.Logger
 import kotlin.time.measureTimedValue
@@ -20,35 +21,47 @@ class IptvRepository(
     private val log = Logger.create("IptvRepository")
     private val rawRepository = IptvRawRepository(source)
 
+    private fun isExpired(lastModified: Long, cacheTime: Long): Boolean {
+        val timeout =
+            System.currentTimeMillis() - lastModified >= (if (source.isLocal) Long.MAX_VALUE else cacheTime)
+        val rawChanged = lastModified < rawRepository.lastModified()
+
+        return timeout || rawChanged
+    }
+
+    private suspend fun refresh(): String {
+        val raw = rawRepository.getRaw()
+        val parser = IptvParser.instances.first { it.isSupport(source.url, raw) }
+
+        log.d("开始解析直播源（${source.name}）...")
+        return measureTimedValue { parser.parse(raw) }.let {
+            log.i("解析直播源（${source.name}）完成", null, it.duration)
+            Globals.json.encodeToString((groupTransform(it.value).toChannelGroupList()))
+        }
+    }
+
+    private fun groupTransform(channelList: List<IptvParser.ChannelItem>): List<IptvParser.ChannelItem> {
+        return channelList
+            .map { channel ->
+                channel.copy(groupName = source.groupNameMap.getOrElse(channel.groupName) { channel.groupName })
+            }
+            .sortedBy {
+                source.groupSort.indexOf(it.groupName).takeIf { index -> index >= 0 }
+                    ?: Int.MAX_VALUE
+            }
+    }
+
     /**
      * 获取直播源分组列表
      */
     suspend fun getChannelGroupList(cacheTime: Long): ChannelGroupList {
         try {
-            val json = getOrRefresh({ lastModified, _ ->
-                val timeout =
-                    System.currentTimeMillis() - lastModified >= (if (source.isLocal) Long.MAX_VALUE else cacheTime)
-                val rawChanged = lastModified < rawRepository.lastModified()
-
-                timeout || rawChanged
-            }) {
-                val raw = rawRepository.getRaw()
-                val parser = IptvParser.instances.first { it.isSupport(source.url, raw) }
-
-                log.d("开始解析直播源（${source.name}）...")
-                measureTimedValue { parser.parse(raw) }.let {
-                    log.i("解析直播源（${source.name}）完成", null, it.duration)
-                    Globals.json.encodeToString(it.value)
-                }
+            val json = getOrRefresh({ lastModified, _ -> isExpired(lastModified, cacheTime) }) {
+                refresh()
             }
 
             return Globals.json.decodeFromString<ChannelGroupList>(json).also { groupList ->
-                log.i(
-                    listOf(
-                        "加载直播源（${source.name}）：${groupList.size}个分组",
-                        "${groupList.sumOf { it.channelList.size }}个频道",
-                    ).joinToString("，")
-                )
+                log.i("加载直播源（${source.name}）：${groupList.size}个分组，${groupList.sumOf { it.channelList.size }}个频道")
             }
         } catch (ex: Exception) {
             log.e("获取直播源失败", ex)
