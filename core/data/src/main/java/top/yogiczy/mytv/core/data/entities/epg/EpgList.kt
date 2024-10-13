@@ -9,7 +9,9 @@ import kotlinx.serialization.Serializable
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.Epg.Companion.recentProgramme
-import top.yogiczy.mytv.core.data.utils.LruMutableMap
+import top.yogiczy.mytv.core.data.utils.Logger
+import top.yogiczy.mytv.core.data.utils.LruMutableCache
+import kotlin.time.measureTimedValue
 
 /**
  * 频道节目单列表
@@ -20,7 +22,8 @@ data class EpgList(
     val value: List<Epg> = emptyList(),
 ) : List<Epg> by value {
     companion object {
-        private val matchCache = LruMutableMap<String, Epg?>(128, 1024)
+        private val log = Logger.create("EpgList")
+        private val matchCache = LruMutableCache<String, Epg>(64)
 
         fun EpgList.recentProgramme(channel: Channel): EpgProgrammeRecent? {
             if (isEmpty()) return null
@@ -32,14 +35,19 @@ data class EpgList(
             if (isEmpty()) return null
 
             return matchCache.getOrPut(channel.epgName) {
-                firstOrNull { epg ->
-                    epg.channelList.any { it.equals(channel.epgName, ignoreCase = true) }
-                } ?: Epg()
+                val t = measureTimedValue {
+                    firstOrNull { epg ->
+                        epg.channelList.any { it.equals(channel.epgName, ignoreCase = true) }
+                    } ?: Epg()
+                }
+                log.v("match(${matchCache.size()}): ${channel.epgName}", null, t.duration)
+
+                t.value
             }
         }
 
         fun clearCache() {
-            matchCache.clear()
+            matchCache.evictAll()
         }
 
         fun example(channelList: ChannelList): EpgList {

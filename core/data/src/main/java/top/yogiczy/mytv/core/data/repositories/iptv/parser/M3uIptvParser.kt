@@ -29,8 +29,8 @@ class M3uIptvParser : IptvParser {
 
                 val name = line.split(",").last().trim()
                 val epgName =
-                    Regex("tvg-name=\"(.+?)\"").find(line)?.groupValues?.get(1)?.trim()
-                        ?: name
+                    Regex("tvg-name=\"(.*?)\"").find(line)?.groupValues?.get(1)?.trim()
+                        ?.ifBlank { name } ?: name
                 val groupNames =
                     Regex("group-title=\"(.+?)\"").find(line)?.groupValues?.get(1)?.split(";")
                         ?.map { it.trim() }
@@ -62,9 +62,12 @@ class M3uIptvParser : IptvParser {
                         name = groupName,
                         channelList = ChannelList(channelList.groupBy { it.name }
                             .map { (channelName, channelList) ->
+                                val first = channelList.first()
+
                                 Channel(
                                     name = channelName,
-                                    epgName = ChannelAlias.standardChannelName(channelList.first().epgName),
+                                    standardName = ChannelAlias.standardChannelName(channelName),
+                                    epgName = ChannelAlias.standardChannelName(first.epgName),
                                     lineList = ChannelLineList(
                                         channelList.distinctBy { it.url }
                                             .map {
@@ -74,7 +77,7 @@ class M3uIptvParser : IptvParser {
                                                 )
                                             }
                                     ),
-                                    logo = channelList.first().logo,
+                                    logo = first.logo,
                                 )
                             })
                     )
@@ -84,7 +87,7 @@ class M3uIptvParser : IptvParser {
     override suspend fun getEpgUrl(data: String): String? {
         val lines = data.split("\r\n", "\n")
         return lines.firstOrNull { it.startsWith("#EXTM3U") }?.let { defLine ->
-            Regex("x-tvg-url=\"(.+?)\"").find(defLine)?.groupValues?.get(1)
+            Regex("x-tvg-url=\"(.*?)\"").find(defLine)?.groupValues?.get(1)
                 ?.split(",")
                 ?.firstOrNull()
                 ?.trim()

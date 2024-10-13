@@ -1,10 +1,12 @@
 package top.yogiczy.mytv.core.data.entities.channel
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
 /**
  * 频道分组列表
  */
+@Serializable
 @Immutable
 data class ChannelGroupList(
     val value: List<ChannelGroup> = emptyList(),
@@ -30,7 +32,7 @@ data class ChannelGroupList(
         fun ChannelGroupList.chanelGroup(channel: Channel) = this[channelGroupIdx(channel)]
 
         fun ChannelGroupList.channelIdx(channel: Channel) =
-            this.flatMap { it.channelList }.indexOfFirst { it == channel }
+            channelList.indexOfFirst { it == channel }
 
         fun ChannelGroupList.channelFirstOrNull() = this.firstOrNull()?.channelList?.firstOrNull()
 

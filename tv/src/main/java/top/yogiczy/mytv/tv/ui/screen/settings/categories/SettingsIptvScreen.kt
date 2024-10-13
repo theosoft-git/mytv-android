@@ -149,7 +149,7 @@ fun SettingsIptvScreen(
 
             SettingsListItem(
                 headlineContent = "混合模式",
-                trailingContent = { Text(hybridMode.label ) },
+                trailingContent = { Text(hybridMode.label) },
                 onSelect = toIptvHybridModeScreen,
                 link = true,
             )

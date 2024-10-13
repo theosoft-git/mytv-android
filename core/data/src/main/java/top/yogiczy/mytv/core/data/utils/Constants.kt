@@ -124,7 +124,7 @@ object Constants {
     /**
      * 日志历史最大保留条数
      */
-    const val LOG_HISTORY_MAX_SIZE = 50
+    const val LOG_HISTORY_MAX_SIZE = 100
 
     /**
      * 界面 临时频道界面显示时间

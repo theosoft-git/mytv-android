@@ -18,8 +18,7 @@ class GitRepository : Loggable("GitRepository") {
 
         try {
             val parser = GitReleaseParser.instances.first { it.isSupport(url) }
-            return url.request { body -> parser.parse(body.string()) }
-                ?: throw Exception("无法获取api响应")
+            return url.request { body -> parser.parse(body.string()) }!!
         } catch (ex: Exception) {
             log.e("获取最新发行版失败", ex)
             throw Exception("获取最新发行版失败，请检查网络连接", ex)

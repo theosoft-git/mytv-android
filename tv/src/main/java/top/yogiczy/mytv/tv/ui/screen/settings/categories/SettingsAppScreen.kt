@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSource
 import top.yogiczy.mytv.core.data.repositories.epg.EpgRepository
 import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
+import top.yogiczy.mytv.core.data.utils.Constants
 import top.yogiczy.mytv.core.data.utils.SP
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.screen.settings.SettingsViewModel
@@ -18,6 +19,7 @@ import top.yogiczy.mytv.tv.ui.screen.settings.components.SettingsCategoryScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.components.SettingsListItem
 import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
+import top.yogiczy.mytv.tv.ui.utils.Configs
 
 @Composable
 fun SettingsAppScreen(
@@ -65,14 +67,20 @@ fun SettingsAppScreen(
                 onSelect = {
                     settingsViewModel.iptvPlayableHostList = emptySet()
                     coroutineScope.launch {
-                        IptvRepository(settingsViewModel.iptvSourceCurrent).getEpgUrl()?.let {
-                            EpgRepository(EpgSource(url = it)).clearCache()
+                        (Constants.IPTV_SOURCE_LIST + Configs.iptvSourceList).forEach { iptvSource ->
+                            IptvRepository(iptvSource).getEpgUrl()?.let {
+                                EpgRepository(EpgSource(url = it)).clearCache()
+                            }
+                            IptvRepository(iptvSource).clearCache()
                         }
-                        IptvRepository(settingsViewModel.iptvSourceCurrent).clearCache()
-                        EpgRepository(settingsViewModel.epgSourceCurrent).clearCache()
+
+                        (Constants.EPG_SOURCE_LIST + Configs.epgSourceList).forEach { epgSource ->
+                            EpgRepository(epgSource).clearCache()
+                        }
+
+                        Snackbar.show("缓存已清除")
+                        onReload()
                     }
-                    Snackbar.show("缓存已清除")
-                    onReload()
                 },
             )
         }

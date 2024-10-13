@@ -2,6 +2,7 @@ package top.yogiczy.mytv.core.data.utils
 
 import android.util.Log
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 /**
  * 日志工具类
@@ -9,29 +10,44 @@ import kotlinx.serialization.Serializable
 class Logger private constructor(
     private val tag: String
 ) {
-    fun d(message: String, throwable: Throwable? = null) {
-        Log.d(tag, message, throwable)
-        addHistoryItem(HistoryItem(LevelType.DEBUG, tag, message, throwable?.message))
+    private fun messageWithDuration(message: String, duration: Duration? = null): String {
+        return if (duration != null) "$message \t [$duration]" else message
     }
 
-    fun i(message: String, throwable: Throwable? = null) {
-        Log.i(tag, message, throwable)
-        addHistoryItem(HistoryItem(LevelType.INFO, tag, message, throwable?.message))
+    fun v(message: String, throwable: Throwable? = null, duration: Duration? = null) {
+        val messageWithDuration = messageWithDuration(message, duration)
+        Log.v(tag, messageWithDuration, throwable)
+        addHistoryItem(HistoryItem(LevelType.DEBUG, tag, messageWithDuration, throwable?.message))
     }
 
-    fun w(message: String, throwable: Throwable? = null) {
-        Log.w(tag, message, throwable)
-        addHistoryItem(HistoryItem(LevelType.WARN, tag, message, throwable?.message))
+    fun d(message: String, throwable: Throwable? = null, duration: Duration? = null) {
+        val messageWithDuration = messageWithDuration(message, duration)
+        Log.d(tag, messageWithDuration, throwable)
+        addHistoryItem(HistoryItem(LevelType.DEBUG, tag, messageWithDuration, throwable?.message))
     }
 
-    fun e(message: String, throwable: Throwable? = null) {
-        Log.e(tag, message, throwable)
-        addHistoryItem(HistoryItem(LevelType.ERROR, tag, message, throwable?.message))
+    fun i(message: String, throwable: Throwable? = null, duration: Duration? = null) {
+        val messageWithDuration = messageWithDuration(message, duration)
+        Log.i(tag, messageWithDuration, throwable)
+        addHistoryItem(HistoryItem(LevelType.INFO, tag, messageWithDuration, throwable?.message))
     }
 
-    fun wtf(message: String, throwable: Throwable? = null) {
-        Log.wtf(tag, message, throwable)
-        addHistoryItem(HistoryItem(LevelType.ERROR, tag, message, throwable?.message))
+    fun w(message: String, throwable: Throwable? = null, duration: Duration? = null) {
+        val messageWithDuration = messageWithDuration(message, duration)
+        Log.w(tag, messageWithDuration, throwable)
+        addHistoryItem(HistoryItem(LevelType.WARN, tag, messageWithDuration, throwable?.message))
+    }
+
+    fun e(message: String, throwable: Throwable? = null, duration: Duration? = null) {
+        val messageWithDuration = messageWithDuration(message, duration)
+        Log.e(tag, messageWithDuration, throwable)
+        addHistoryItem(HistoryItem(LevelType.ERROR, tag, messageWithDuration, throwable?.message))
+    }
+
+    fun wtf(message: String, throwable: Throwable? = null, duration: Duration? = null) {
+        val messageWithDuration = messageWithDuration(message, duration)
+        Log.wtf(tag, messageWithDuration, throwable)
+        addHistoryItem(HistoryItem(LevelType.ERROR, tag, messageWithDuration, throwable?.message))
     }
 
     companion object {

@@ -89,8 +89,8 @@ fun ChannelInfo(
             LocalContentColor provides LocalContentColor.current.copy(alpha = 0.8f),
         ) {
             if (currentPlaybackEpgProgramme == null) {
-                Text("正在播放：${recentEpgProgramme?.now?.title ?: "无节目"}", maxLines = 1)
-                Text("稍后播放：${recentEpgProgramme?.next?.title ?: "无节目"}", maxLines = 1)
+                Text("正在播放：${recentEpgProgramme?.now?.title ?: "精彩节目"}", maxLines = 1)
+                Text("稍后播放：${recentEpgProgramme?.next?.title ?: "精彩节目"}", maxLines = 1)
             } else {
                 Text("正在回放：${currentPlaybackEpgProgramme.title}", maxLines = 1)
             }

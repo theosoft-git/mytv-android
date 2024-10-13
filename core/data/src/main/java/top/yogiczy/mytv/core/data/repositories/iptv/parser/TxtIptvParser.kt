@@ -51,9 +51,12 @@ class TxtIptvParser : IptvParser {
                         name = groupName,
                         channelList = ChannelList(channelList.groupBy { it.name }
                             .map { (channelName, channelList) ->
+                                val first = channelList.first()
+
                                 Channel(
                                     name = channelName,
-                                    epgName = ChannelAlias.standardChannelName(channelList.first().epgName),
+                                    standardName = ChannelAlias.standardChannelName(channelName),
+                                    epgName = ChannelAlias.standardChannelName(first.epgName),
                                     lineList = ChannelLineList(
                                         channelList.distinctBy { it.url }
                                             .map { ChannelLine(url = it.url) }

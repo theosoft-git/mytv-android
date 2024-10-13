@@ -1,8 +1,11 @@
 package top.yogiczy.mytv.core.data.entities.channel
 
+import kotlinx.serialization.Serializable
+
 /**
  * 频道分组
  */
+@Serializable
 data class ChannelGroup(
     /**
      * 分组名称

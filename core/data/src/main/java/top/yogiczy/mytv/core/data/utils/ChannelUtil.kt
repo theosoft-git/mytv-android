@@ -154,12 +154,10 @@ object ChannelUtil {
     }
 
     fun urlSupportPlayback(url: String): Boolean {
-        return listOf("pltv", "PLTV", "tvod", "TVOD").any { url.contains(it) }
+        return listOf("pltv", "tvod").any { url.contains(it, ignoreCase = true) }
     }
 
     fun urlToCanPlayback(url: String): String {
-        return url
-            .replace("PLTV", "tvod")
-            .replace("pltv", "tvod")
+        return url.replace("pltv", "tvod", ignoreCase = true)
     }
 }

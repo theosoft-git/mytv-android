@@ -1,8 +1,6 @@
 package top.yogiczy.mytv.tv
 
 import android.annotation.SuppressLint
-import java.security.KeyManagementException
-import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
@@ -35,9 +33,7 @@ class UnsafeTrustManager : X509TrustManager {
                 sslContext.init(null, trustAllCerts, SecureRandom())
                 HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.socketFactory)
                 HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
-            } catch (e: NoSuchAlgorithmException) {
-                e.printStackTrace()
-            } catch (e: KeyManagementException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }

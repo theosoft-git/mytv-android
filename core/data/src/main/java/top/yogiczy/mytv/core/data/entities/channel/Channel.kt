@@ -1,6 +1,7 @@
 package top.yogiczy.mytv.core.data.entities.channel
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * 频道
@@ -11,6 +12,11 @@ data class Channel(
      * 频道名称
      */
     val name: String = "",
+
+    /**
+     * 标准频道名称
+     */
+    val standardName: String = name,
 
     /**
      * 节目单名称，用于查询节目单
@@ -30,7 +36,7 @@ data class Channel(
     /**
      * 频道号
      */
-    val index: Int = 0,
+    @Transient val index: Int = -1,
 ) {
     companion object {
         val EXAMPLE = Channel(

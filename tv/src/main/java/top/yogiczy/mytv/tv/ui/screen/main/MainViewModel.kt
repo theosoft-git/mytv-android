@@ -32,13 +32,17 @@ import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
 import top.yogiczy.mytv.core.data.utils.ChannelAlias
 import top.yogiczy.mytv.core.data.utils.ChannelUtil
 import top.yogiczy.mytv.core.data.utils.Constants
+import top.yogiczy.mytv.core.data.utils.Logger
 import top.yogiczy.mytv.tv.sync.CloudSync
 import top.yogiczy.mytv.tv.sync.CloudSyncDate
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.material.SnackbarType
 import top.yogiczy.mytv.tv.ui.utils.Configs
+import java.util.Calendar
 
 class MainViewModel : ViewModel() {
+    private val log = Logger.create("MainViewModel")
+
     private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
@@ -50,6 +54,7 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             pullCloudSyncData()
             init()
+            _lastJob?.join()
             refreshOtherIptvSource()
         }
     }
@@ -124,7 +129,7 @@ class MainViewModel : ViewModel() {
             return@withContext ChannelGroupList(channelGroupList.map { group ->
                 group.copy(
                     channelList = ChannelList(group.channelList
-                        .groupBy { channel -> ChannelAlias.standardChannelName(channel.name) }
+                        .groupBy { channel -> channel.standardName }
                         .map { (standardName, similarChannels) ->
                             val firstChannel = similarChannels.first()
                             val mergedLineList = similarChannels
@@ -150,10 +155,11 @@ class MainViewModel : ViewModel() {
 
     private suspend fun hybridChannel(channelGroupList: ChannelGroupList) =
         withContext(Dispatchers.Default) {
-            _uiState.value = MainUiState.Loading("混合直播源")
+            if(Configs.iptvHybridMode != Configs.IptvHybridMode.DISABLE) {
+                _uiState.value = MainUiState.Loading("混合直播源")
+            }
 
-            val hybridMode = Configs.iptvHybridMode
-            return@withContext when (hybridMode) {
+            return@withContext when (Configs.iptvHybridMode) {
                 Configs.IptvHybridMode.DISABLE -> channelGroupList
                 Configs.IptvHybridMode.IPTV_FIRST -> {
                     ChannelGroupList(channelGroupList.map { group ->
@@ -184,6 +190,13 @@ class MainViewModel : ViewModel() {
     private suspend fun refreshEpg() {
         if (!Configs.epgEnable) return
 
+        if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < Configs.epgRefreshTimeThreshold) {
+            val threshold = Configs.epgRefreshTimeThreshold.toString().padStart(2, '0') + ":00"
+            log.i("当前时间未到${threshold}，不获取节目单")
+            return
+        }
+
+
         if (_uiState.value is MainUiState.Ready) {
             EpgList.clearCache()
             val channelGroupList = (_uiState.value as MainUiState.Ready).channelGroupList
@@ -196,9 +209,7 @@ class MainViewModel : ViewModel() {
                 } else Configs.epgSourceCurrent
 
                 emit(
-                    EpgRepository(epgSource).getEpgList(
-                        refreshTimeThreshold = Configs.epgRefreshTimeThreshold,
-                    )
+                    EpgRepository(epgSource).getEpgList()
                 )
             }
                 .retryWhen { e, attempt ->
@@ -214,7 +225,8 @@ class MainViewModel : ViewModel() {
                 }
                 .map { epgList ->
                     withContext(Dispatchers.Default) {
-                        val filteredChannels = channelGroupList.channelList.map { it.epgName }
+                        val filteredChannels =
+                            (channelGroupList.channelList + Configs.iptvChannelFavoriteList.map { it.channel }).map { it.epgName }
 
                         EpgList(epgList.filter { epg -> epg.channelList.any { it in filteredChannels } })
                     }
