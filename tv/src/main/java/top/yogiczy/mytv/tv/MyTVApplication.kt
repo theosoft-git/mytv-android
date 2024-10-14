@@ -19,9 +19,9 @@ class MyTVApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
 
+        initSentry()
         AppData.init(applicationContext)
         UnsafeTrustManager.enableUnsafeTrustManager()
-        initSentry()
     }
 
     override fun newImageLoader(): ImageLoader {
@@ -54,15 +54,10 @@ class MyTVApplication : Application(), ImageLoaderFactory {
             options.tracesSampleRate = 1.0
             options.beforeSend =
                 SentryOptions.BeforeSendCallback { event: SentryEvent, _: Hint ->
-                    if (SentryLevel.ERROR == event.level || SentryLevel.FATAL == event.level) {
-                        if (event.exceptions?.any { ex -> ex.type?.contains("HttpException") == true } == true) {
-                            null
-                        } else {
-                            event
-                        }
-                    } else {
-                        null
-                    }
+                    if (SentryLevel.ERROR == event.level || SentryLevel.FATAL == event.level)
+                        if (event.exceptions?.any { ex -> ex.type?.contains("HttpException") == true } == true) null
+                        else event
+                    else null
                 }
         }
     }
