@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.core.data.entities.channel.Channel
+import top.yogiczy.mytv.core.data.entities.channel.ChannelGroup
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
@@ -33,7 +34,7 @@ fun ChannelsScreen(
 ) {
     var currentChannelGroupIdx by rememberSaveable { mutableIntStateOf(0) }
     val currentChannelGroup = remember(currentChannelGroupIdx) {
-        channelGroupListProvider()[currentChannelGroupIdx]
+        channelGroupListProvider().getOrElse(currentChannelGroupIdx) { ChannelGroup() }
     }
 
     AppScreen(
@@ -74,5 +75,13 @@ private fun ChannelsScreenPreview() {
             channelGroupListProvider = { ChannelGroupList.EXAMPLE },
             epgListProvider = { EpgList.example(ChannelGroupList.EXAMPLE.channelList) },
         )
+    }
+}
+
+@Preview(device = "id:Android TV (720p)")
+@Composable
+private fun ChannelsScreenEmptyPreview() {
+    MyTvTheme {
+        ChannelsScreen()
     }
 }

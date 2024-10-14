@@ -213,6 +213,7 @@ private fun ChannelsChannelItemNo(
     channelProvider: () -> Channel = { Channel() },
 ) {
     val channel = channelProvider()
+    if (channel.index <= -1) return
 
     Surface(
         modifier = modifier.fillMaxSize(),
