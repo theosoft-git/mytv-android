@@ -13,6 +13,12 @@ abstract class FileCacheRepository(
     private val fileName: String,
     private val isFullPath: Boolean = false,
 ) {
+    init {
+        getCacheFile().parentFile?.let {
+            if (!it.exists()) it.mkdirs()
+        }
+    }
+
     private fun getCacheFile() =
         if (isFullPath) File(fileName) else File(Globals.cacheDir, fileName)
 

@@ -107,7 +107,6 @@ class MainViewModel : ViewModel() {
             .map { mergeSimilarChannel(it) }
             .map { hybridChannel(it) }
             .map { groupList ->
-                refreshChannelFavoriteList(Configs.iptvSourceCurrent, groupList)
                 _uiState.value = MainUiState.Ready(
                     channelGroupList = groupList,
                     filteredChannelGroupList = withContext(Dispatchers.Default) {
@@ -117,6 +116,7 @@ class MainViewModel : ViewModel() {
                 )
                 groupList
             }
+            .map { refreshChannelFavoriteList(Configs.iptvSourceCurrent, it) }
             .collect()
     }
 

@@ -19,11 +19,11 @@ import kotlin.time.measureTimedValue
 /**
  * 节目单获取
  */
-class EpgRepository(
-    private val source: EpgSource,
-) : FileCacheRepository("epg-${source.url.hashCode().toUInt().toString(16)}.json") {
+class EpgRepository(private val source: EpgSource) :
+    FileCacheRepository(source.cacheFileName("json")) {
+
     private val log = Logger.create("EpgRepository")
-    private val epgXmlRepository = EpgXmlRepository(source.url)
+    private val epgXmlRepository = EpgXmlRepository(source)
 
     private fun isExpired(lastModified: Long): Boolean {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -58,23 +58,29 @@ class EpgRepository(
         epgXmlRepository.clearCache()
         super.clearCache()
     }
+
+    companion object {
+        suspend fun clearAllCache() = withContext(Dispatchers.IO) {
+            EpgSource.cacheDir.deleteRecursively()
+        }
+    }
 }
 
 /**
  * 节目单xml获取
  */
-private class EpgXmlRepository(
-    private val url: String
-) : FileCacheRepository("epg-${url.hashCode().toUInt().toString(16)}.xml") {
+private class EpgXmlRepository(private val source: EpgSource) :
+    FileCacheRepository(source.cacheFileName("xml")) {
+
     private val log = Logger.create("EpgXmlRepository")
 
     suspend fun getXml(): InputStream {
         return getOrRefreshInputStream(0) {
-            log.i("开始获取节目单xml: $url")
+            log.i("开始获取节目单xml: ${source.url}")
 
             try {
                 val t = measureTimedValue {
-                    url.request { response, request ->
+                    source.url.request { response, request ->
                         val fetcher =
                             EpgFetcher.instances.first { it.isSupport(request.url.toString()) }
                         fetcher.fetch(response.body!!)

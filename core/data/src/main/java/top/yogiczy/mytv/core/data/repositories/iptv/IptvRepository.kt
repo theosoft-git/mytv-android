@@ -1,5 +1,7 @@
 package top.yogiczy.mytv.core.data.repositories.iptv
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
@@ -15,9 +17,9 @@ import kotlin.time.measureTimedValue
 /**
  * 直播源数据获取
  */
-class IptvRepository(
-    private val source: IptvSource,
-) : FileCacheRepository("iptv-${source.url.hashCode().toUInt().toString(16)}.json") {
+class IptvRepository(private val source: IptvSource) :
+    FileCacheRepository(source.cacheFileName("json")) {
+
     private val log = Logger.create("IptvRepository")
     private val rawRepository = IptvRawRepository(source)
 
@@ -81,15 +83,19 @@ class IptvRepository(
         rawRepository.clearCache()
         super.clearCache()
     }
+
+    companion object {
+        suspend fun clearAllCache() = withContext(Dispatchers.IO) {
+            IptvSource.cacheDir.deleteRecursively()
+        }
+    }
 }
 
-private class IptvRawRepository(
-    private val source: IptvSource,
-) : FileCacheRepository(
-    if (source.isLocal) source.url
-    else "iptv-${source.url.hashCode().toUInt().toString(16)}.txt",
+private class IptvRawRepository(private val source: IptvSource) : FileCacheRepository(
+    if (source.isLocal) source.url else source.cacheFileName("txt"),
     source.isLocal,
 ) {
+
     private val log = Logger.create("IptvRawRepository")
 
     suspend fun getRaw(): String {

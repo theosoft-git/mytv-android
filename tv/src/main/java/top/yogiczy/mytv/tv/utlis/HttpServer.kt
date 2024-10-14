@@ -18,6 +18,8 @@ import top.yogiczy.mytv.core.data.entities.epgsource.EpgSource
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSourceList
+import top.yogiczy.mytv.core.data.repositories.epg.EpgRepository
+import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
 import top.yogiczy.mytv.core.data.utils.ChannelAlias
 import top.yogiczy.mytv.core.data.utils.Constants
 import top.yogiczy.mytv.core.data.utils.Globals
@@ -167,7 +169,8 @@ object HttpServer : Loggable("HttpServer") {
             }
 
             "content" -> {
-                val file = File(Globals.cacheDir, "iptv-${System.currentTimeMillis()}.txt")
+                val file =
+                    File(Globals.cacheDir, "iptv_source_local_${System.currentTimeMillis()}.txt")
                 file.writeText(content)
                 newIptvSource = IptvSource(name, file.path, true)
             }
@@ -209,6 +212,10 @@ object HttpServer : Loggable("HttpServer") {
         val alias = request.getBody<StringBody>().get()
 
         ChannelAlias.aliasFile.writeText(alias)
+        runBlocking {
+            IptvRepository.clearAllCache()
+            EpgRepository.clearAllCache()
+        }
 
         wrapResponse(response).send("success")
     }
