@@ -170,7 +170,7 @@ object HttpServer : Loggable("HttpServer") {
 
             "content" -> {
                 val file =
-                    File(Globals.cacheDir, "iptv_source_local_${System.currentTimeMillis()}.txt")
+                    File(Globals.fileDir, "iptv_source_local_${System.currentTimeMillis()}.txt")
                 file.writeText(content)
                 newIptvSource = IptvSource(name, file.path, true)
             }

@@ -7,7 +7,7 @@ import java.io.File
 import kotlin.time.measureTimedValue
 
 object ChannelAlias : Loggable("ChannelAlias") {
-    val aliasFile by lazy { File(Globals.cacheDir, "channel_name_alias.json") }
+    val aliasFile by lazy { File(Globals.fileDir, "channel_name_alias.json") }
 
     private var _aliasMap = mapOf<String, List<String>>()
     val aliasMap get() = _aliasMap

@@ -41,7 +41,7 @@ object CloudSync : Loggable("CloudSync") {
             syncFrom = Globals.deviceName,
             configs = configs.desensitized(),
             extraLocalIptvSourceList = configs.iptvSourceList
-                ?.filter { it.isLocal && it.url.startsWith(Globals.cacheDir.path) }
+                ?.filter { it.isLocal && it.url.startsWith(Globals.fileDir.path) }
                 ?.associate { it.url to runCatching { File(it.url).readText() }.getOrDefault("") },
             extraChannelNameAlias = runCatching { ChannelAlias.aliasFile.readText() }.getOrDefault(""),
         )

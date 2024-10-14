@@ -10,6 +10,8 @@ import java.io.File
 object Globals {
     lateinit var cacheDir: File
 
+    lateinit var fileDir: File
+
     lateinit var resources: Resources
 
     lateinit var deviceName: String

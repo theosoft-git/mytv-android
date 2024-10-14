@@ -46,7 +46,7 @@ data class IptvSource(
         )
 
         fun IptvSource.needExternalStoragePermission(): Boolean {
-            return this.isLocal && !this.url.startsWith(Globals.cacheDir.path)
+            return this.isLocal && !this.url.startsWith(Globals.fileDir.path)
         }
     }
 }

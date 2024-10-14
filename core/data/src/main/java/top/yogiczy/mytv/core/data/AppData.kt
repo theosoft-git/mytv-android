@@ -9,6 +9,7 @@ import top.yogiczy.mytv.core.data.utils.SP
 object AppData {
     fun init(context: Context) {
         Globals.cacheDir = context.cacheDir
+        Globals.fileDir = context.filesDir
         Globals.resources = context.resources
         Globals.deviceName = runCatching {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
