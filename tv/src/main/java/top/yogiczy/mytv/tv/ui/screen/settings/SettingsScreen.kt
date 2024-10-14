@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
+import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSourceList
@@ -207,6 +208,7 @@ fun SettingsScreen(
                             if (settingsViewModel.iptvSourceCurrent != it) {
                                 settingsViewModel.iptvSourceCurrent = it
                                 settingsViewModel.iptvChannelGroupHiddenList = emptySet()
+                                settingsViewModel.iptvChannelLastPlay = Channel.EMPTY
                             }
                             onReload()
                         },

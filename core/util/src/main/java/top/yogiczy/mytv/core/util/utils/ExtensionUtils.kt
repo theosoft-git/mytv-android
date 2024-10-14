@@ -15,6 +15,15 @@ fun Long.humanizeMs(): String {
     }
 }
 
+fun Long.humanizeBytes(): String {
+    return when (this) {
+        in 0..<1024 -> "${this}B"
+        in 1024..<1048576 -> "${this / 1024}KB"
+        in 1048576..<1073741824 -> "${this / 1048576}MB"
+        else -> "${this / 1073741824}GB"
+    }
+}
+
 fun String.isIPv6(): Boolean {
     val urlPattern = Pattern.compile(
         "^((http|https)://)?(\\[[0-9a-fA-F:]+])(:[0-9]+)?(/.*)?$"
