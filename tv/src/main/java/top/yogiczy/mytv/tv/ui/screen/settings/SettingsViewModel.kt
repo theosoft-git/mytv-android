@@ -17,7 +17,6 @@ import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSourceList
 import top.yogiczy.mytv.tv.sync.CloudSyncProvider
-import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.screen.components.AppThemeDef
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.VideoPlayerDisplayMode
 import top.yogiczy.mytv.tv.ui.utils.Configs
@@ -192,15 +191,23 @@ class SettingsViewModel : ViewModel() {
             _iptvChannelLastPlay = value
             Configs.iptvChannelLastPlay = value
             afterSetWhenCloudSyncAutoPull()
-
         }
 
-    private var _iptvPlayableHostList by mutableStateOf(emptySet<String>())
-    var iptvPlayableHostList: Set<String>
-        get() = _iptvPlayableHostList
+    private var _iptvChannelLinePlayableHostList by mutableStateOf(emptySet<String>())
+    var iptvChannelLinePlayableHostList: Set<String>
+        get() = _iptvChannelLinePlayableHostList
         set(value) {
-            _iptvPlayableHostList = value
-            Configs.iptvPlayableHostList = value
+            _iptvChannelLinePlayableHostList = value
+            Configs.iptvChannelLinePlayableHostList = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _iptvChannelLinePlayableUrlList by mutableStateOf(emptySet<String>())
+    var iptvChannelLinePlayableUrlList: Set<String>
+        get() = _iptvChannelLinePlayableUrlList
+        set(value) {
+            _iptvChannelLinePlayableUrlList = value
+            Configs.iptvChannelLinePlayableUrlList = value
             afterSetWhenCloudSyncAutoPull()
         }
 
@@ -513,7 +520,7 @@ class SettingsViewModel : ViewModel() {
         }
 
     private fun afterSetWhenCloudSyncAutoPull() {
-        if (_cloudSyncAutoPull) Snackbar.show("云同步：自动拉取已启用")
+        // if (_cloudSyncAutoPull) Snackbar.show("云同步：自动拉取已启用")
     }
 
     init {
@@ -547,7 +554,8 @@ class SettingsViewModel : ViewModel() {
         _iptvChannelFavoriteListVisible = Configs.iptvChannelFavoriteListVisible
         _iptvChannelFavoriteList = Configs.iptvChannelFavoriteList
         _iptvChannelLastPlay = Configs.iptvChannelLastPlay
-        _iptvPlayableHostList = Configs.iptvPlayableHostList
+        _iptvChannelLinePlayableHostList = Configs.iptvChannelLinePlayableHostList
+        _iptvChannelLinePlayableUrlList = Configs.iptvChannelLinePlayableUrlList
         _iptvChannelChangeFlip = Configs.iptvChannelChangeFlip
         _iptvChannelNoSelectEnable = Configs.iptvChannelNoSelectEnable
         _iptvChannelChangeListLoop = Configs.iptvChannelChangeListLoop

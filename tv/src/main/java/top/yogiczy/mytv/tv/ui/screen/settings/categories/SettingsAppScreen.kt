@@ -76,7 +76,8 @@ fun SettingsAppScreen(
                 headlineContent = "清除缓存",
                 trailingContent = "约 ${totalSize.humanizeBytes()}",
                 onSelect = {
-                    settingsViewModel.iptvPlayableHostList = emptySet()
+                    settingsViewModel.iptvChannelLinePlayableHostList = emptySet()
+                    settingsViewModel.iptvChannelLinePlayableUrlList = emptySet()
                     coroutineScope.launch {
                         IptvRepository.clearAllCache()
                         EpgRepository.clearAllCache()

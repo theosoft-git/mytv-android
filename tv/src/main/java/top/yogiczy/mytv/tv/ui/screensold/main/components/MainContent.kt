@@ -340,7 +340,8 @@ fun MainContent(
                 toSettingsScreen(it)
             },
             onClearCache = {
-                settingsViewModel.iptvPlayableHostList = emptySet()
+                settingsViewModel.iptvChannelLinePlayableHostList = emptySet()
+                settingsViewModel.iptvChannelLinePlayableUrlList = emptySet()
                 coroutineScope.launch {
                     IptvRepository(settingsViewModel.iptvSourceCurrent).clearCache()
                     EpgRepository(settingsViewModel.epgSourceCurrent).clearCache()

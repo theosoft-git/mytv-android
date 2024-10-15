@@ -59,8 +59,11 @@ fun MultiViewItem(
 ) {
     val channel = channelProvider()
     val line = remember(channel) {
-        channel.lineList.firstOrNull { Configs.iptvPlayableHostList.contains(it.url.urlHost()) }
-            ?: channel.lineList.first()
+        channel.lineList.firstOrNull { line ->
+            Configs.iptvChannelLinePlayableUrlList.contains(line.url)
+        } ?: channel.lineList.firstOrNull { line ->
+            Configs.iptvChannelLinePlayableHostList.contains(line.url.urlHost())
+        } ?: channel.lineList.first()
     }
     val childPadding = rememberChildPadding()
 

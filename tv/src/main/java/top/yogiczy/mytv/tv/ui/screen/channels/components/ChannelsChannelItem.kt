@@ -133,8 +133,10 @@ private fun ChannelsChannelItemLogoWithPreview(
         preview = null
 
         if (showChannelPreview) {
-            val line = channel.lineList.firstOrNull {
-                Configs.iptvPlayableHostList.contains(it.url.urlHost())
+            val line = channel.lineList.firstOrNull { line ->
+                Configs.iptvChannelLinePlayableUrlList.contains(line.url)
+            } ?: channel.lineList.firstOrNull { line ->
+                Configs.iptvChannelLinePlayableHostList.contains(line.url.urlHost())
             } ?: channel.lineList.first()
             preview = M3u8AnalysisUtil.getFirstFrame(line.url)
         }

@@ -120,13 +120,15 @@ class MainContentState(
         })
 
         videoPlayerState.onReady {
-            settingsViewModel.iptvPlayableHostList += currentChannelLine.url.urlHost()
+            settingsViewModel.iptvChannelLinePlayableUrlList += currentChannelLine.url
+            settingsViewModel.iptvChannelLinePlayableHostList += currentChannelLine.url.urlHost()
         }
 
         videoPlayerState.onError {
             if (_currentPlaybackEpgProgramme != null) return@onError
 
-            settingsViewModel.iptvPlayableHostList -= currentChannelLine.url.urlHost()
+            settingsViewModel.iptvChannelLinePlayableUrlList -= currentChannelLine.url
+            settingsViewModel.iptvChannelLinePlayableHostList -= currentChannelLine.url.urlHost()
 
             if (_currentChannelLineIdx < _currentChannel.lineList.size - 1) {
                 changeCurrentChannel(_currentChannel, _currentChannelLineIdx + 1)
@@ -225,10 +227,17 @@ class MainContentState(
     }
 
     private fun getLineIdx(lineList: ChannelLineList, lineIdx: Int? = null): Int {
-        val idx = if (lineIdx == null) lineList.indexOfFirst {
-            settingsViewModel.iptvPlayableHostList.contains(it.url.urlHost())
-        }
-        else (lineIdx + lineList.size) % lineList.size
+        val idx = if (lineIdx == null) {
+            val idx = lineList.indexOfFirst { line ->
+                settingsViewModel.iptvChannelLinePlayableUrlList.contains(line.url)
+            }
+
+            if (idx < 0) {
+                lineList.indexOfFirst { line ->
+                    settingsViewModel.iptvChannelLinePlayableHostList.contains(line.url.urlHost())
+                }
+            } else idx
+        } else (lineIdx + lineList.size) % lineList.size
 
         return max(0, min(idx, lineList.size - 1))
     }
@@ -243,7 +252,8 @@ class MainContentState(
         if (channel == _currentChannel && lineIdx == _currentChannelLineIdx && playbackEpgProgramme == _currentPlaybackEpgProgramme) return
 
         if (channel == _currentChannel && lineIdx != _currentChannelLineIdx) {
-            settingsViewModel.iptvPlayableHostList -= currentChannelLine.url.urlHost()
+            settingsViewModel.iptvChannelLinePlayableUrlList -= currentChannelLine.url
+            settingsViewModel.iptvChannelLinePlayableHostList -= currentChannelLine.url.urlHost()
         }
 
         _isTempChannelScreenVisible = true
