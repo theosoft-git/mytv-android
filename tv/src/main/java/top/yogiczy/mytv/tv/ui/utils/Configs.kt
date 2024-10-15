@@ -35,6 +35,9 @@ object Configs {
         APP_AGREEMENT_AGREED,
 
         /** ==================== 调式 ==================== */
+        /** 开发者模式 */
+        DEBUG_DEVELOPER_MODE,
+
         /** 显示fps */
         DEBUG_SHOW_FPS,
 
@@ -221,6 +224,11 @@ object Configs {
         set(value) = SP.putBoolean(KEY.APP_AGREEMENT_AGREED.name, value)
 
     /** ==================== 调式 ==================== */
+    /** 开发者模式 */
+    var debugDeveloperMode: Boolean
+        get() = SP.getBoolean(KEY.DEBUG_DEVELOPER_MODE.name, false)
+        set(value) = SP.putBoolean(KEY.DEBUG_DEVELOPER_MODE.name, value)
+
     /** 显示fps */
     var debugShowFps: Boolean
         get() = SP.getBoolean(KEY.DEBUG_SHOW_FPS.name, false)
@@ -609,6 +617,7 @@ object Configs {
             appPipEnable = appPipEnable,
             appLastLatestVersion = appLastLatestVersion,
             appAgreementAgreed = appAgreementAgreed,
+            debugDeveloperMode = debugDeveloperMode,
             debugShowFps = debugShowFps,
             debugShowVideoPlayerMetadata = debugShowVideoPlayerMetadata,
             debugShowLayoutGrids = debugShowLayoutGrids,
@@ -669,6 +678,7 @@ object Configs {
         configs.appPipEnable?.let { appPipEnable = it }
         configs.appLastLatestVersion?.let { appLastLatestVersion = it }
         configs.appAgreementAgreed?.let { appAgreementAgreed = it }
+        configs.debugDeveloperMode?.let { debugDeveloperMode = it }
         configs.debugShowFps?.let { debugShowFps = it }
         configs.debugShowVideoPlayerMetadata?.let { debugShowVideoPlayerMetadata = it }
         configs.debugShowLayoutGrids?.let { debugShowLayoutGrids = it }
@@ -731,6 +741,7 @@ object Configs {
         val appPipEnable: Boolean? = null,
         val appLastLatestVersion: String? = null,
         val appAgreementAgreed: Boolean? = null,
+        val debugDeveloperMode: Boolean? = null,
         val debugShowFps: Boolean? = null,
         val debugShowVideoPlayerMetadata: Boolean? = null,
         val debugShowLayoutGrids: Boolean? = null,

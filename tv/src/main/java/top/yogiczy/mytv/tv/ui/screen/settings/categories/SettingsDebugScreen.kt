@@ -26,6 +26,18 @@ fun SettingsDebugScreen(
         item {
             SettingsListItem(
                 modifier = Modifier.focusRequester(firstItemFocusRequester),
+                headlineContent = "开发者模式",
+                trailingContent = {
+                    Switch(settingsViewModel.debugDeveloperMode, null)
+                },
+                onSelect = {
+                    settingsViewModel.debugDeveloperMode = !settingsViewModel.debugDeveloperMode
+                },
+            )
+        }
+
+        item {
+            SettingsListItem(
                 headlineContent = "显示FPS",
                 supportingContent = "在屏幕左上角显示fps和柱状图",
                 trailingContent = {

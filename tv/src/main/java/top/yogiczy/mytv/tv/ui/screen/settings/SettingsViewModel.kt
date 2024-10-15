@@ -58,6 +58,15 @@ class SettingsViewModel : ViewModel() {
             afterSetWhenCloudSyncAutoPull()
         }
 
+    private var _debugDeveloperMode by mutableStateOf(false)
+    var debugDeveloperMode: Boolean
+        get() = _debugDeveloperMode
+        set(value) {
+            _debugDeveloperMode = value
+            Configs.debugDeveloperMode = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
     private var _debugShowFps by mutableStateOf(false)
     var debugShowFps: Boolean
         get() = _debugShowFps
@@ -539,6 +548,7 @@ class SettingsViewModel : ViewModel() {
         _appPipEnable = Configs.appPipEnable
         _appLastLatestVersion = Configs.appLastLatestVersion
         _appAgreementAgreed = Configs.appAgreementAgreed
+        _debugDeveloperMode = Configs.debugDeveloperMode
         _debugShowFps = Configs.debugShowFps
         _debugShowVideoPlayerMetadata = Configs.debugShowVideoPlayerMetadata
         _debugShowLayoutGrids = Configs.debugShowLayoutGrids
