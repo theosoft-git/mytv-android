@@ -122,8 +122,7 @@ fun ClassicChannelScreen(
                     if (channelFavoriteListVisible)
                         ClassicPanelScreenFavoriteChannelGroup
                     else
-                        channelGroupList.find { it.channelList.contains(currentChannelProvider()) }
-                            ?: ChannelGroup()
+                        channelGroupList[max(0, channelGroupList.channelGroupIdx(currentChannelProvider()))]
                 },
                 onChannelGroupFocused = {
                     focusedChannelGroup = it

@@ -24,6 +24,7 @@ fun CrashHandlerScreen(
     errorMessage: String,
     errorStacktrace: String = "",
     onRestart: () -> Unit = {},
+    onBackPressed: () -> Unit = {},
 ) {
     val childPaddings = rememberChildPadding()
 
@@ -38,6 +39,7 @@ fun CrashHandlerScreen(
                 onSelect = onRestart,
             )
         },
+        onBackPressed = onBackPressed,
     ) {
         LazyColumn {
             @Suppress("UnstableApiUsage")

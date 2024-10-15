@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import top.yogiczy.mytv.tv.ui.screen.crash.CrashHandlerScreen
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
+import kotlin.system.exitProcess
 
 class CrashHandlerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +20,7 @@ class CrashHandlerActivity : ComponentActivity() {
 
         val errorMessage = intent.getStringExtra("error_message") ?: "未知错误"
         val errorStacktrace = intent.getStringExtra("error_stacktrace") ?: ""
-        
+
         enableEdgeToEdge()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
 
@@ -38,10 +39,15 @@ class CrashHandlerActivity : ComponentActivity() {
                 CrashHandlerScreen(
                     errorMessage = errorMessage,
                     errorStacktrace = errorStacktrace,
-                ) {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                }
+                    onRestart = {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    },
+                    onBackPressed = {
+                        finish()
+                        exitProcess(0)
+                    },
+                )
             }
         }
 

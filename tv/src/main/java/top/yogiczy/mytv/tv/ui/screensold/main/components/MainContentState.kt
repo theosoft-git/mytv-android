@@ -120,7 +120,6 @@ class MainContentState(
         })
 
         videoPlayerState.onReady {
-            settingsViewModel.iptvChannelLastPlay = _currentChannel
             settingsViewModel.iptvPlayableHostList += currentChannelLine.url.urlHost()
         }
 
@@ -239,6 +238,8 @@ class MainContentState(
         lineIdx: Int? = null,
         playbackEpgProgramme: EpgProgramme? = null,
     ) {
+        settingsViewModel.iptvChannelLastPlay = channel
+
         if (channel == _currentChannel && lineIdx == _currentChannelLineIdx && playbackEpgProgramme == _currentPlaybackEpgProgramme) return
 
         if (channel == _currentChannel && lineIdx != _currentChannelLineIdx) {
