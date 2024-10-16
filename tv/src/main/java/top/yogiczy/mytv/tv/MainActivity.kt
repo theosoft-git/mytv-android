@@ -53,6 +53,11 @@ class MainActivity : ComponentActivity() {
         applicationContext.startService(Intent(applicationContext, HttpServerService::class.java))
     }
 
+    override fun onDestroy() {
+        applicationContext.stopService(Intent(applicationContext, HttpServerService::class.java))
+        super.onDestroy()
+    }
+
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
 
