@@ -236,7 +236,7 @@ class IjkVideoPlayer(
                     IjkMediaMeta.AV_CH_LAYOUT_HEXAGONAL -> "六角环绕声"
                     IjkMediaMeta.AV_CH_LAYOUT_OCTAGONAL -> "八角环绕声"
                     IjkMediaMeta.AV_CH_LAYOUT_STEREO_DOWNMIX -> "立体声下混音"
-                    IjkMediaMeta.AV_CH_AV3A_LAYOUT_5POINT1POINT4 -> "三维菁彩声"
+                    IjkMediaMeta.AV_CH_AV3A_LAYOUT_5POINT1POINT4 -> "菁彩声"
                     else -> null
                 },
                 sampleRate = info.mMeta.mAudioStream?.mSampleRate,

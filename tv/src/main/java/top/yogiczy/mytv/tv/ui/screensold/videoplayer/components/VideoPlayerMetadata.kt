@@ -43,7 +43,7 @@ fun VideoPlayerMetadata(
                         nnVideo.width?.let { nnWidth -> Text("分辨率: ${nnWidth}x${nnVideo.height}") }
                         nnVideo.color?.let { nnColor -> Text("颜色空间: $nnColor") }
                         nnVideo.frameRate?.let { nnFrameRate -> Text("帧率: $nnFrameRate") }
-                        nnVideo.bitrate?.let { nnBitrate -> Text("码率: ${nnBitrate / 1024} kbps") }
+                        nnVideo.bitrate?.let { nnBitrate -> Text("码率: ${nnBitrate / 1000} kbps") }
                         nnVideo.mimeType?.let { nnMimeType -> Text("编码: $nnMimeType") }
                         nnVideo.decoder?.let { nnDecoder -> Text("解码器: $nnDecoder") }
                     }
@@ -56,7 +56,7 @@ fun VideoPlayerMetadata(
                     Column(modifier = Modifier.padding(start = 10.dp)) {
                         nnAudio.channels?.let { nnChannels -> Text("声道数: $nnChannels") }
                         nnAudio.sampleRate?.let { nnSampleRate -> Text("采样率: $nnSampleRate Hz") }
-                        nnAudio.bitrate?.let { nnBitrate -> Text("比特率: ${nnBitrate / 1024} kbps") }
+                        nnAudio.bitrate?.let { nnBitrate -> Text("比特率: ${nnBitrate / 1000} kbps") }
                         nnAudio.mimeType?.let { nnMimeType -> Text("编码: $nnMimeType") }
                         nnAudio.decoder?.let { nnDecoder -> Text("解码器: $nnDecoder") }
                     }

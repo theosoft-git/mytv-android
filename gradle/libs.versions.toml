@@ -24,8 +24,8 @@ tvMaterial = "1.0.0-rc01"
 navigationCompose = "2.8.2"
 sentry = "4.11.0"
 minSdk = "21"
-targetSdk = "34"
-compileSdk = "34"
+targetSdk = "35"
+compileSdk = "35"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

@@ -8,6 +8,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
@@ -224,6 +225,7 @@ class Media3VideoPlayer(
             metadata = metadata.copy(
                 audio = (metadata.audio ?: Metadata.Audio()).copy(
                     channels = format.channelCount,
+                    channelsLabel = if (format.sampleMimeType == MimeTypes.AUDIO_AV3A) "菁彩声" else null,
                     sampleRate = format.sampleRate,
                     bitrate = format.bitrate,
                     mimeType = format.sampleMimeType,

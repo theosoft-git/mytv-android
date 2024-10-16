@@ -84,6 +84,7 @@ private fun getErrorCodeDesc(error: String): String? {
         "ERROR_CODE_AUDIO_TRACK_OFFLOAD_INIT_FAILED" -> "音频轨道离线初始化失败，请检查视频源。"
         "ERROR_CODE_VIDEO_FRAME_PROCESSOR_INIT_FAILED" -> "视频帧处理器初始化失败，请检查视频源。"
         "ERROR_CODE_VIDEO_FRAME_PROCESSING_FAILED" -> "视频帧处理失败，请检查视频源。"
+        "ERROR_CODE_FAILED_RUNTIME_CHECK" -> "运行时检查失败，请检查视频源。"
         else -> null
     }
 }
