@@ -49,7 +49,7 @@ class EpgRepository(private val source: EpgSource) :
                 log.i("加载节目单（${source.name}）：${epgList.size}个频道，${epgList.sumOf { it.programmeList.size }}个节目")
             }
         } catch (ex: Exception) {
-            log.e("获取节目单失败", ex)
+            log.e("获取节目单（${source.name}）失败", ex)
             throw ex
         }
     }
@@ -76,7 +76,7 @@ private class EpgXmlRepository(private val source: EpgSource) :
 
     suspend fun getXml(): InputStream {
         return getOrRefreshInputStream(0) {
-            log.i("开始获取节目单xml: ${source.url}")
+            log.i("开始获取节目单（${source.name}）xml: ${source.url}")
 
             try {
                 val t = measureTimedValue {
@@ -86,11 +86,11 @@ private class EpgXmlRepository(private val source: EpgSource) :
                         fetcher.fetch(response.body!!)
                     }
                 }
-                log.i("获取节目单xml成功", null, t.duration)
+                log.i("获取节目单（${source.name}）xml成功", null, t.duration)
 
                 t.value
             } catch (ex: Exception) {
-                log.e("获取节目单xml失败", ex)
+                log.e("获取节目单（${source.name}）xml失败", ex)
                 throw HttpException("获取节目单xml失败，请检查网络连接", ex)
             }
         }

@@ -66,7 +66,7 @@ class IptvRepository(private val source: IptvSource) :
                 log.i("加载直播源（${source.name}）：${groupList.size}个分组，${groupList.sumOf { it.channelList.size }}个频道")
             }
         } catch (ex: Exception) {
-            log.e("获取直播源失败", ex)
+            log.e("获取直播源（${source.name}）失败", ex)
             throw ex
         }
     }
@@ -105,7 +105,7 @@ private class IptvRawRepository(private val source: IptvSource) : FileCacheRepos
             try {
                 source.url.request { body -> body.string() } ?: ""
             } catch (ex: Exception) {
-                log.e("获取直播源失败", ex)
+                log.e("获取直播源（${source.name}）失败", ex)
                 throw HttpException("获取直播源失败，请检查网络连接", ex)
             }
         }

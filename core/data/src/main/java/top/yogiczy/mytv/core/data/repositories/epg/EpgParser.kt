@@ -137,15 +137,11 @@ object EpgParser : Loggable("EpgParser") {
         return runCatching {
             log.d("开始解析节目单xml...")
             val t = measureTimedValue { parse(inputStream) }
-            log.i(
-                "节目单解析完成，共${t.value.size}个频道，${t.value.sumOf { it.programmeList.size }}个节目",
-                null,
-                t.duration
-            )
+            log.i("节目单xml解析完成", null, t.duration)
 
             t.value
         }
-            .onFailure { log.e("节目单解析失败", it) }
+            .onFailure { log.e("节目单xml解析失败", it) }
             .getOrThrow()
     }
 }
