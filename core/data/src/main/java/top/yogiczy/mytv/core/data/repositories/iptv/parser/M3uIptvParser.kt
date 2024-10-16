@@ -17,35 +17,39 @@ class M3uIptvParser : IptvParser {
             val lines = data.split("\r\n", "\n")
             val channelList = mutableListOf<IptvParser.ChannelItem>()
 
-            lines.forEachIndexed { index, line ->
-                if (!line.startsWith("#EXTINF")) return@forEachIndexed
+            var addChannel: ((String) -> Unit)? = null
+            lines.forEach { line ->
+                if (line.isBlank()) return@forEach
 
-                val name = line.split(",").last().trim()
-                val epgName =
-                    Regex("tvg-name=\"(.*?)\"").find(line)?.groupValues?.get(1)?.trim()
-                        ?.ifBlank { name } ?: name
-                val groupNames =
-                    Regex("group-title=\"(.+?)\"").find(line)?.groupValues?.get(1)?.split(";")
-                        ?.map { it.trim() }
-                        ?: listOf("其他")
-                val logo = Regex("tvg-logo=\"(.+?)\"").find(line)?.groupValues?.get(1)?.trim()
-                val httpUserAgent =
-                    Regex("http-user-agent=\"(.+?)\"").find(line)?.groupValues?.get(1)?.trim()
-                val url = lines.getOrNull(index + 1)?.trim()
+                if (line.startsWith("#EXTINF")) {
+                    val name = line.split(",").last().trim()
+                    val epgName =
+                        Regex("tvg-name=\"(.*?)\"").find(line)?.groupValues?.get(1)?.trim()
+                            ?.ifBlank { name } ?: name
+                    val groupNames =
+                        Regex("group-title=\"(.+?)\"").find(line)?.groupValues?.get(1)?.split(";")
+                            ?.map { it.trim() }
+                            ?: listOf("其他")
+                    val logo = Regex("tvg-logo=\"(.+?)\"").find(line)?.groupValues?.get(1)?.trim()
+                    val httpUserAgent =
+                        Regex("http-user-agent=\"(.+?)\"").find(line)?.groupValues?.get(1)?.trim()
 
-                url?.let {
-                    channelList.addAll(
-                        groupNames.map { groupName ->
-                            IptvParser.ChannelItem(
-                                name = name,
-                                epgName = epgName,
-                                groupName = groupName,
-                                url = url,
-                                logo = logo,
-                                httpUserAgent = httpUserAgent,
-                            )
-                        }
-                    )
+                    addChannel = { url ->
+                        channelList.addAll(
+                            groupNames.map { groupName ->
+                                IptvParser.ChannelItem(
+                                    name = name,
+                                    epgName = epgName,
+                                    groupName = groupName,
+                                    url = url,
+                                    logo = logo,
+                                    httpUserAgent = httpUserAgent,
+                                )
+                            }
+                        )
+                    }
+                } else {
+                    addChannel?.invoke(line.trim())
                 }
             }
 
