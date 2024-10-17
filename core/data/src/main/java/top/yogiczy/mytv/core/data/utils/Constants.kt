@@ -114,7 +114,7 @@ object Constants {
     /**
      * 播放器 userAgent
      */
-    const val VIDEO_PLAYER_USER_AGENT = "aptv"
+    const val VIDEO_PLAYER_USER_AGENT = "okhttp"
 
     /**
      * 播放器加载超时

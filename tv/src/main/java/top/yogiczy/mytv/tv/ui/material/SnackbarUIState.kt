@@ -32,37 +32,16 @@ class SnackbarUIState(
     private var _currentData by mutableStateOf(SnackbarData(text = ""))
     val currentData get() = _currentData
 
-    fun show(
-        text: String,
-        showLeadingIcon: Boolean = true,
-        leadingIcon: ImageVector = Icons.Outlined.Info,
-        leadingLoading: Boolean = false,
-        showTrailingIcon: Boolean = false,
-        trailingIcon: ImageVector = Icons.Outlined.Info,
-        trailingLoading: Boolean = false,
-        type: SnackbarType = SnackbarType.DEFAULT,
-        duration: Long = 2300,
-        id: String = UUID.randomUUID().toString(),
-    ) {
+    fun show(text: String, data: SnackbarData = SnackbarData()) {
         coroutineScope.launch {
-            if (_visible && _currentData.id != id) {
+            if (_visible && _currentData.id != data.id) {
                 _visible = false
                 delay(AnimationConstants.DefaultDurationMillis.toLong())
             }
 
-            _currentData = SnackbarData(
-                id = id,
-                text = text,
-                showLeadingIcon = showLeadingIcon,
-                leadingIcon = leadingIcon,
-                leadingLoading = leadingLoading,
-                showTrailingIcon = showTrailingIcon,
-                trailingIcon = trailingIcon,
-                trailingLoading = trailingLoading,
-                type = type,
-            )
+            _currentData = data.copy(text = text)
             _visible = true
-            channel.trySend(duration)
+            channel.trySend(data.duration)
         }
     }
 
@@ -90,7 +69,7 @@ fun rememberSnackbarUIState(): SnackbarUIState {
 }
 
 data class SnackbarData(
-    val text: String,
+    val text: String = "",
     val showLeadingIcon: Boolean = true,
     val leadingIcon: ImageVector = Icons.Outlined.Info,
     val leadingLoading: Boolean = false,
@@ -98,9 +77,13 @@ data class SnackbarData(
     val trailingIcon: ImageVector = Icons.Outlined.Info,
     val trailingLoading: Boolean = false,
     val type: SnackbarType = SnackbarType.DEFAULT,
-    val duration: Long = 2300,
+    val duration: Long = DEFAULT_DURATION,
     val id: String = UUID.randomUUID().toString(),
-)
+) {
+    companion object {
+        const val DEFAULT_DURATION = 2300L
+    }
+}
 
 enum class SnackbarType {
     DEFAULT, PRIMARY, SECONDARY, TERTIARY, ERROR
@@ -113,6 +96,10 @@ data class SnackbarColorData(
 )
 
 object Snackbar {
+    fun show(text: String, data: SnackbarData) {
+        SnackbarUIState.I.show(text, data)
+    }
+
     fun show(
         text: String,
         showLeadingIcon: Boolean = true,
@@ -127,15 +114,17 @@ object Snackbar {
     ) {
         SnackbarUIState.I.show(
             text = text,
-            showLeadingIcon = showLeadingIcon,
-            leadingIcon = leadingIcon,
-            leadingLoading = leadingLoading,
-            showTrailingIcon = showTrailingIcon,
-            trailingIcon = trailingIcon,
-            trailingLoading = trailingLoading,
-            type = type,
-            duration = duration,
-            id = id,
+            data = SnackbarData(
+                showLeadingIcon = showLeadingIcon,
+                leadingIcon = leadingIcon,
+                leadingLoading = leadingLoading,
+                showTrailingIcon = showTrailingIcon,
+                trailingIcon = trailingIcon,
+                trailingLoading = trailingLoading,
+                type = type,
+                duration = duration,
+                id = id,
+            )
         )
     }
 }
