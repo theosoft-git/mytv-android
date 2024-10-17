@@ -61,4 +61,10 @@ data class Channel(
         get() = (index + 1).toString().padStart(2, '0')
 
     fun isEmptyOrElse(defaultValue: () -> Channel) = if (this == EMPTY) defaultValue() else this
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Channel) return false
+
+        return name == other.name && lineList == other.lineList
+    }
 }
