@@ -65,7 +65,7 @@ class IjkVideoPlayer(
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-all-videos", 1)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-hevc", 1)
-        player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1)
+        player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 0)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1)
