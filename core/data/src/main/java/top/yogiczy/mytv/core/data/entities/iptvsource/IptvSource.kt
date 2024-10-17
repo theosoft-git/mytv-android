@@ -38,7 +38,7 @@ data class IptvSource(
         "${cacheDir.name}/iptv_source_${hashCode().toUInt().toString(16)}.$ext"
 
     companion object {
-        val cacheDir = File(Globals.cacheDir, "iptv_source_cache")
+        val cacheDir by lazy { File(Globals.cacheDir, "iptv_source_cache") }
 
         val EXAMPLE = IptvSource(
             name = "测试直播源1",

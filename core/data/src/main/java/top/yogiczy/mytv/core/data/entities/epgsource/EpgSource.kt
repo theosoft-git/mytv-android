@@ -24,7 +24,7 @@ data class EpgSource(
         "${cacheDir.name}/epg_source_${hashCode().toUInt().toString(16)}.$ext"
 
     companion object {
-        val cacheDir = File(Globals.cacheDir, "epg_source_cache")
+        val cacheDir by lazy { File(Globals.cacheDir, "epg_source_cache") }
 
         val EXAMPLE = EpgSource(
             name = "测试节目单1",
