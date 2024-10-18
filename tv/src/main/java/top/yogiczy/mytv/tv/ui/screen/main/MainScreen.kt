@@ -128,6 +128,12 @@ fun MainScreen(
         }
     }
 
+    fun reload() {
+        mainViewModel.init()
+        navController.navigateUp()
+        navController.navigateSingleTop(Screens.Loading())
+    }
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -176,6 +182,7 @@ fun MainScreen(
                             Screens.Settings.withArgs(SettingsSubCategories.IPTV_SOURCE)
                         )
                     },
+                    onReload = { reload() },
                     onBackPressed = onBackPressed,
                 )
             }
@@ -259,11 +266,7 @@ fun MainScreen(
                     },
                     channelGroupListProvider = channelGroupListProvider,
                     onCheckUpdate = { checkUpdate(false) },
-                    onReload = {
-                        mainViewModel.init()
-                        navController.navigateUp()
-                        navController.navigateSingleTop(Screens.Loading())
-                    },
+                    onReload = { reload() },
                     onBackPressed = { navController.navigateUp() },
                 )
             }

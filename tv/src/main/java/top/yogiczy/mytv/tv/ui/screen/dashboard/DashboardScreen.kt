@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,17 +27,20 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
+import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
 import top.yogiczy.mytv.tv.ui.rememberChildPadding
 import top.yogiczy.mytv.tv.ui.screen.components.AppScreen
 import top.yogiczy.mytv.tv.ui.screen.dashboard.components.DashboardFavoriteList
 import top.yogiczy.mytv.tv.ui.screen.dashboard.components.DashboardModuleList
 import top.yogiczy.mytv.tv.ui.screen.dashboard.components.DashboardTime
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
+import top.yogiczy.mytv.tv.ui.utils.Configs
 import top.yogiczy.mytv.tv.ui.utils.focusOnLaunched
 import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 
@@ -57,9 +61,11 @@ fun DashboardScreen(
     toSettingsScreen: () -> Unit = {},
     toAboutScreen: () -> Unit = {},
     toSettingsIptvSourceScreen: () -> Unit = {},
+    onReload: () -> Unit = {},
     onBackPressed: () -> Unit = {},
 ) {
     val childPadding = rememberChildPadding()
+    val coroutineScope = rememberCoroutineScope()
 
     AppScreen(
         modifier = modifier,
@@ -67,6 +73,12 @@ fun DashboardScreen(
             DashboardScreeIptvSource(
                 currentIptvSourceProvider = currentIptvSourceProvider,
                 toSettingsIptvSourceScreen = toSettingsIptvSourceScreen,
+                clearCurrentIptvSourceCache = {
+                    coroutineScope.launch {
+                        IptvRepository(Configs.iptvSourceCurrent).clearCache()
+                        onReload()
+                    }
+                },
             )
         },
         headerExtra = { DashboardTime() },
@@ -107,6 +119,7 @@ fun DashboardScreeIptvSource(
     modifier: Modifier = Modifier,
     currentIptvSourceProvider: () -> IptvSource = { IptvSource() },
     toSettingsIptvSourceScreen: () -> Unit = {},
+    clearCurrentIptvSourceCache: () -> Unit = {},
 ) {
     val currentIptvSource = currentIptvSourceProvider()
 
@@ -127,7 +140,10 @@ fun DashboardScreeIptvSource(
     Surface(
         modifier = modifier
             .onFocusChanged { isFocused = it.isFocused || it.hasFocus }
-            .handleKeyEvents(onSelect = toSettingsIptvSourceScreen)
+            .handleKeyEvents(
+                onSelect = toSettingsIptvSourceScreen,
+                onLongSelect = clearCurrentIptvSourceCache,
+            )
             .alpha(alpha.value),
         colors = ClickableSurfaceDefaults.colors(
             containerColor = Color.Transparent,
