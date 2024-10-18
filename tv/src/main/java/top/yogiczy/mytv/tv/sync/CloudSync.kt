@@ -78,9 +78,11 @@ data class CloudSyncDate(
         val that = this
         withContext(Dispatchers.IO) {
             Configs.fromPartial(that.configs)
-            that.extraLocalIptvSourceList?.entries?.forEach { entry ->
-                File(entry.key).writeText(entry.value)
-            }
+            that.extraLocalIptvSourceList?.entries
+                ?.filter { it.key.startsWith(Globals.fileDir.path) }
+                ?.forEach { entry ->
+                    File(entry.key).writeText(entry.value)
+                }
             that.extraChannelNameAlias?.let {
                 ChannelAlias.aliasFile.writeText(it)
             }

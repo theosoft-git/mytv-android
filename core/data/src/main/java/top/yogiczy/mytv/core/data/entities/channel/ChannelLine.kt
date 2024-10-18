@@ -12,6 +12,7 @@ data class ChannelLine(
     val hybridType: HybridType = HybridType.None,
     val name: String? = if (url.contains("$")) url.split("$").lastOrNull() else null,
 ) {
+
     companion object {
         val EXAMPLE =
             ChannelLine(

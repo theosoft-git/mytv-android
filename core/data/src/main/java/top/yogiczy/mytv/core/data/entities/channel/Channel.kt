@@ -67,4 +67,10 @@ data class Channel(
 
         return name == other.name && lineList == other.lineList
     }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + lineList.hashCode()
+        return result
+    }
 }
