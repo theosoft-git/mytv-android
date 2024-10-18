@@ -49,7 +49,7 @@ class EpgRepository(private val source: EpgSource) :
                 log.i("加载节目单（${source.name}）：${epgList.size}个频道，${epgList.sumOf { it.programmeList.size }}个节目")
             }
         } catch (ex: Exception) {
-            log.e("获取节目单（${source.name}）失败", ex)
+            log.e("加载节目单（${source.name}）失败", ex)
             throw ex
         }
     }

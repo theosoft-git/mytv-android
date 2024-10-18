@@ -23,3 +23,8 @@
 -keep class tv.danmaku.ijk.media.player.** { *; }
 -keep class com.aliyun.rts.network.** { *; }
 -keep class com.wangsu.httpclient.** { *; }
+-keep class org.mozilla.javascript.** { *; }
+
+-dontwarn java.awt.**
+-dontwarn java.beans.**
+-dontwarn javax.swing.**

@@ -189,6 +189,15 @@ private fun IptvSourceItem(
                         containerColor = LocalContentColor.current.copy(0.1f)
                     ),
                 )
+
+                if (iptvSource.transformJs != null) {
+                    Tag(
+                        "转换JS",
+                        colors = TagDefaults.colors(
+                            containerColor = LocalContentColor.current.copy(0.1f)
+                        ),
+                    )
+                }
             }
         },
         supportingContent = {

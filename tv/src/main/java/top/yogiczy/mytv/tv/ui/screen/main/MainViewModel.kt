@@ -131,22 +131,25 @@ class MainViewModel : ViewModel() {
                     channelList = ChannelList(group.channelList
                         .groupBy { channel -> channel.standardName }
                         .map { (standardName, similarChannels) ->
-                            val firstChannel = similarChannels.first()
-                            val mergedLineList = similarChannels
-                                .asSequence()
-                                .flatMap { channel ->
-                                    channel.lineList.asSequence().map { line ->
-                                        if (similarChannels.size > 1) line.copy(name = channel.name)
-                                        else line
+                            if (similarChannels.size == 1) {
+                                similarChannels.first()
+                            } else {
+                                val firstChannel = similarChannels.first()
+                                val mergedLineList = similarChannels
+                                    .asSequence()
+                                    .flatMap { channel ->
+                                        channel.lineList.asSequence().map { line ->
+                                            line.copy(name = channel.name)
+                                        }
                                     }
-                                }
-                                .distinctBy { it.url }
-                                .toList()
+                                    .distinctBy { it.url }
+                                    .toList()
 
-                            firstChannel.copy(
-                                name = standardName,
-                                lineList = ChannelLineList(mergedLineList)
-                            )
+                                firstChannel.copy(
+                                    name = standardName,
+                                    lineList = ChannelLineList(mergedLineList)
+                                )
+                            }
                         }
                     )
                 )

@@ -31,27 +31,53 @@ class IptvRepository(private val source: IptvSource) :
         return timeout || rawChanged
     }
 
-    private suspend fun refresh(): String {
+    private suspend fun refresh(
+        transform: suspend ((List<IptvParser.ChannelItem>) -> List<IptvParser.ChannelItem>) = { it -> it },
+    ): String {
         val raw = rawRepository.getRaw()
         val parser = IptvParser.instances.first { it.isSupport(source.url, raw) }
 
         log.d("开始解析直播源（${source.name}）...")
-        return measureTimedValue { parser.parse(raw) }.let {
+        return measureTimedValue {
+            val list = parser.parse(raw)
+            Globals.json.encodeToString(withContext(Dispatchers.Default) {
+                runCatching { transform(list) }
+                    .getOrDefault(list)
+                    .toChannelGroupList()
+            })
+        }.let {
             log.i("解析直播源（${source.name}）完成", null, it.duration)
-            Globals.json.encodeToString((groupTransform(it.value).toChannelGroupList()))
+            it.value
         }
     }
 
-    private fun groupTransform(channelList: List<IptvParser.ChannelItem>): List<IptvParser.ChannelItem> {
-        return channelList
-            .map { channel ->
-                channel.copy(groupName = source.groupNameMap.getOrElse(channel.groupName) { channel.groupName })
+    private suspend fun transform(channelList: List<IptvParser.ChannelItem>): List<IptvParser.ChannelItem> =
+        withContext(Dispatchers.IO) {
+            if (source.transformJs == null) return@withContext channelList
+
+            val context = org.mozilla.javascript.Context.enter()
+            context.optimizationLevel = -1
+            val result = runCatching {
+                val scope = context.initStandardObjects()
+                context.evaluateString(
+                    scope, """
+                    (function() {
+                        var channelList = ${Globals.json.encodeToString(channelList)};
+                        ${source.transformJs}
+                        return JSON.stringify(main(channelList));
+                    })();
+                    """.trimIndent(), "JavaScript", 1, null
+                ) as String
             }
-            .sortedBy {
-                source.groupSort.indexOf(it.groupName).takeIf { index -> index >= 0 }
-                    ?: Int.MAX_VALUE
+            org.mozilla.javascript.Context.exit()
+
+            if (result.isFailure) {
+                log.e("转换直播源（${source.name}）错误: ${result.exceptionOrNull()}")
             }
-    }
+
+            if (result.isSuccess) Globals.json.decodeFromString(result.getOrNull()!!)
+            else channelList
+        }
 
     /**
      * 获取直播源分组列表
@@ -59,14 +85,14 @@ class IptvRepository(private val source: IptvSource) :
     suspend fun getChannelGroupList(cacheTime: Long): ChannelGroupList {
         try {
             val json = getOrRefresh({ lastModified, _ -> isExpired(lastModified, cacheTime) }) {
-                refresh()
+                refresh { transform(it) }
             }
 
             return Globals.json.decodeFromString<ChannelGroupList>(json).also { groupList ->
                 log.i("加载直播源（${source.name}）：${groupList.size}个分组，${groupList.sumOf { it.channelList.size }}个频道")
             }
         } catch (ex: Exception) {
-            log.e("获取直播源（${source.name}）失败", ex)
+            log.e("加载直播源（${source.name}）失败", ex)
             throw ex
         }
     }

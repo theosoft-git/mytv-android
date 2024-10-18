@@ -3,13 +3,22 @@
     "高码",
     "50-FPS",
     "HEVC",
+    "4K-SDR",
+    "4K",
+    "8K",
+    "UHD",
+    "SDR",
+    "10m",
+    "36m",
+    "120m",
     "HD",
     "高清",
     "IPV4",
     "IPV6",
     "「IPV4」",
     "「IPV6」",
-    "-"
+    "-",
+    "_"
   ],
   "CCTV1": [
     "CCTV1HD",
@@ -561,7 +570,8 @@
     "CGTN西班牙语高清",
     "CGTN 西班牙语 高清",
     "CGTN-西班牙语高清",
-    "CGTN-西班牙语 高清"
+    "CGTN-西班牙语 高清",
+    "cgtnsp"
   ],
   "CGTN法语": [
     "CGTN法语",
@@ -576,7 +586,8 @@
     "CGTN 法语高清",
     "CGTN 法语 高清",
     "CGTN-法语高清",
-    "CGTN-法语 高清"
+    "CGTN-法语 高清",
+    "cgtnfr"
   ],
   "CGTN俄语": [
     "CGTN俄语",
@@ -591,7 +602,8 @@
     "CGTN 俄语高清",
     "CGTN 俄语 高清",
     "CGTN-俄语高清",
-    "CGTN-俄语 高清"
+    "CGTN-俄语 高清",
+    "cgtnru"
   ],
   "CGTN阿语": [
     "CGTN阿语",
@@ -616,7 +628,8 @@
     "CGTN阿拉伯语高清",
     "CGTN 阿拉伯语 高清",
     "CGTN-阿拉伯语高清",
-    "CGTN-阿拉伯语 高清"
+    "CGTN-阿拉伯语 高清",
+    "cgtnar"
   ],
   "CGTN": [
     "CGTN英语",
@@ -644,7 +657,8 @@
     "CGTN 新闻高清",
     "CGTN 新闻 高清",
     "CGTN-新闻高清",
-    "CGTN-新闻 高清"
+    "CGTN-新闻 高清",
+    "cgtnen"
   ],
   "CCTV4K": [
     "CCTV 4K",
@@ -684,7 +698,9 @@
     "CGTN 纪录高清",
     "CGTN 纪录 高清",
     "CGTN-纪录高清",
-    "CGTN-纪录 高清"
+    "CGTN-纪录 高清",
+    "cgtndoc",
+    "CGTN-记录"
   ],
   "重庆卫视": [
     "重庆卫视HD",

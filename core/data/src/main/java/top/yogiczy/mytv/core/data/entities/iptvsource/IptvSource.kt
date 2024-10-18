@@ -25,14 +25,9 @@ data class IptvSource(
     val isLocal: Boolean = false,
 
     /**
-     * 分组名称映射
+     * 转换js
      */
-    val groupNameMap: Map<String, String> = mapOf(),
-
-    /**
-     * 分组排序
-     */
-    val groupSort: List<String> = listOf(),
+    val transformJs: String? = null,
 ) {
     fun cacheFileName(ext: String) =
         "${cacheDir.name}/iptv_source_${hashCode().toUInt().toString(16)}.$ext"
@@ -43,6 +38,7 @@ data class IptvSource(
         val EXAMPLE = IptvSource(
             name = "测试直播源1",
             url = "http://1.2.3.4/tv.txt",
+            transformJs = "",
         )
 
         fun IptvSource.needExternalStoragePermission(): Boolean {

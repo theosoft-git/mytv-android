@@ -43,6 +43,7 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization)
+    implementation(libs.rhino)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
