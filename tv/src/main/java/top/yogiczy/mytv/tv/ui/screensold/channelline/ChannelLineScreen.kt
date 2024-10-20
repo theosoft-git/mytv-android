@@ -44,7 +44,7 @@ fun ChannelLineScreen(
 
 @Preview(device = "id:Android TV (720p)")
 @Composable
-private fun ChannelLinelScreenPreview() {
+private fun ChannelLineScreenPreview() {
     MyTvTheme {
         PreviewWithLayoutGrids {
             ChannelLineScreen(

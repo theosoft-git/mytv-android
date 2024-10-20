@@ -1,6 +1,5 @@
 package top.yogiczy.mytv.tv.ui.screensold.datetime
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,12 +11,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
 import top.yogiczy.mytv.core.data.utils.Constants
 import top.yogiczy.mytv.tv.ui.rememberChildPadding
+import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
+import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
 import top.yogiczy.mytv.tv.ui.utils.Configs
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -67,12 +68,20 @@ fun DatetimeScreen(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = childPadding.top, end = childPadding.end)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface.copy(0.8f),
-                        shape = MaterialTheme.shapes.medium,
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(top = childPadding.top, end = childPadding.end),
+            )
+        }
+    }
+}
+
+
+@Preview(device = "id:Android TV (720p)")
+@Composable
+private fun DatetimeScreenPreview() {
+    MyTvTheme {
+        PreviewWithLayoutGrids {
+            DatetimeScreen(
+                showModeProvider = { Configs.UiTimeShowMode.ALWAYS }
             )
         }
     }
