@@ -40,9 +40,13 @@ class Media3VideoPlayer(
 ) : VideoPlayer(coroutineScope) {
     private val videoPlayer by lazy {
         val renderersFactory =
-            DefaultRenderersFactory(context).setExtensionRendererMode(EXTENSION_RENDERER_MODE_ON)
+            DefaultRenderersFactory(context)
+                .setExtensionRendererMode(EXTENSION_RENDERER_MODE_ON)
+                .setEnableDecoderFallback(true)
 
-        ExoPlayer.Builder(context).setRenderersFactory(renderersFactory).build()
+        ExoPlayer.Builder(context)
+            .setRenderersFactory(renderersFactory)
+            .build()
             .apply { playWhenReady = true }
     }
 
