@@ -79,7 +79,7 @@ class IjkVideoPlayer(
     override fun prepare(line: ChannelLine) {
         player.reset()
         player.setDataSource(
-            line.url,
+            line.playableUrl,
             Configs.videoPlayerHeaders.toHeaders() + mapOf(
                 "User-Agent" to (line.httpUserAgent ?: Configs.videoPlayerUserAgent),
             )

@@ -13,6 +13,9 @@ data class ChannelLine(
     val name: String? = if (url.contains("$")) url.split("$").lastOrNull() else null,
 ) {
 
+    val playableUrl: String
+        get() = url.substringBefore("$")
+
     companion object {
         val EXAMPLE =
             ChannelLine(

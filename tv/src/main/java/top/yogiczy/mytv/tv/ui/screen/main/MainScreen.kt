@@ -129,6 +129,7 @@ fun MainScreen(
     }
 
     fun reload() {
+        settingsViewModel.refresh()
         mainViewModel.init()
         navController.navigateUp()
         navController.navigateSingleTop(Screens.Loading())

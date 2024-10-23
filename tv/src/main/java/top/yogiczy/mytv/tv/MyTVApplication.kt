@@ -16,6 +16,7 @@ import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import top.yogiczy.mytv.core.data.AppData
+import top.yogiczy.mytv.core.data.utils.Globals
 import kotlin.system.exitProcess
 
 class MyTVApplication : Application(), ImageLoaderFactory {
@@ -66,6 +67,11 @@ class MyTVApplication : Application(), ImageLoaderFactory {
 
                     event
                 }
+        }
+
+        @Suppress("UnstableApiUsage")
+        Sentry.withScope { scope ->
+            Globals.deviceId = scope.options.distinctId ?: ""
         }
     }
 

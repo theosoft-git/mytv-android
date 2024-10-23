@@ -28,5 +28,8 @@ include(":tv")
 include(":mobile")
 include(":ijkplayer-java")
 
-(gradle as ExtensionAware).extra["androidxMediaModulePrefix"] = "media3-"
-apply(from = file("../media/core_settings.gradle"))
+val mediaSettingsFile = file("../media/core_settings.gradle")
+if (mediaSettingsFile.exists()) {
+    (gradle as ExtensionAware).extra["androidxMediaModulePrefix"] = "media3-"
+    apply(from = mediaSettingsFile)
+}

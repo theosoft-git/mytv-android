@@ -69,7 +69,7 @@ class Media3VideoPlayer(
     }
 
     private fun getMediaSource(contentType: Int? = null): MediaSource? {
-        val uri = Uri.parse(currentChannelLine.url)
+        val uri = Uri.parse(currentChannelLine.playableUrl)
         val mediaItem = MediaItem.fromUri(uri)
 
         if (uri.toString().startsWith("rtp://")) {
@@ -102,7 +102,7 @@ class Media3VideoPlayer(
     }
 
     private fun prepare(contentType: Int? = null) {
-        val uri = Uri.parse(currentChannelLine.url)
+        val uri = Uri.parse(currentChannelLine.playableUrl)
         val mediaSource = getMediaSource(contentType)
 
         if (mediaSource != null) {
