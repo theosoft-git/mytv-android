@@ -63,7 +63,7 @@ fun MainScreen(
     }
     val epgListProvider = { (uiState as? MainUiState.Ready)?.epgList ?: EpgList() }
     val favoriteChannelListProvider = {
-        ChannelList(settingsViewModel.iptvChannelFavoriteList.map { it.channel })
+        ChannelList(settingsViewModel.iptvChannelFavoriteList.map { it.channel.copy(index = -1) })
     }
 
     val navController = rememberNavController()

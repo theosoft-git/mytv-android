@@ -83,6 +83,8 @@ fun DashboardFavoriteList(
             contentPadding = PaddingValues(start = childPadding.start, end = childPadding.end),
         ) {
             itemsIndexed(channelFavoriteList) { index, channelFavorite ->
+                val channel = channelFavorite.channel.copy(index = -1)
+
                 ChannelsChannelItem(
                     modifier = Modifier
                         .ifElse(
@@ -91,10 +93,10 @@ fun DashboardFavoriteList(
                                 .focusRequester(firstItemFocusRequester)
                                 .onFocusChanged { isFirstItemFocused = it.isFocused },
                         ),
-                    channelProvider = { channelFavorite.channel },
-                    onChannelSelected = { onChannelSelected(channelFavorite.channel) },
-                    onChannelFavoriteToggle = { onChannelUnFavorite(channelFavorite.channel) },
-                    recentEpgProgrammeProvider = { epgListProvider().recentProgramme(channelFavorite.channel) },
+                    channelProvider = { channel },
+                    onChannelSelected = { onChannelSelected(channel) },
+                    onChannelFavoriteToggle = { onChannelUnFavorite(channel) },
+                    recentEpgProgrammeProvider = { epgListProvider().recentProgramme(channel) },
                 )
             }
         }

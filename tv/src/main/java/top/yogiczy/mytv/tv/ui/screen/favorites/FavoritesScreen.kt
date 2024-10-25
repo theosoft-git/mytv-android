@@ -41,7 +41,7 @@ fun FavoritesScreen(
         ChannelGroupList(channelFavoriteListProvider().let { channelFavoriteList ->
             val groupAll = ChannelGroup(
                 name = "全部",
-                channelList = ChannelList(channelFavoriteList.map { it.channel })
+                channelList = ChannelList(channelFavoriteList.map { it.channel.copy(index = -1) })
             )
 
             listOf(groupAll) + channelFavoriteList
@@ -49,7 +49,7 @@ fun FavoritesScreen(
                 .map { (iptvSourceName, channelFavoriteList) ->
                     ChannelGroup(
                         name = iptvSourceName,
-                        channelList = ChannelList(channelFavoriteList.map { it.channel }),
+                        channelList = ChannelList(channelFavoriteList.map { it.channel.copy(index = -1) }),
                     )
                 }
         })
