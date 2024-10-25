@@ -11,6 +11,9 @@ data class ChannelLine(
     val httpUserAgent: String? = null,
     val hybridType: HybridType = HybridType.None,
     val name: String? = if (url.contains("$")) url.split("$").lastOrNull() else null,
+    val manifestType: String? = null,
+    val licenseType: String? = null,
+    val licenseKey: String? = null,
 ) {
 
     val playableUrl: String

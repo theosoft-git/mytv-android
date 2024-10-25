@@ -43,33 +43,43 @@ interface IptvParser {
         val url: String,
         val logo: String? = null,
         val httpUserAgent: String? = null,
+        val manifestType: String? = null,
+        val licenseType: String? = null,
+        val licenseKey: String? = null,
     ) {
         companion object {
+            private fun List<ChannelItem>.toChannelList(): ChannelList {
+                return ChannelList(groupBy { it.name }
+                    .map { (channelName, channelList) ->
+                        val first = channelList.first()
+
+                        Channel(
+                            name = channelName,
+                            standardName = ChannelAlias.standardChannelName(channelName),
+                            epgName = ChannelAlias.standardChannelName(first.epgName),
+                            lineList = ChannelLineList(
+                                channelList.distinctBy { it.url }
+                                    .map {
+                                        ChannelLine(
+                                            url = it.url,
+                                            httpUserAgent = it.httpUserAgent,
+                                            manifestType = it.manifestType,
+                                            licenseType = it.licenseType,
+                                            licenseKey = it.licenseKey,
+                                        )
+                                    }
+                            ),
+                            logo = first.logo,
+                        )
+                    })
+            }
+
             fun List<ChannelItem>.toChannelGroupList(): ChannelGroupList {
                 return ChannelGroupList(groupBy { it.groupName }
                     .map { (groupName, channelList) ->
                         ChannelGroup(
                             name = groupName,
-                            channelList = ChannelList(channelList.groupBy { it.name }
-                                .map { (channelName, channelList) ->
-                                    val first = channelList.first()
-
-                                    Channel(
-                                        name = channelName,
-                                        standardName = ChannelAlias.standardChannelName(channelName),
-                                        epgName = ChannelAlias.standardChannelName(first.epgName),
-                                        lineList = ChannelLineList(
-                                            channelList.distinctBy { it.url }
-                                                .map {
-                                                    ChannelLine(
-                                                        url = it.url,
-                                                        httpUserAgent = it.httpUserAgent,
-                                                    )
-                                                }
-                                        ),
-                                        logo = first.logo,
-                                    )
-                                }),
+                            channelList = channelList.toChannelList(),
                         )
                     })
             }

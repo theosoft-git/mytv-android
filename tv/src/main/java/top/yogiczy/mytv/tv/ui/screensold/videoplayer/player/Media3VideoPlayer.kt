@@ -2,6 +2,7 @@ package top.yogiczy.mytv.tv.ui.screensold.videoplayer.player
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import android.view.SurfaceView
 import android.view.TextureView
 import androidx.annotation.OptIn
@@ -20,6 +21,10 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.dash.DashMediaSource
+import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
+import androidx.media3.exoplayer.drm.FrameworkMediaDrm
+import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.rtsp.RtspMediaSource
 import androidx.media3.exoplayer.source.MediaSource
@@ -72,14 +77,52 @@ class Media3VideoPlayer(
         val uri = Uri.parse(currentChannelLine.playableUrl)
         val mediaItem = MediaItem.fromUri(uri)
 
+        var contentTypeForce = contentType
+
         if (uri.toString().startsWith("rtp://")) {
-            return RtspMediaSource.Factory().createMediaSource(mediaItem)
+            contentTypeForce = C.CONTENT_TYPE_RTSP
+        }
+
+        if (currentChannelLine.manifestType == "mpd") {
+            contentTypeForce = C.CONTENT_TYPE_DASH
         }
 
         val dataSourceFactory = getDataSourceFactory()
-        return when (val type = contentType ?: Util.inferContentType(uri)) {
+        return when (contentTypeForce ?: Util.inferContentType(uri)) {
             C.CONTENT_TYPE_HLS -> {
                 HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+            }
+
+            C.CONTENT_TYPE_DASH -> {
+                DashMediaSource.Factory(dataSourceFactory)
+                    .apply {
+                        if (!(currentChannelLine.manifestType == "mpd" && currentChannelLine.licenseType == "clearkey" && currentChannelLine.licenseKey != null))
+                            return@apply
+
+                        val (drmKeyId, drmKey) = currentChannelLine.licenseKey!!.split(":")
+                        val encodedDrmKey = Base64.encodeToString(
+                            drmKey.chunked(2).map { it.toInt(16).toByte() }.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        )
+                        val encodedDrmKeyId = Base64.encodeToString(
+                            drmKeyId.chunked(2).map { it.toInt(16).toByte() }.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        )
+                        val drmBody =
+                            "{\"keys\":[{\"kty\":\"oct\",\"k\":\"${encodedDrmKey}\",\"kid\":\"${encodedDrmKeyId}\"}],\"type\":\"temporary\"}"
+
+                        val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
+                        val drmSessionManager = DefaultDrmSessionManager.Builder()
+                            .setMultiSession(true)
+                            .setUuidAndExoMediaDrmProvider(
+                                C.CLEARKEY_UUID,
+                                FrameworkMediaDrm.DEFAULT_PROVIDER
+                            )
+                            .build(drmCallback)
+
+                        setDrmSessionManagerProvider { drmSessionManager }
+                    }
+                    .createMediaSource(mediaItem)
             }
 
             C.CONTENT_TYPE_RTSP -> {
@@ -91,11 +134,7 @@ class Media3VideoPlayer(
             }
 
             else -> {
-                triggerError(
-                    PlaybackException.UNSUPPORTED_TYPE.copy(
-                        errorCodeName = "${PlaybackException.UNSUPPORTED_TYPE.message}_$type"
-                    )
-                )
+                triggerError(PlaybackException.UNSUPPORTED_TYPE)
                 null
             }
         }
@@ -136,17 +175,14 @@ class Media3VideoPlayer(
                     videoPlayer.currentMediaItem?.localConfiguration?.uri?.let {
                         if (contentTypeAttempts[C.CONTENT_TYPE_HLS] != true) {
                             prepare(C.CONTENT_TYPE_HLS)
+                        } else if (contentTypeAttempts[C.CONTENT_TYPE_DASH] != true) {
+                            prepare(C.CONTENT_TYPE_DASH)
                         } else if (contentTypeAttempts[C.CONTENT_TYPE_RTSP] != true) {
                             prepare(C.CONTENT_TYPE_RTSP)
                         } else if (contentTypeAttempts[C.CONTENT_TYPE_OTHER] != true) {
                             prepare(C.CONTENT_TYPE_OTHER)
                         } else {
-                            val type = Util.inferContentType(it)
-                            triggerError(
-                                PlaybackException.UNSUPPORTED_TYPE.copy(
-                                    errorCodeName = "${PlaybackException.UNSUPPORTED_TYPE.message}_$type"
-                                )
-                            )
+                            triggerError(PlaybackException.UNSUPPORTED_TYPE)
                         }
                     }
                 }

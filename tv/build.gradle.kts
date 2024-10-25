@@ -118,10 +118,12 @@ dependencies {
         implementation(project(":media3-lib-exoplayer"))
         implementation(project(":media3-lib-exoplayer-hls"))
         implementation(project(":media3-lib-exoplayer-rtsp"))
+        implementation(project(":media3-lib-exoplayer-dash"))
     } else {
         implementation(libs.androidx.media3.exoplayer)
         implementation(libs.androidx.media3.exoplayer.hls)
         implementation(libs.androidx.media3.exoplayer.rtsp)
+        implementation(libs.androidx.media3.exoplayer.dash)
     }
 
 

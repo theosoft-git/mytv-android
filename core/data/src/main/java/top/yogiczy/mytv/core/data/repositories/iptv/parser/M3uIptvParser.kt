@@ -17,7 +17,7 @@ class M3uIptvParser : IptvParser {
             val lines = data.split("\r\n", "\n")
             val channelList = mutableListOf<IptvParser.ChannelItem>()
 
-            var addChannel: ((String) -> Unit)? = null
+            var addedChannels: List<IptvParser.ChannelItem> = listOf()
             lines.forEach { line ->
                 if (line.isBlank()) return@forEach
 
@@ -34,22 +34,34 @@ class M3uIptvParser : IptvParser {
                     val httpUserAgent =
                         Regex("http-user-agent=\"(.+?)\"").find(line)?.groupValues?.get(1)?.trim()
 
-                    addChannel = { url ->
-                        channelList.addAll(
-                            groupNames.map { groupName ->
-                                IptvParser.ChannelItem(
-                                    name = name,
-                                    epgName = epgName,
-                                    groupName = groupName,
-                                    url = url,
-                                    logo = logo,
-                                    httpUserAgent = httpUserAgent,
-                                )
-                            }
+                    addedChannels = groupNames.map { groupName ->
+                        IptvParser.ChannelItem(
+                            name = name,
+                            epgName = epgName,
+                            groupName = groupName,
+                            url = "",
+                            logo = logo,
+                            httpUserAgent = httpUserAgent,
                         )
                     }
                 } else {
-                    addChannel?.invoke(line.trim())
+                    if (line.startsWith("#KODIPROP:inputstream.adaptive.manifest_type")) {
+                        addedChannels =
+                            addedChannels.map { it.copy(manifestType = line.split("=").last()) }
+                    }
+                    else if (line.startsWith("#KODIPROP:inputstream.adaptive.license_type")) {
+                        addedChannels =
+                            addedChannels.map { it.copy(licenseType = line.split("=").last()) }
+                    }
+                    else if (line.startsWith("#KODIPROP:inputstream.adaptive.license_key")) {
+                        addedChannels =
+                            addedChannels.map { it.copy(licenseKey = line.split("=").last()) }
+                    }
+                    else {
+                        addedChannels = addedChannels.map { it.copy(url = line.trim()) }
+                        channelList.addAll(addedChannels)
+                        addedChannels = listOf()
+                    }
                 }
             }
 
