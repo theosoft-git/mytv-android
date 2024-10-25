@@ -7,6 +7,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.ChannelLine
+import top.yogiczy.mytv.core.util.utils.humanizeAudioChannels
+import top.yogiczy.mytv.core.util.utils.humanizeBitrate
 import top.yogiczy.mytv.tv.ui.utils.Configs
 
 abstract class VideoPlayer(
@@ -39,6 +41,10 @@ abstract class VideoPlayer(
         interruptJob?.cancel()
         currentPosition = 0L
     }
+
+    abstract fun selectVideoTrack(index: Int)
+
+    abstract fun selectAudioTrack(index: Int)
 
     abstract fun setVideoSurfaceView(surfaceView: SurfaceView)
 
@@ -181,8 +187,11 @@ abstract class VideoPlayer(
     data class Metadata(
         val video: Video? = null,
         val audio: Audio? = null,
+        val videoTracks: List<Video> = emptyList(),
+        val audioTracks: List<Audio> = emptyList(),
     ) {
         data class Video(
+            val index: Int? = null,
             val width: Int? = null,
             val height: Int? = null,
             val color: String? = null,
@@ -190,15 +199,59 @@ abstract class VideoPlayer(
             val bitrate: Int? = null,
             val mimeType: String? = null,
             val decoder: String? = null,
-        )
+        ) {
+            override fun equals(other: Any?): Boolean {
+                if (other !is Video) return false
+
+                return width == other.width && height == other.height && frameRate == other.frameRate && bitrate == other.bitrate && mimeType == other.mimeType
+            }
+
+            override fun hashCode(): Int {
+                var result = width ?: 0
+                result = 31 * result + (height ?: 0)
+                result = 31 * result + (frameRate?.hashCode() ?: 0)
+                result = 31 * result + (bitrate ?: 0)
+                result = 31 * result + (mimeType?.hashCode() ?: 0)
+                return result
+            }
+
+            val shortLabel: String
+                get() = listOfNotNull(
+                    "${width.toString()}x${height.toString()}",
+                    bitrate?.takeIf { nnBitrate -> nnBitrate > 0 }?.humanizeBitrate()
+                )
+                    .joinToString(", ")
+        }
 
         data class Audio(
+            val index: Int? = null,
             val channels: Int? = null,
             val channelsLabel: String? = null,
             val sampleRate: Int? = null,
             val bitrate: Int? = null,
             val mimeType: String? = null,
             val decoder: String? = null,
-        )
+        ) {
+            override fun equals(other: Any?): Boolean {
+                if (other !is Audio) return false
+
+                return channels == other.channels && sampleRate == other.sampleRate && bitrate == other.bitrate && mimeType == other.mimeType
+            }
+
+            override fun hashCode(): Int {
+                var result = channels ?: 0
+                result = 31 * result + (sampleRate ?: 0)
+                result = 31 * result + (bitrate ?: 0)
+                result = 31 * result + (mimeType?.hashCode() ?: 0)
+                return result
+            }
+
+            val shortLabel: String
+                get() = listOfNotNull(
+                    channelsLabel ?: channels?.humanizeAudioChannels(),
+                    bitrate?.takeIf { nnBitrate -> nnBitrate > 0 }?.humanizeBitrate()
+                )
+                    .joinToString(", ")
+        }
     }
 }

@@ -41,6 +41,7 @@ import top.yogiczy.mytv.core.data.entities.epg.EpgProgramme.Companion.progress
 import top.yogiczy.mytv.core.data.entities.epg.EpgProgramme.Companion.remainingMinutes
 import top.yogiczy.mytv.core.data.entities.epg.EpgProgrammeRecent
 import top.yogiczy.mytv.core.data.utils.ChannelUtil
+import top.yogiczy.mytv.core.util.utils.humanizeAudioChannels
 import top.yogiczy.mytv.core.util.utils.isIPv6
 import top.yogiczy.mytv.tv.ui.material.ProgressBar
 import top.yogiczy.mytv.tv.ui.material.ProgressBarColors
@@ -205,21 +206,9 @@ private fun LiveChannelsChannelInfoTags(
         }
 
         playerMetadata.audio?.let { nnAudio ->
-            if ((nnAudio.channels ?: 0) > 0) {
+            nnAudio.channels?.takeIf { it > 0 }?.let { nnChannels ->
                 Tag(
-                    nnAudio.channelsLabel ?: when (nnAudio.channels) {
-                        1 -> "单声道"
-                        2 -> "立体声"
-                        3 -> "2.1 声道"
-                        4 -> "4.0 四声道"
-                        5 -> "5.0 环绕声"
-                        6 -> "5.1 环绕声"
-                        7 -> "6.1 环绕声"
-                        8 -> "7.1 环绕声"
-                        10 -> "7.1.2 杜比全景声"
-                        12 -> "7.1.4 杜比全景声"
-                        else -> "${nnAudio.channels}声道"
-                    },
+                    nnAudio.channelsLabel ?: nnChannels.humanizeAudioChannels(),
                     colors = tagColors,
                 )
             }

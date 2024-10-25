@@ -55,6 +55,8 @@ fun QuickOpScreen(
     onShowChannelLine: () -> Unit = {},
     onShowVideoPlayerController: () -> Unit = {},
     onShowVideoPlayerDisplayMode: () -> Unit = {},
+    onShowVideoTracks: () -> Unit = {},
+    onShowAudioTracks: () -> Unit = {},
     onClearCache: () -> Unit = {},
     toSettingsScreen: (SettingsSubCategories?) -> Unit = {},
     onClose: () -> Unit = {},
@@ -86,6 +88,8 @@ fun QuickOpScreen(
             onShowChannelLine = onShowChannelLine,
             onShowVideoPlayerController = onShowVideoPlayerController,
             onShowVideoPlayerDisplayMode = onShowVideoPlayerDisplayMode,
+            onShowVideoTracks = onShowVideoTracks,
+            onShowAudioTracks = onShowAudioTracks,
             onShowMoreSettings = { toSettingsScreen(null) },
             onClearCache = onClearCache,
             onUserAction = { screenAutoCloseState.active() },
@@ -148,6 +152,8 @@ private fun QuickOpScreenBottom(
     onShowChannelLine: () -> Unit = {},
     onShowVideoPlayerController: () -> Unit = {},
     onShowVideoPlayerDisplayMode: () -> Unit = {},
+    onShowVideoTracks: () -> Unit = {},
+    onShowAudioTracks: () -> Unit = {},
     onShowMoreSettings: () -> Unit = {},
     onClearCache: () -> Unit = {},
     onUserAction: () -> Unit = {},
@@ -174,11 +180,14 @@ private fun QuickOpScreenBottom(
             )
 
             QuickOpBtnList(
+                playerMetadataProvider = videoPlayerMetadataProvider,
                 onShowEpg = onShowEpg,
                 onShowChannelLine = onShowChannelLine,
                 onShowVideoPlayerController = onShowVideoPlayerController,
                 onShowVideoPlayerDisplayMode = onShowVideoPlayerDisplayMode,
                 onShowMoreSettings = onShowMoreSettings,
+                onShowVideoTracks = onShowVideoTracks,
+                onShowAudioTracks = onShowAudioTracks,
                 onClearCache = onClearCache,
                 onUserAction = onUserAction,
             )

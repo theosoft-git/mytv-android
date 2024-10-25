@@ -14,6 +14,7 @@ import androidx.tv.material3.Text
 import kotlinx.coroutines.flow.distinctUntilChanged
 import top.yogiczy.mytv.tv.ui.rememberChildPadding
 import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
+import top.yogiczy.mytv.tv.ui.screensold.videoplayer.player.VideoPlayer
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.Configs
 import top.yogiczy.mytv.tv.ui.utils.focusOnLaunched
@@ -21,16 +22,20 @@ import top.yogiczy.mytv.tv.ui.utils.focusOnLaunched
 @Composable
 fun QuickOpBtnList(
     modifier: Modifier = Modifier,
+    playerMetadataProvider: () -> VideoPlayer.Metadata = { VideoPlayer.Metadata() },
     onShowEpg: () -> Unit = {},
     onShowChannelLine: () -> Unit = {},
     onShowVideoPlayerController: () -> Unit = {},
     onShowVideoPlayerDisplayMode: () -> Unit = {},
+    onShowVideoTracks: () -> Unit = {},
+    onShowAudioTracks: () -> Unit = {},
     onShowMoreSettings: () -> Unit = {},
     onClearCache: () -> Unit = {},
     onUserAction: () -> Unit = {},
 ) {
     val childPadding = rememberChildPadding()
     val listState = rememberLazyListState()
+    val playerMetadata = playerMetadataProvider()
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
@@ -71,6 +76,24 @@ fun QuickOpBtnList(
                 title = { Text("显示模式") },
                 onSelect = onShowVideoPlayerDisplayMode,
             )
+        }
+
+        if (playerMetadata.videoTracks.size > 1) {
+            item {
+                QuickOpBtn(
+                    title = { Text(playerMetadata.video?.shortLabel ?: "视轨") },
+                    onSelect = onShowVideoTracks,
+                )
+            }
+        }
+
+        if (playerMetadata.audioTracks.size > 1) {
+            item {
+                QuickOpBtn(
+                    title = { Text(playerMetadata.audio?.shortLabel ?: "音轨") },
+                    onSelect = onShowAudioTracks,
+                )
+            }
         }
 
         item {

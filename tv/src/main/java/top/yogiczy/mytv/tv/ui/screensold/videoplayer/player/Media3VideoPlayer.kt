@@ -11,6 +11,8 @@ import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
+import androidx.media3.common.TrackGroup
+import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
@@ -223,6 +225,54 @@ class Media3VideoPlayer(
         }
     }
 
+    private fun Format.toVideoMetadata(video: Metadata.Video? = null): Metadata.Video {
+        return (video ?: Metadata.Video()).copy(
+            width = width,
+            height = height,
+            color = colorInfo?.toLogString(),
+            frameRate = frameRate,
+            // TODO 帧率、比特率目前是从tag中获取，有的返回空，后续需要实时计算
+            bitrate = bitrate,
+            mimeType = sampleMimeType,
+        )
+    }
+
+    private fun Format.toAudioMetadata(audio: Metadata.Audio? = null): Metadata.Audio {
+        return (audio ?: Metadata.Audio()).copy(
+            channels = channelCount,
+            channelsLabel = if (sampleMimeType == MimeTypes.AUDIO_AV3A) "菁彩声" else null,
+            sampleRate = sampleRate,
+            bitrate = bitrate,
+            mimeType = sampleMimeType,
+        )
+    }
+
+    private fun getVideoTrackGroup(): TrackGroup? {
+        return videoPlayer.currentTracks.groups.firstOrNull { it.type == C.TRACK_TYPE_VIDEO }?.mediaTrackGroup
+    }
+
+    private fun getAudioTrackGroup(): TrackGroup? {
+        return videoPlayer.currentTracks.groups.firstOrNull { it.type == C.TRACK_TYPE_AUDIO }?.mediaTrackGroup
+    }
+
+    private fun getVideoTracks(): List<Metadata.Video> {
+        val group = getVideoTrackGroup() ?: return emptyList()
+
+        return (0..<group.length).map { index ->
+            val format = group.getFormat(index)
+            format.toVideoMetadata().copy(index = index)
+        }
+    }
+
+    private fun getAudioTracks(): List<Metadata.Audio> {
+        val group = getAudioTrackGroup() ?: return emptyList()
+
+        return (0..<group.length).map { index ->
+            val format = group.getFormat(index)
+            format.toAudioMetadata().copy(index = index)
+        }
+    }
+
     private val metadataListener = object : AnalyticsListener {
         override fun onVideoInputFormatChanged(
             eventTime: AnalyticsListener.EventTime,
@@ -230,17 +280,9 @@ class Media3VideoPlayer(
             decoderReuseEvaluation: DecoderReuseEvaluation?,
         ) {
             metadata = metadata.copy(
-                video = (metadata.video ?: Metadata.Video()).copy(
-                    width = format.width,
-                    height = format.height,
-                    color = format.colorInfo?.toLogString(),
-                    frameRate = format.frameRate,
-                    // TODO 帧率、比特率目前是从tag中获取，有的返回空，后续需要实时计算
-                    bitrate = format.bitrate,
-                    mimeType = format.sampleMimeType,
-                )
+                video = format.toVideoMetadata(metadata.video),
+                videoTracks = getVideoTracks(),
             )
-
             triggerMetadata(metadata)
         }
 
@@ -263,15 +305,9 @@ class Media3VideoPlayer(
             decoderReuseEvaluation: DecoderReuseEvaluation?,
         ) {
             metadata = metadata.copy(
-                audio = (metadata.audio ?: Metadata.Audio()).copy(
-                    channels = format.channelCount,
-                    channelsLabel = if (format.sampleMimeType == MimeTypes.AUDIO_AV3A) "菁彩声" else null,
-                    sampleRate = format.sampleRate,
-                    bitrate = format.bitrate,
-                    mimeType = format.sampleMimeType,
-                )
+                audio = format.toAudioMetadata(metadata.audio),
+                audioTracks = getAudioTracks(),
             )
-
             triggerMetadata(metadata)
         }
 
@@ -337,6 +373,24 @@ class Media3VideoPlayer(
         videoPlayer.stop()
         updatePositionJob?.cancel()
         super.stop()
+    }
+
+    override fun selectVideoTrack(index: Int) {
+        val group = getVideoTrackGroup() ?: return
+
+        videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
+            .buildUpon()
+            .setOverrideForType(TrackSelectionOverride(group, index))
+            .build()
+    }
+
+    override fun selectAudioTrack(index: Int) {
+        val group = getAudioTrackGroup() ?: return
+
+        videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
+            .buildUpon()
+            .setOverrideForType(TrackSelectionOverride(group, index))
+            .build()
     }
 
     override fun setVideoSurfaceView(surfaceView: SurfaceView) {

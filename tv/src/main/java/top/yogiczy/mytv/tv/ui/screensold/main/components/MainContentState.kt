@@ -112,6 +112,20 @@ class MainContentState(
             _isVideoPlayerDisplayModeScreenVisible = value
         }
 
+    private var _isVideoTracksScreenVisible by mutableStateOf(false)
+    var isVideoTracksScreenVisible
+        get() = _isVideoTracksScreenVisible
+        set(value) {
+            _isVideoTracksScreenVisible = value
+        }
+
+    private var _isAudioTracksScreenVisible by mutableStateOf(false)
+    var isAudioTracksScreenVisible
+        get() = _isAudioTracksScreenVisible
+        set(value) {
+            _isAudioTracksScreenVisible = value
+        }
+
     init {
         val channelGroupList = channelGroupListProvider()
 

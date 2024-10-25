@@ -24,6 +24,7 @@ import top.yogiczy.mytv.tv.ui.material.popupable
 import top.yogiczy.mytv.tv.ui.screen.settings.SettingsSubCategories
 import top.yogiczy.mytv.tv.ui.screen.settings.SettingsViewModel
 import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
+import top.yogiczy.mytv.tv.ui.screensold.audiotracks.AudioTracksScreen
 import top.yogiczy.mytv.tv.ui.screensold.channel.ChannelNumberSelectScreen
 import top.yogiczy.mytv.tv.ui.screensold.channel.ChannelScreen
 import top.yogiczy.mytv.tv.ui.screensold.channel.ChannelTempScreen
@@ -40,6 +41,7 @@ import top.yogiczy.mytv.tv.ui.screensold.videoplayer.player.VideoPlayer
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.rememberVideoPlayerState
 import top.yogiczy.mytv.tv.ui.screensold.videoplayercontroller.VideoPlayerControllerScreen
 import top.yogiczy.mytv.tv.ui.screensold.videoplayerdiaplaymode.VideoPlayerDisplayModeScreen
+import top.yogiczy.mytv.tv.ui.screensold.videotracks.VideoTracksScreen
 import top.yogiczy.mytv.tv.ui.screensold.webview.WebViewScreen
 import top.yogiczy.mytv.tv.ui.utils.backHandler
 import top.yogiczy.mytv.tv.ui.utils.handleDragGestures
@@ -307,6 +309,36 @@ fun MainContent(
     }
 
     PopupContent(
+        visibleProvider = { mainContentState.isVideoTracksScreenVisible },
+        onDismissRequest = { mainContentState.isVideoTracksScreenVisible = false },
+    ) {
+        VideoTracksScreen(
+            trackListProvider = { videoPlayerState.metadata.videoTracks },
+            currentTrackProvider = { videoPlayerState.metadata.video },
+            onTrackChanged = {
+                videoPlayerState.selectVideoTrack(it.index ?: 0)
+                mainContentState.isVideoTracksScreenVisible = false
+            },
+            onClose = { mainContentState.isVideoTracksScreenVisible = false },
+        )
+    }
+
+    PopupContent(
+        visibleProvider = { mainContentState.isAudioTracksScreenVisible },
+        onDismissRequest = { mainContentState.isAudioTracksScreenVisible = false },
+    ) {
+        AudioTracksScreen(
+            trackListProvider = { videoPlayerState.metadata.audioTracks },
+            currentTrackProvider = { videoPlayerState.metadata.audio },
+            onTrackChanged = {
+                videoPlayerState.selectAudioTrack(it.index ?: 0)
+                mainContentState.isAudioTracksScreenVisible = false
+            },
+            onClose = { mainContentState.isAudioTracksScreenVisible = false },
+        )
+    }
+
+    PopupContent(
         visibleProvider = { mainContentState.isQuickOpScreenVisible },
         onDismissRequest = { mainContentState.isQuickOpScreenVisible = false },
     ) {
@@ -334,6 +366,14 @@ fun MainContent(
             onShowVideoPlayerDisplayMode = {
                 mainContentState.isQuickOpScreenVisible = false
                 mainContentState.isVideoPlayerDisplayModeScreenVisible = true
+            },
+            onShowVideoTracks = {
+                mainContentState.isQuickOpScreenVisible = false
+                mainContentState.isVideoTracksScreenVisible = true
+            },
+            onShowAudioTracks = {
+                mainContentState.isQuickOpScreenVisible = false
+                mainContentState.isAudioTracksScreenVisible = true
             },
             toSettingsScreen = {
                 mainContentState.isQuickOpScreenVisible = false

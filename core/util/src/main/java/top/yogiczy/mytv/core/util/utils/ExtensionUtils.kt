@@ -3,6 +3,7 @@ package top.yogiczy.mytv.core.util.utils
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -104,5 +105,32 @@ fun String.headersValid(): Boolean {
     return lines().all { line ->
         val parts = line.split(":", limit = 2)
         parts.size == 2 && parts[0].isNotBlank() && parts[1].isNotBlank()
+    }
+}
+
+fun Int.humanizeBitrate(base: Int = 1000): String {
+    return when (this) {
+        in 0..<base -> "${this}bps"
+        in base..<base * base -> "${
+            String.format(Locale.getDefault(), "%.2f", this.toFloat() / base)
+        }Kbps"
+
+        else -> "${String.format(Locale.getDefault(), "%.2f", this.toFloat() / base / base)}Mbps"
+    }
+}
+
+fun Int.humanizeAudioChannels(): String {
+    return when (this) {
+        1 -> "单声道"
+        2 -> "立体声"
+        3 -> "2.1 声道"
+        4 -> "4.0 四声道"
+        5 -> "5.0 环绕声"
+        6 -> "5.1 环绕声"
+        7 -> "6.1 环绕声"
+        8 -> "7.1 环绕声"
+        10 -> "7.1.2 杜比全景声"
+        12 -> "7.1.4 杜比全景声"
+        else -> "${this}声道"
     }
 }

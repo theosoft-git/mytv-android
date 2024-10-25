@@ -83,6 +83,14 @@ class VideoPlayerState(
         instance.stop()
     }
 
+    fun selectVideoTrack(index: Int) {
+        instance.selectVideoTrack(index)
+    }
+
+    fun selectAudioTrack(index: Int) {
+        instance.selectAudioTrack(index)
+    }
+
     fun setVideoSurfaceView(surfaceView: SurfaceView) {
         instance.setVideoSurfaceView(surfaceView)
     }
