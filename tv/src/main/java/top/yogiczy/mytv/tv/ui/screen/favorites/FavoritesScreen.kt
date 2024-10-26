@@ -55,7 +55,7 @@ fun FavoritesScreen(
         })
 
     var currentChannelGroupIdx by rememberSaveable { mutableIntStateOf(0) }
-    val currentChannelGroup = remember(currentChannelGroupIdx) {
+    val currentChannelGroup = remember(currentChannelGroupIdx, channelFavoriteGroupList) {
         channelFavoriteGroupList.getOrElse(currentChannelGroupIdx) { ChannelGroup() }
     }
 
