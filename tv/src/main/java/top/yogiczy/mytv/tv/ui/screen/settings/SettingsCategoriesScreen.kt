@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.ControlCamera
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.DisplaySettings
 import androidx.compose.material.icons.outlined.LiveTv
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material.icons.outlined.Wifi
@@ -208,6 +209,7 @@ enum class SettingsCategories(
     CLOUD_SYNC(Icons.Outlined.CloudSync, "云同步"),
     DEBUG(Icons.Outlined.BugReport, "调试"),
     LOG(Icons.AutoMirrored.Outlined.FormatListBulleted, "日志"),
+    PERMISSIONS(Icons.Outlined.Shield, "权限"),
 }
 
 enum class SettingsSubCategories {

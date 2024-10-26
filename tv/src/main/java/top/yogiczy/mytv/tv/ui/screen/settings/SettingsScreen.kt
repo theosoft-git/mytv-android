@@ -24,6 +24,7 @@ import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsEpgScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsIptvScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsLogScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsNetworkScreen
+import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsPermissionsScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsThemeScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsUiScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsUpdateScreen
@@ -196,6 +197,12 @@ fun SettingsScreen(
 
                 composable(SettingsCategories.LOG.name) {
                     SettingsLogScreen(
+                        onBackPressed = { navController.navigateUp() },
+                    )
+                }
+
+                composable(SettingsCategories.PERMISSIONS.name) {
+                    SettingsPermissionsScreen(
                         onBackPressed = { navController.navigateUp() },
                     )
                 }

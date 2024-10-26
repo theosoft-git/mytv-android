@@ -1,10 +1,5 @@
 package top.yogiczy.mytv.tv.ui.screen.update
 
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,8 +25,6 @@ import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.git.GitRelease
 import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.util.utils.ApkInstaller
-import top.yogiczy.mytv.tv.ui.material.Snackbar
-import top.yogiczy.mytv.tv.ui.material.SnackbarType
 import top.yogiczy.mytv.tv.ui.screen.components.AppScreen
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.theme.SAFE_AREA_HORIZONTAL_PADDING
@@ -39,6 +32,7 @@ import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
 import top.yogiczy.mytv.tv.ui.utils.focusOnLaunched
 import top.yogiczy.mytv.tv.ui.utils.gridColumns
 import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
+import top.yogiczy.mytv.tv.ui.utils.rememberCanRequestPackageInstallsPermission
 import java.io.File
 
 @Composable
@@ -52,37 +46,17 @@ fun UpdateScreen(
     val coroutineScope = rememberCoroutineScope()
     val latestRelease = updateViewModel.latestRelease
 
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (context.packageManager.canRequestPackageInstalls()) {
-                    ApkInstaller.installApk(context, latestFile.path)
-                } else {
-                    Snackbar.show("未授予安装权限", type = SnackbarType.ERROR)
-                }
-            }
-        }
+    val (hasPermission, requestPermission) = rememberCanRequestPackageInstallsPermission()
+
+    LaunchedEffect(hasPermission) {
+        if (hasPermission) ApkInstaller.installApk(context, latestFile.path)
+    }
 
     LaunchedEffect(updateViewModel.updateDownloaded) {
         if (!updateViewModel.updateDownloaded) return@LaunchedEffect
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            ApkInstaller.installApk(context, latestFile.path)
-        } else {
-            if (context.packageManager.canRequestPackageInstalls()) {
-                ApkInstaller.installApk(context, latestFile.path)
-            } else {
-                runCatching {
-                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
-                    launcher.launch(intent)
-                }.onFailure {
-                    Snackbar.show(
-                        "无法找到相应的设置项，请手动启用未知来源安装权限。",
-                        type = SnackbarType.ERROR,
-                    )
-                }
-            }
-        }
+        if (hasPermission) ApkInstaller.installApk(context, latestFile.path)
+        else requestPermission()
     }
 
     AppScreen(modifier = modifier) {
