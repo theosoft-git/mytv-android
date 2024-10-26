@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
+import kotlin.math.max
 
 fun Long.humanizeMs(): String {
     return when (this) {
@@ -109,13 +110,11 @@ fun String.headersValid(): Boolean {
 }
 
 fun Int.humanizeBitrate(base: Int = 1000): String {
-    return when (this) {
-        in 0..<base -> "${this}bps"
-        in base..<base * base -> "${
-            String.format(Locale.getDefault(), "%.2f", this.toFloat() / base)
-        }Kbps"
+    return when (val value = max(0, this)) {
+        in 0..<base -> "${value}bps"
+        in base..<base * base -> "${value / base}Kbps"
 
-        else -> "${String.format(Locale.getDefault(), "%.2f", this.toFloat() / base / base)}Mbps"
+        else -> "${String.format(Locale.getDefault(), "%.2f", value.toFloat() / base / base)}Mbps"
     }
 }
 
