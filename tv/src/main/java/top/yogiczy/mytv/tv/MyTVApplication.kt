@@ -63,7 +63,9 @@ class MyTVApplication : Application(), ImageLoaderFactory {
 
                     if (BuildConfig.DEBUG) return@BeforeSendCallback null
                     if (SentryLevel.ERROR != event.level && SentryLevel.FATAL != event.level) return@BeforeSendCallback null
-                    if (event.exceptions?.any { ex -> ex.type?.contains("HttpException") == true } == true) return@BeforeSendCallback null
+                    if (event.exceptions?.any { ex ->
+                            ex.type?.contains("HttpException") == true || ex.type?.contains("HttpClientException") == true
+                        } == true) return@BeforeSendCallback null
 
                     event
                 }
