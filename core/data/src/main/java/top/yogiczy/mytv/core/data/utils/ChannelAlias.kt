@@ -30,7 +30,7 @@ object ChannelAlias : Loggable("ChannelAlias") {
                     normalizedSuffixes.fold(name) { acc, suffix -> acc.removeSuffix(suffix) }
                         .trim()
 
-                findAliasName(nameWithoutSuffix) ?: name
+                findAliasName(nameWithoutSuffix) ?: nameWithoutSuffix
             }.let {
                 if (it.value != name) {
                     log.d(

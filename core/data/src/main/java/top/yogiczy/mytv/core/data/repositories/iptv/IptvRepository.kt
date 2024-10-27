@@ -53,7 +53,7 @@ class IptvRepository(private val source: IptvSource) :
 
     private suspend fun transform(channelList: List<IptvParser.ChannelItem>): List<IptvParser.ChannelItem> =
         withContext(Dispatchers.IO) {
-            if (source.transformJs == null) return@withContext channelList
+            if (source.transformJs.isNullOrBlank()) return@withContext channelList
 
             val context = org.mozilla.javascript.Context.enter()
             context.optimizationLevel = -1
