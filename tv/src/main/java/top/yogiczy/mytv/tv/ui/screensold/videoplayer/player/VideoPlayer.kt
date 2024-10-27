@@ -10,6 +10,7 @@ import top.yogiczy.mytv.core.data.entities.channel.ChannelLine
 import top.yogiczy.mytv.core.util.utils.humanizeAudioChannels
 import top.yogiczy.mytv.core.util.utils.humanizeBitrate
 import top.yogiczy.mytv.tv.ui.utils.Configs
+import kotlin.math.roundToInt
 
 abstract class VideoPlayer(
     private val coroutineScope: CoroutineScope,
@@ -218,6 +219,7 @@ abstract class VideoPlayer(
             val shortLabel: String
                 get() = listOfNotNull(
                     "${width.toString()}x${height.toString()}",
+                    frameRate?.takeIf { it > 0 }?.let { "${it.roundToInt()}fps" },
                     bitrate?.takeIf { nnBitrate -> nnBitrate > 0 }?.humanizeBitrate()
                 )
                     .joinToString(", ")

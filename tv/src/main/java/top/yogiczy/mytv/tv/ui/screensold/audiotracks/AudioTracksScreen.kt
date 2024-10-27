@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.tv.ui.material.Drawer
 import top.yogiczy.mytv.tv.ui.material.DrawerPosition
@@ -14,6 +13,7 @@ import top.yogiczy.mytv.tv.ui.screensold.videoplayer.player.VideoPlayer
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
 import top.yogiczy.mytv.tv.ui.utils.backHandler
+import top.yogiczy.mytv.tv.ui.utils.gridColumns
 
 @Composable
 fun AudioTracksScreen(
@@ -32,7 +32,7 @@ fun AudioTracksScreen(
         header = { Text("视轨") },
     ) {
         AudioTrackItemList(
-            modifier = Modifier.width(268.dp),
+            modifier = Modifier.width(4.5f.gridColumns()),
             trackListProvider = trackListProvider,
             currentTrackProvider = currentTrackProvider,
             onSelected = onTrackChanged,
@@ -46,7 +46,26 @@ fun AudioTracksScreen(
 private fun AudioTracksScreenPreview() {
     MyTvTheme {
         PreviewWithLayoutGrids {
-            AudioTracksScreen()
+            AudioTracksScreen(
+                trackListProvider = {
+                    listOf(
+                        VideoPlayer.Metadata.Audio(
+                            channels = 2,
+                            bitrate = 128000,
+                        ),
+                        VideoPlayer.Metadata.Audio(
+                            channels = 10,
+                            bitrate = 567000,
+                        )
+                    )
+                },
+                currentTrackProvider = {
+                    VideoPlayer.Metadata.Audio(
+                        channels = 10,
+                        bitrate = 567000,
+                    )
+                },
+            )
         }
     }
 }

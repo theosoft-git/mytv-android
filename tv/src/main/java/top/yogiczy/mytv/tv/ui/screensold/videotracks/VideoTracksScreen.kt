@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.tv.ui.material.Drawer
 import top.yogiczy.mytv.tv.ui.material.DrawerPosition
@@ -14,6 +13,7 @@ import top.yogiczy.mytv.tv.ui.screensold.videotracks.components.VideoTrackItemLi
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
 import top.yogiczy.mytv.tv.ui.utils.backHandler
+import top.yogiczy.mytv.tv.ui.utils.gridColumns
 
 @Composable
 fun VideoTracksScreen(
@@ -32,7 +32,7 @@ fun VideoTracksScreen(
         header = { Text("视轨") },
     ) {
         VideoTrackItemList(
-            modifier = Modifier.width(268.dp),
+            modifier = Modifier.width(4.5f.gridColumns()),
             trackListProvider = trackListProvider,
             currentTrackProvider = currentTrackProvider,
             onSelected = onTrackChanged,
@@ -46,7 +46,30 @@ fun VideoTracksScreen(
 private fun VideoTracksScreenPreview() {
     MyTvTheme {
         PreviewWithLayoutGrids {
-            VideoTracksScreen()
+            VideoTracksScreen(
+                trackListProvider = {
+                    listOf(
+                        VideoPlayer.Metadata.Video(
+                            width = 1920,
+                            height = 1080,
+                            bitrate = 5_000_000,
+                            frameRate = 50f,
+                        ),
+                        VideoPlayer.Metadata.Video(
+                            width = 1280,
+                            height = 720,
+                            bitrate = 1_000_000,
+                        )
+                    )
+                },
+                currentTrackProvider = {
+                    VideoPlayer.Metadata.Video(
+                        width = 1280,
+                        height = 720,
+                        bitrate = 1_000_000,
+                    )
+                },
+            )
         }
     }
 }

@@ -38,8 +38,7 @@ fun QuickOpBtnList(
     val playerMetadata = playerMetadataProvider()
 
     LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .distinctUntilChanged()
+        snapshotFlow { listState.isScrollInProgress }.distinctUntilChanged()
             .collect { _ -> onUserAction() }
     }
 
@@ -78,19 +77,19 @@ fun QuickOpBtnList(
             )
         }
 
-        if (playerMetadata.videoTracks.size > 1) {
+        if (playerMetadata.videoTracks.isNotEmpty()) {
             item {
                 QuickOpBtn(
-                    title = { Text(playerMetadata.video?.shortLabel ?: "视轨") },
+                    title = { Text("视轨") },
                     onSelect = onShowVideoTracks,
                 )
             }
         }
 
-        if (playerMetadata.audioTracks.size > 1) {
+        if (playerMetadata.audioTracks.isNotEmpty()) {
             item {
                 QuickOpBtn(
-                    title = { Text(playerMetadata.audio?.shortLabel ?: "音轨") },
+                    title = { Text("音轨") },
                     onSelect = onShowAudioTracks,
                 )
             }
