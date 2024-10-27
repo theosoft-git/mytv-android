@@ -305,7 +305,10 @@ fun SettingsScreen(
                 composable(SettingsSubCategories.UI_SCREEN_AUTO_CLOSE_DELAY.name) {
                     SettingsUiScreenAutoCloseScreen(
                         delayProvider = { settingsViewModel.uiScreenAutoCloseDelay },
-                        onDelayChanged = { settingsViewModel.uiScreenAutoCloseDelay = it },
+                        onDelayChanged = {
+                            settingsViewModel.uiScreenAutoCloseDelay = it
+                            navController.navigateUp()
+                        },
                         onBackPressed = { navController.navigateUp() },
                     )
                 }

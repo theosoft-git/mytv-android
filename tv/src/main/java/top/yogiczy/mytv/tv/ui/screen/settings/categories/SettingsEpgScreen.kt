@@ -61,7 +61,7 @@ fun SettingsEpgScreen(
             val epgRefreshTimeThreshold = settingsViewModel.epgRefreshTimeThreshold
 
             SettingsListItem(
-                headlineContent = "节目单刷新时间阈值",
+                headlineContent = "刷新时间阈值",
                 trailingContent = { Text("${epgRefreshTimeThreshold}:00") },
                 supportingContent = "时间不到${epgRefreshTimeThreshold}:00节目单将不会刷新",
                 onSelect = toEpgRefreshTimeThresholdScreen,

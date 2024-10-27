@@ -71,7 +71,7 @@ fun SettingsVideoPlayerScreen(
         item {
             SettingsListItem(
                 headlineContent = "自定义ua",
-                supportingContent = settingsViewModel.videoPlayerUserAgent,
+                trailingContent = settingsViewModel.videoPlayerUserAgent,
                 remoteConfig = true,
             )
         }

@@ -1,11 +1,8 @@
 package top.yogiczy.mytv.tv.ui.screen.components
 
-import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -49,7 +45,6 @@ import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import coil.compose.SubcomposeAsyncImage
 import kotlinx.serialization.Serializable
 import top.yogiczy.mytv.tv.ui.material.CircularProgressIndicator
 import top.yogiczy.mytv.tv.ui.rememberChildPadding
@@ -232,28 +227,20 @@ fun AppThemeWrapper(
                 )
         )
     } else {
-        val imageBytes = Base64.decode(appThemeDef.background, Base64.DEFAULT)
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-        val imageBitmap = bitmap.asImageBitmap()
+        AsyncImageEnhance(
+            model = appThemeDef.background,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                bitmap = imageBitmap,
-                contentDescription = null,
+        appThemeDef.texture?.let { nnTexture ->
+            AsyncImageEnhance(
+                model = nnTexture,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(appThemeDef.textureAlpha ?: 1f),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
             )
-
-            appThemeDef.texture?.let { nnTexture ->
-                SubcomposeAsyncImage(
-                    model = nnTexture,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(appThemeDef.textureAlpha ?: 1f),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                )
-            }
         }
 
         Box(

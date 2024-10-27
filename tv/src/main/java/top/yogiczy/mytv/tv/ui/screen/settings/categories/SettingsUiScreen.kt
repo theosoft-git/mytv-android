@@ -47,7 +47,7 @@ fun SettingsUiScreen(
             val showProgress = settingsViewModel.uiShowEpgProgrammePermanentProgress
 
             SettingsListItem(
-                headlineContent = "常驻底部节目进度",
+                headlineContent = "常驻节目进度",
                 supportingContent = "在播放器底部显示当前节目进度条",
                 trailingContent = {
                     Switch(showProgress, null)
