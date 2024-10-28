@@ -26,8 +26,10 @@ import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.data.utils.Loggable
 import top.yogiczy.mytv.core.data.utils.Logger
 import top.yogiczy.mytv.core.util.utils.ApkInstaller
+import top.yogiczy.mytv.tv.BuildConfig
 import top.yogiczy.mytv.tv.R
 import top.yogiczy.mytv.tv.sync.CloudSync
+import top.yogiczy.mytv.tv.sync.CloudSyncData
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.material.SnackbarType
 import top.yogiczy.mytv.tv.ui.utils.Configs
@@ -67,6 +69,24 @@ object HttpServer : Loggable("HttpServer") {
                     handleRawResource(response, context, "text/javascript", R.raw.web_push_js)
                 }
 
+                server.get("/advance") { _, response ->
+                    handleAssets(response, context, "text/html", "remote-configs/index.html")
+                }
+
+                server.get("/remote-configs/(.*)") { request, response ->
+                    val contentType = when (request.path.split(".").last()) {
+                        "css" -> "text/css"
+                        "js" -> "text/javascript"
+                        "html" -> "text/html"
+                        "json" -> "application/json"
+                        "svg" -> "image/svg+xml"
+                        "png" -> "image/png"
+                        else -> "text/plain"
+                    }
+
+                    handleAssets(response, context, contentType, request.path.removePrefix("/"))
+                }
+
                 server.get("/api/info") { _, response ->
                     handleGetInfo(response)
                 }
@@ -103,6 +123,30 @@ object HttpServer : Loggable("HttpServer") {
                     handleCloudSyncDataGet(response)
                 }
 
+                server.post("/api/cloud-sync/data") { request, response ->
+                    handleCloudSyncDataPost(request, response)
+                }
+
+                server.get("/api/about") { _, response ->
+                    handleAboutGet(response)
+                }
+
+                server.get("/api/logs") { _, response ->
+                    handleLogsGet(response)
+                }
+
+                server.get("/api/file/content") { request, response ->
+                    handleFileContentGet(request, response)
+                }
+
+                server.post("/api/file/content") { request, response ->
+                    handleFileContentPost(request, response)
+                }
+
+                server.post("/api/file/content-with-dir") { request, response ->
+                    handleFileContentWithDirPost(request, response)
+                }
+
                 log.i("设置服务已启动: $serverUrl")
             } catch (ex: Exception) {
                 log.e("设置服务启动失败: ${ex.message}", ex)
@@ -119,6 +163,13 @@ object HttpServer : Loggable("HttpServer") {
         headers.set("Access-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token")
     }
 
+    private fun responseSuccess(response: AsyncHttpServerResponse) {
+        wrapResponse(response).apply {
+            setContentType("application/json")
+            send("{\"code\": 0}")
+        }
+    }
+
     private fun handleRawResource(
         response: AsyncHttpServerResponse,
         context: Context,
@@ -128,6 +179,18 @@ object HttpServer : Loggable("HttpServer") {
         wrapResponse(response).apply {
             setContentType(contentType)
             send(context.resources.openRawResource(id).readBytes().decodeToString())
+        }
+    }
+
+    private fun handleAssets(
+        response: AsyncHttpServerResponse,
+        context: Context,
+        contentType: String,
+        filename: String,
+    ) {
+        wrapResponse(response).apply {
+            setContentType(contentType)
+            send(context.assets.open(filename).reader().readText())
         }
     }
 
@@ -181,7 +244,7 @@ object HttpServer : Loggable("HttpServer") {
             Configs.iptvSourceCurrent = it
         }
 
-        wrapResponse(response).send("success")
+        responseSuccess(response)
     }
 
     private fun handleEpgSourcePush(
@@ -197,12 +260,11 @@ object HttpServer : Loggable("HttpServer") {
             Configs.epgSourceCurrent = it
         }
 
-        wrapResponse(response).send("success")
+        responseSuccess(response)
     }
 
     private fun handleGetChannelAlias(response: AsyncHttpServerResponse) {
         wrapResponse(response).apply {
-            setContentType("application/json")
             send(runCatching { ChannelAlias.aliasFile.readText() }.getOrElse { "" })
         }
     }
@@ -219,7 +281,7 @@ object HttpServer : Loggable("HttpServer") {
             EpgRepository.clearAllCache()
         }
 
-        wrapResponse(response).send("success")
+        responseSuccess(response)
     }
 
     private fun handleConfigsGet(response: AsyncHttpServerResponse) {
@@ -237,7 +299,7 @@ object HttpServer : Loggable("HttpServer") {
         val configs = Globals.json.decodeFromString<Configs.Partial>(body.toString())
         Configs.fromPartial(configs)
 
-        wrapResponse(response).send("success")
+        responseSuccess(response)
     }
 
     private fun handleUploadApk(
@@ -274,7 +336,7 @@ object HttpServer : Loggable("HttpServer") {
             ApkInstaller.installApk(context, uploadedApkFile.path)
         }
 
-        wrapResponse(response).send("success")
+        responseSuccess(response)
     }
 
     private fun handleCloudSyncDataGet(response: AsyncHttpServerResponse) {
@@ -282,6 +344,101 @@ object HttpServer : Loggable("HttpServer") {
             setContentType("application/json")
             send(Globals.json.encodeToString(runBlocking { CloudSync.getData() }))
         }
+    }
+
+    private fun handleCloudSyncDataPost(
+        request: AsyncHttpServerRequest,
+        response: AsyncHttpServerResponse
+    ) {
+        val body = request.getBody<JSONObjectBody>().get()
+        val data = Globals.json.decodeFromString<CloudSyncData>(body.toString())
+        runBlocking{ data.apply() }
+
+        responseSuccess(response)
+    }
+
+    private fun handleAboutGet(response: AsyncHttpServerResponse) {
+        wrapResponse(response).apply {
+            setContentType("application/json")
+            send(
+                Globals.json.encodeToString(
+                    AppAbout(
+                        applicationId = BuildConfig.APPLICATION_ID,
+                        flavor = BuildConfig.FLAVOR,
+                        buildType = BuildConfig.BUILD_TYPE,
+                        versionCode = BuildConfig.VERSION_CODE,
+                        versionName = BuildConfig.VERSION_NAME,
+                        deviceName = Globals.deviceName,
+                        deviceId = Globals.deviceId,
+                    )
+                )
+            )
+        }
+    }
+
+    private fun handleLogsGet(response: AsyncHttpServerResponse) {
+        wrapResponse(response).apply {
+            setContentType("application/json")
+            send(Globals.json.encodeToString(Logger.history))
+        }
+    }
+
+    private fun handleFileContentGet(
+        request: AsyncHttpServerRequest,
+        response: AsyncHttpServerResponse
+    ) {
+        val path = request.query.getString("path")
+
+        val file = File(path).takeIf { it.exists() } ?: run {
+            return response.code(404).send("File not found")
+        }
+
+        wrapResponse(response).send(file.readText())
+    }
+
+    private fun handleFileContentPost(
+        request: AsyncHttpServerRequest,
+        response: AsyncHttpServerResponse
+    ) {
+        val body = request.getBody<JSONObjectBody>().get()
+        val path = body.get("path").toString()
+        val content = body.get("content").toString()
+
+        val file = File(path)
+
+        if (file.exists()) {
+            file.writeText(content)
+        } else {
+            file.parentFile?.mkdirs()
+            file.writeText(content)
+        }
+
+        responseSuccess(response)
+    }
+
+    private fun handleFileContentWithDirPost(
+        request: AsyncHttpServerRequest,
+        response: AsyncHttpServerResponse
+    ) {
+        val body = request.getBody<JSONObjectBody>().get()
+        val dir = body.get("dir").toString()
+        val filename = body.get("filename").toString()
+        val content = body.get("content").toString()
+
+        val file = when (dir) {
+            "cache" -> File(Globals.cacheDir, filename)
+            "file" -> File(Globals.fileDir, filename)
+            else -> return response.code(400).send("Invalid dir")
+        }
+
+        if (file.exists()) {
+            file.writeText(content)
+        } else {
+            file.parentFile?.mkdirs()
+            file.writeText(content)
+        }
+
+        wrapResponse(response).send(file.path)
     }
 
     private fun getLocalIpAddress(): String {
@@ -312,4 +469,15 @@ private data class AppInfo(
     val appTitle: String,
     val appRepo: String,
     val logHistory: List<Logger.HistoryItem>,
+)
+
+@Serializable
+private data class AppAbout(
+    val applicationId: String,
+    val flavor: String,
+    val buildType: String,
+    val versionCode: Int,
+    val versionName: String,
+    val deviceName: String,
+    val deviceId: String,
 )
