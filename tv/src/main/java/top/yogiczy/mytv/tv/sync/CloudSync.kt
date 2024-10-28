@@ -33,9 +33,9 @@ object CloudSync : Loggable("CloudSync") {
         }
     }
 
-    suspend fun getData(): CloudSyncDate = withContext(Dispatchers.IO) {
+    suspend fun getData(): CloudSyncData = withContext(Dispatchers.IO) {
         val configs = Configs.toPartial()
-        CloudSyncDate(
+        CloudSyncData(
             version = BuildConfig.VERSION_NAME,
             syncAt = System.currentTimeMillis(),
             syncFrom = Globals.deviceName,
@@ -52,7 +52,7 @@ object CloudSync : Loggable("CloudSync") {
         return getRepository().push(getData())
     }
 
-    suspend fun pull(): CloudSyncDate {
+    suspend fun pull(): CloudSyncData {
         log.i("拉取云端数据(${Configs.cloudSyncProvider.label})")
         return getRepository().pull().let {
             it.copy(configs = it.configs.desensitized())
@@ -61,7 +61,7 @@ object CloudSync : Loggable("CloudSync") {
 }
 
 @Serializable
-data class CloudSyncDate(
+data class CloudSyncData(
     val version: String = "",
     val syncAt: Long = 0,
     val syncFrom: String = "",
@@ -71,7 +71,7 @@ data class CloudSyncDate(
     val extraChannelNameAlias: String? = null,
 ) {
     companion object {
-        val EMPTY = CloudSyncDate()
+        val EMPTY = CloudSyncData()
     }
 
     suspend fun apply() {

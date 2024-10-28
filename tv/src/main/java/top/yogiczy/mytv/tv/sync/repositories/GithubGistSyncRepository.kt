@@ -10,14 +10,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import top.yogiczy.mytv.core.data.network.request
 import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.data.utils.Loggable
-import top.yogiczy.mytv.tv.sync.CloudSyncDate
+import top.yogiczy.mytv.tv.sync.CloudSyncData
 import java.net.URL
 
 class GithubGistSyncRepository(
     private val gistId: String,
     private val token: String,
 ) : CloudSyncRepository, Loggable("GithubGistSyncRepository") {
-    override suspend fun push(data: CloudSyncDate) = withContext(Dispatchers.IO) {
+    override suspend fun push(data: CloudSyncData) = withContext(Dispatchers.IO) {
         try {
             return@withContext "https://api.github.com/gists/${gistId}".request({ builder ->
                 builder
@@ -54,11 +54,11 @@ class GithubGistSyncRepository(
                 file?.get("truncated")?.jsonPrimitive?.booleanOrNull?.let { nnTruncated ->
                     if (nnTruncated) {
                         file["raw_url"]?.jsonPrimitive?.content?.let { rawUrl ->
-                            Globals.json.decodeFromString<CloudSyncDate>(URL(rawUrl).readText())
+                            Globals.json.decodeFromString<CloudSyncData>(URL(rawUrl).readText())
                         }
                     } else {
                         file["content"]?.jsonPrimitive?.content?.let {
-                            Globals.json.decodeFromString<CloudSyncDate>(it)
+                            Globals.json.decodeFromString<CloudSyncData>(it)
                         }
                     }
                 }?.let { syncData ->
@@ -66,7 +66,7 @@ class GithubGistSyncRepository(
                         syncData.copy(description = it)
                     } ?: syncData
                 }
-            } ?: CloudSyncDate.EMPTY
+            } ?: CloudSyncData.EMPTY
         } catch (ex: Exception) {
             log.e("拉取云端失败", ex)
             throw Exception("拉取云端失败", ex)

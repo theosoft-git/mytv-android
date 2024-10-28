@@ -1,8 +1,8 @@
 package top.yogiczy.mytv.tv.sync.repositories
 
-import top.yogiczy.mytv.tv.sync.CloudSyncDate
+import top.yogiczy.mytv.tv.sync.CloudSyncData
 
 interface CloudSyncRepository {
-    suspend fun push(data: CloudSyncDate): Boolean
-    suspend fun pull(): CloudSyncDate
+    suspend fun push(data: CloudSyncData): Boolean
+    suspend fun pull(): CloudSyncData
 }

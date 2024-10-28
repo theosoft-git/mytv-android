@@ -24,7 +24,7 @@ import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
 import kotlinx.coroutines.launch
 import top.yogiczy.mytv.tv.sync.CloudSync
-import top.yogiczy.mytv.tv.sync.CloudSyncDate
+import top.yogiczy.mytv.tv.sync.CloudSyncData
 import top.yogiczy.mytv.tv.sync.CloudSyncProvider
 import top.yogiczy.mytv.tv.ui.material.CircularProgressIndicator
 import top.yogiczy.mytv.tv.ui.material.Snackbar
@@ -44,7 +44,7 @@ fun SettingsCloudSyncScreen(
     toCloudSyncProviderScreen: () -> Unit = {},
     onReload: () -> Unit = {},
     onBackPressed: () -> Unit = {},
-    debugInitialSyncData: CloudSyncDate? = null,
+    debugInitialSyncData: CloudSyncData? = null,
 ) {
     val coroutineScope = rememberCoroutineScope()
     var syncData by remember { mutableStateOf(debugInitialSyncData) }
@@ -54,7 +54,7 @@ fun SettingsCloudSyncScreen(
         runCatching { syncData = CloudSync.pull() }
             .onFailure {
                 Snackbar.show("拉取云端失败")
-                syncData = CloudSyncDate.EMPTY
+                syncData = CloudSyncData.EMPTY
             }
     }
 
@@ -114,7 +114,7 @@ fun SettingsCloudSyncScreen(
                     }
 
                     syncData?.let { nnSyncData ->
-                        if (nnSyncData == CloudSyncDate.EMPTY) {
+                        if (nnSyncData == CloudSyncData.EMPTY) {
                             Text("无云端数据")
                         } else {
                             Column {
@@ -133,7 +133,7 @@ fun SettingsCloudSyncScreen(
                 },
                 onLongSelect = {
                     syncData?.let { nnSyncData ->
-                        if (syncData != CloudSyncDate.EMPTY) {
+                        if (syncData != CloudSyncData.EMPTY) {
                             coroutineScope.launch {
                                 nnSyncData.apply()
                                 settingsViewModel.refresh()
@@ -227,7 +227,7 @@ private fun SettingsCloudSyncScreenPreview() {
                 cloudSyncGithubGistId = "GistId".repeat(3)
                 cloudSyncGithubGistToken = "sjdoiasjidosjd".repeat(10)
             },
-            debugInitialSyncData = CloudSyncDate(
+            debugInitialSyncData = CloudSyncData(
                 version = "9.9.9",
                 syncFrom = "客厅的电视",
                 syncAt = System.currentTimeMillis(),

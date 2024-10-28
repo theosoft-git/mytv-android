@@ -34,7 +34,7 @@ import top.yogiczy.mytv.core.data.utils.ChannelUtil
 import top.yogiczy.mytv.core.data.utils.Constants
 import top.yogiczy.mytv.core.data.utils.Logger
 import top.yogiczy.mytv.tv.sync.CloudSync
-import top.yogiczy.mytv.tv.sync.CloudSyncDate
+import top.yogiczy.mytv.tv.sync.CloudSyncData
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.material.SnackbarType
 import top.yogiczy.mytv.tv.ui.utils.Configs
@@ -76,7 +76,7 @@ class MainViewModel : ViewModel() {
         runCatching {
             val syncData = CloudSync.pull()
 
-            if (syncData != CloudSyncDate.EMPTY) {
+            if (syncData != CloudSyncData.EMPTY) {
                 syncData.apply()
                 needRefresh()
             }
