@@ -44,11 +44,6 @@ fun App(
     settingsViewModel: SettingsViewModel = settingsVM,
     onBackPressed: () -> Unit = {},
 ) {
-    if (settingsViewModel.iptvSourceCurrent.needExternalStoragePermission()) {
-        val (hasPermission, requestPermission) = rememberReadExternalStoragePermission()
-        if (!hasPermission) requestPermission()
-    }
-
     val configuration = LocalConfiguration.current
     val doubleBackPressedExitState = rememberDoubleBackPressedExitState()
 
@@ -78,6 +73,11 @@ fun App(
         SnackbarUI()
         Visibility({ settingsViewModel.debugShowFps }) { MonitorPopup() }
         Visibility({ settingsViewModel.debugShowLayoutGrids }) { PreviewWithLayoutGrids { } }
+
+        if (settingsViewModel.iptvSourceCurrent.needExternalStoragePermission()) {
+            val (hasPermission, requestPermission) = rememberReadExternalStoragePermission()
+            LaunchedEffect(Unit) { if (!hasPermission) requestPermission() }
+        }
     }
 }
 
