@@ -17,7 +17,10 @@ data class ChannelLine(
 ) {
 
     val playableUrl: String
-        get() = url.substringBefore("$")
+        get() = url.substringBefore("$").let {
+            // 修复部分链接无法播放，实际请求时?将去掉，导致链接无法访问，因此加上一个t
+            if (url.endsWith("?")) "${it}t" else it
+        }
 
     companion object {
         val EXAMPLE =
