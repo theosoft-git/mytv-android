@@ -126,6 +126,13 @@ class MainContentState(
             _isAudioTracksScreenVisible = value
         }
 
+    private var _isSubtitleTracksScreenVisible by mutableStateOf(false)
+    var isSubtitleTracksScreenVisible
+        get() = _isSubtitleTracksScreenVisible
+        set(value) {
+            _isSubtitleTracksScreenVisible = value
+        }
+
     init {
         val channelGroupList = channelGroupListProvider()
 

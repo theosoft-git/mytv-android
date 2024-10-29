@@ -29,6 +29,7 @@ fun QuickOpBtnList(
     onShowVideoPlayerDisplayMode: () -> Unit = {},
     onShowVideoTracks: () -> Unit = {},
     onShowAudioTracks: () -> Unit = {},
+    onShowSubtitleTracks: () -> Unit = {},
     onShowMoreSettings: () -> Unit = {},
     onClearCache: () -> Unit = {},
     onUserAction: () -> Unit = {},
@@ -91,6 +92,15 @@ fun QuickOpBtnList(
                 QuickOpBtn(
                     title = { Text("音轨") },
                     onSelect = onShowAudioTracks,
+                )
+            }
+        }
+
+        if (playerMetadata.subtitleTracks.isNotEmpty()) {
+            item {
+                QuickOpBtn(
+                    title = { Text("字幕") },
+                    onSelect = onShowSubtitleTracks,
                 )
             }
         }

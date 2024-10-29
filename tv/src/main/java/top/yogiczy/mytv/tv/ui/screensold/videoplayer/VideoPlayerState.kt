@@ -25,7 +25,7 @@ import top.yogiczy.mytv.tv.ui.utils.Configs
 
 @Stable
 class VideoPlayerState(
-    private val instance: VideoPlayer,
+    val instance: VideoPlayer,
     private var defaultDisplayModeProvider: () -> VideoPlayerDisplayMode = { VideoPlayerDisplayMode.ORIGINAL },
 ) {
     /** 显示模式 */
@@ -83,12 +83,16 @@ class VideoPlayerState(
         instance.stop()
     }
 
-    fun selectVideoTrack(index: Int) {
-        instance.selectVideoTrack(index)
+    fun selectVideoTrack(track: VideoPlayer.Metadata.Video?) {
+        instance.selectVideoTrack(track)
     }
 
-    fun selectAudioTrack(index: Int) {
-        instance.selectAudioTrack(index)
+    fun selectAudioTrack(track: VideoPlayer.Metadata.Audio?) {
+        instance.selectAudioTrack(track)
+    }
+
+    fun selectSubtitleTrack(track: VideoPlayer.Metadata.Subtitle?) {
+        instance.selectSubtitleTrack(track)
     }
 
     fun setVideoSurfaceView(surfaceView: SurfaceView) {

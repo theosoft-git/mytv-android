@@ -1,4 +1,4 @@
-package top.yogiczy.mytv.tv.ui.screensold.audiotracks
+package top.yogiczy.mytv.tv.ui.screensold.subtitletracks
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -7,8 +7,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.tv.ui.material.Drawer
 import top.yogiczy.mytv.tv.ui.material.DrawerPosition
-import top.yogiczy.mytv.tv.ui.screensold.audiotracks.components.AudioTrackItemList
 import top.yogiczy.mytv.tv.ui.screensold.components.rememberScreenAutoCloseState
+import top.yogiczy.mytv.tv.ui.screensold.subtitletracks.components.SubtitleTrackItemList
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.player.VideoPlayer
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
@@ -16,10 +16,10 @@ import top.yogiczy.mytv.tv.ui.utils.backHandler
 import top.yogiczy.mytv.tv.ui.utils.gridColumns
 
 @Composable
-fun AudioTracksScreen(
+fun SubtitleTracksScreen(
     modifier: Modifier = Modifier,
-    trackListProvider: () -> List<VideoPlayer.Metadata.Audio> = { emptyList() },
-    onTrackChanged: (VideoPlayer.Metadata.Audio?) -> Unit = {},
+    trackListProvider: () -> List<VideoPlayer.Metadata.Subtitle> = { emptyList() },
+    onTrackChanged: (VideoPlayer.Metadata.Subtitle?) -> Unit = {},
     onClose: () -> Unit = {},
 ) {
     val screenAutoCloseState = rememberScreenAutoCloseState(onTimeout = onClose)
@@ -28,9 +28,9 @@ fun AudioTracksScreen(
         modifier = modifier.backHandler { onClose() },
         onDismissRequest = onClose,
         position = DrawerPosition.End,
-        header = { Text("视轨") },
+        header = { Text("字幕") },
     ) {
-        AudioTrackItemList(
+        SubtitleTrackItemList(
             modifier = Modifier.width(4.5f.gridColumns()),
             trackListProvider = trackListProvider,
             onSelected = onTrackChanged,
@@ -41,19 +41,19 @@ fun AudioTracksScreen(
 
 @Preview(device = "id:Android TV (720p)")
 @Composable
-private fun AudioTracksScreenPreview() {
+private fun SubtitleTracksScreenPreview() {
     MyTvTheme {
         PreviewWithLayoutGrids {
-            AudioTracksScreen(
+            SubtitleTracksScreen(
                 trackListProvider = {
                     listOf(
-                        VideoPlayer.Metadata.Audio(
-                            channels = 2,
-                            bitrate = 128000,
+                        VideoPlayer.Metadata.Subtitle(
+                            bitrate = 10000,
+                            language = "zh",
                         ),
-                        VideoPlayer.Metadata.Audio(
-                            channels = 10,
-                            bitrate = 567000,
+                        VideoPlayer.Metadata.Subtitle(
+                            bitrate = 10000,
+                            language = "en",
                             isSelected = true,
                         )
                     )

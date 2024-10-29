@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.ChannelLine
 import top.yogiczy.mytv.core.util.utils.humanizeAudioChannels
 import top.yogiczy.mytv.core.util.utils.humanizeBitrate
+import top.yogiczy.mytv.core.util.utils.humanizeLanguage
 import top.yogiczy.mytv.tv.ui.utils.Configs
 import kotlin.math.roundToInt
 
@@ -43,9 +44,11 @@ abstract class VideoPlayer(
         currentPosition = 0L
     }
 
-    abstract fun selectVideoTrack(index: Int)
+    abstract fun selectVideoTrack(track: Metadata.Video?)
 
-    abstract fun selectAudioTrack(index: Int)
+    abstract fun selectAudioTrack(track: Metadata.Audio?)
+
+    abstract fun selectSubtitleTrack(track: Metadata.Subtitle?)
 
     abstract fun setVideoSurfaceView(surfaceView: SurfaceView)
 
@@ -190,9 +193,11 @@ abstract class VideoPlayer(
         val audio: Audio? = null,
         val videoTracks: List<Video> = emptyList(),
         val audioTracks: List<Audio> = emptyList(),
+        val subtitleTracks: List<Subtitle> = emptyList(),
     ) {
         data class Video(
             val index: Int? = null,
+            val isSelected: Boolean? = null,
             val width: Int? = null,
             val height: Int? = null,
             val color: String? = null,
@@ -227,17 +232,19 @@ abstract class VideoPlayer(
 
         data class Audio(
             val index: Int? = null,
+            val isSelected: Boolean? = null,
             val channels: Int? = null,
             val channelsLabel: String? = null,
             val sampleRate: Int? = null,
             val bitrate: Int? = null,
             val mimeType: String? = null,
+            val language: String? = null,
             val decoder: String? = null,
         ) {
             override fun equals(other: Any?): Boolean {
                 if (other !is Audio) return false
 
-                return channels == other.channels && sampleRate == other.sampleRate && bitrate == other.bitrate && mimeType == other.mimeType
+                return channels == other.channels && sampleRate == other.sampleRate && bitrate == other.bitrate && mimeType == other.mimeType && language == other.language
             }
 
             override fun hashCode(): Int {
@@ -245,13 +252,42 @@ abstract class VideoPlayer(
                 result = 31 * result + (sampleRate ?: 0)
                 result = 31 * result + (bitrate ?: 0)
                 result = 31 * result + (mimeType?.hashCode() ?: 0)
+                result = 31 * result + (language?.hashCode() ?: 0)
                 return result
             }
 
             val shortLabel: String
                 get() = listOfNotNull(
                     channelsLabel ?: channels?.humanizeAudioChannels(),
-                    bitrate?.takeIf { nnBitrate -> nnBitrate > 0 }?.humanizeBitrate()
+                    bitrate?.takeIf { nnBitrate -> nnBitrate > 0 }?.humanizeBitrate(),
+                    language?.humanizeLanguage(),
+                )
+                    .joinToString(", ")
+        }
+
+        data class Subtitle(
+            val index: Int? = null,
+            val isSelected: Boolean? = null,
+            val bitrate: Int? = null,
+            val mimeType: String? = null,
+            val language: String? = null,
+        ) {
+            override fun equals(other: Any?): Boolean {
+                if (other !is Subtitle) return false
+
+                return bitrate == other.bitrate && mimeType == other.mimeType && language == other.language
+            }
+
+            override fun hashCode(): Int {
+                var result = (bitrate ?: 0)
+                result = 31 * result + (mimeType?.hashCode() ?: 0)
+                result = 31 * result + (language?.hashCode() ?: 0)
+                return result
+            }
+
+            val shortLabel: String
+                get() = listOfNotNull(
+                    language?.humanizeLanguage(),
                 )
                     .joinToString(", ")
         }

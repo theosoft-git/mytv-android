@@ -1,4 +1,4 @@
-package top.yogiczy.mytv.tv.ui.screensold.videotracks.components
+package top.yogiczy.mytv.tv.ui.screensold.subtitletracks.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,10 +23,10 @@ import top.yogiczy.mytv.tv.ui.utils.ifElse
 import kotlin.math.max
 
 @Composable
-fun VideoTrackItemList(
+fun SubtitleTrackItemList(
     modifier: Modifier = Modifier,
-    trackListProvider: () -> List<VideoPlayer.Metadata.Video> = { emptyList() },
-    onSelected: (VideoPlayer.Metadata.Video?) -> Unit = {},
+    trackListProvider: () -> List<VideoPlayer.Metadata.Subtitle> = { emptyList() },
+    onSelected: (VideoPlayer.Metadata.Subtitle?) -> Unit = {},
     onUserAction: () -> Unit = {},
 ) {
     val trackList = trackListProvider()
@@ -64,7 +64,7 @@ fun VideoTrackItemList(
         }
 
         items(trackList) { track ->
-            VideoTrackItem(
+            SubtitleTrackItem(
                 trackProvider = { track },
                 onSelected = { onSelected(track) },
             )
@@ -74,20 +74,18 @@ fun VideoTrackItemList(
 
 @Preview
 @Composable
-private fun VideoTrackItemListPreview() {
+private fun SubtitleTrackItemListPreview() {
     MyTvTheme {
-        VideoTrackItemList(
+        SubtitleTrackItemList(
             trackListProvider = {
                 listOf(
-                    VideoPlayer.Metadata.Video(
-                        width = 1920,
-                        height = 1080,
-                        bitrate = 5_000_000,
+                    VideoPlayer.Metadata.Subtitle(
+                        bitrate = 10000,
+                        language = "zh",
                     ),
-                    VideoPlayer.Metadata.Video(
-                        width = 1280,
-                        height = 720,
-                        bitrate = 1_000_000,
+                    VideoPlayer.Metadata.Subtitle(
+                        bitrate = 10000,
+                        language = "en",
                         isSelected = true,
                     )
                 )

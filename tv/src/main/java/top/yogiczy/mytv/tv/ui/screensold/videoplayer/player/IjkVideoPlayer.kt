@@ -115,9 +115,11 @@ class IjkVideoPlayer(
         super.stop()
     }
 
-    override fun selectVideoTrack(index: Int) {}
+    override fun selectVideoTrack(track: Metadata.Video?) {}
 
-    override fun selectAudioTrack(index: Int) {}
+    override fun selectAudioTrack(track: Metadata.Audio?) {}
+
+    override fun selectSubtitleTrack(track: Metadata.Subtitle?) {}
 
     override fun setVideoSurfaceView(surfaceView: SurfaceView) {
         cacheSurfaceView = surfaceView

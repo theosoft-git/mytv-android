@@ -19,8 +19,7 @@ import top.yogiczy.mytv.tv.ui.utils.gridColumns
 fun VideoTracksScreen(
     modifier: Modifier = Modifier,
     trackListProvider: () -> List<VideoPlayer.Metadata.Video> = { emptyList() },
-    currentTrackProvider: () -> VideoPlayer.Metadata.Video? = { VideoPlayer.Metadata.Video() },
-    onTrackChanged: (VideoPlayer.Metadata.Video) -> Unit = {},
+    onTrackChanged: (VideoPlayer.Metadata.Video?) -> Unit = {},
     onClose: () -> Unit = {},
 ) {
     val screenAutoCloseState = rememberScreenAutoCloseState(onTimeout = onClose)
@@ -34,7 +33,6 @@ fun VideoTracksScreen(
         VideoTrackItemList(
             modifier = Modifier.width(4.5f.gridColumns()),
             trackListProvider = trackListProvider,
-            currentTrackProvider = currentTrackProvider,
             onSelected = onTrackChanged,
             onUserAction = { screenAutoCloseState.active() },
         )
@@ -59,14 +57,8 @@ private fun VideoTracksScreenPreview() {
                             width = 1280,
                             height = 720,
                             bitrate = 1_000_000,
+                            isSelected = true,
                         )
-                    )
-                },
-                currentTrackProvider = {
-                    VideoPlayer.Metadata.Video(
-                        width = 1280,
-                        height = 720,
-                        bitrate = 1_000_000,
                     )
                 },
             )

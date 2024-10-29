@@ -1,4 +1,4 @@
-package top.yogiczy.mytv.tv.ui.screensold.audiotracks.components
+package top.yogiczy.mytv.tv.ui.screensold.subtitletracks.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,9 +17,9 @@ import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 import top.yogiczy.mytv.tv.ui.utils.ifElse
 
 @Composable
-fun AudioTrackItem(
+fun SubtitleTrackItem(
     modifier: Modifier = Modifier,
-    trackProvider: () -> VideoPlayer.Metadata.Audio = { VideoPlayer.Metadata.Audio() },
+    trackProvider: () -> VideoPlayer.Metadata.Subtitle = { VideoPlayer.Metadata.Subtitle() },
     onSelected: () -> Unit = {},
 ) {
     val track = trackProvider()
@@ -39,26 +39,26 @@ fun AudioTrackItem(
 
 @Preview
 @Composable
-private fun AudioTrackItemPreview() {
+private fun SubtitleTrackItemPreview() {
     MyTvTheme {
         Column(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            AudioTrackItem(
+            SubtitleTrackItem(
                 trackProvider = {
-                    VideoPlayer.Metadata.Audio(
-                        channels = 2,
-                        bitrate = 128000,
+                    VideoPlayer.Metadata.Subtitle(
+                        bitrate = 10000,
+                        language = "zh",
                     )
                 },
             )
 
-            AudioTrackItem(
+            SubtitleTrackItem(
                 trackProvider = {
-                    VideoPlayer.Metadata.Audio(
-                        channels = 10,
-                        bitrate = 128000,
+                    VideoPlayer.Metadata.Subtitle(
+                        bitrate = 10000,
+                        language = "en",
                         isSelected = true,
                     )
                 },

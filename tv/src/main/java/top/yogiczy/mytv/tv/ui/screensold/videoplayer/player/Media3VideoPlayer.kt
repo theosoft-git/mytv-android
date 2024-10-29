@@ -13,7 +13,10 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.TrackGroup
 import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
+import androidx.media3.common.text.Cue
+import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.datasource.DefaultDataSource
@@ -31,7 +34,9 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.rtsp.RtspMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.util.EventLogger
+import com.google.common.collect.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -51,8 +56,21 @@ class Media3VideoPlayer(
                 .setExtensionRendererMode(EXTENSION_RENDERER_MODE_ON)
                 .setEnableDecoderFallback(true)
 
+        val trackSelector = DefaultTrackSelector(context).apply {
+            parameters = buildUponParameters()
+                .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+                .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                .setMaxVideoSize(Integer.MAX_VALUE, Integer.MAX_VALUE)
+                .setForceHighestSupportedBitrate(true)
+                .setPreferredTextLanguages("zh")
+                .build()
+        }
+
+
         ExoPlayer.Builder(context)
             .setRenderersFactory(renderersFactory)
+            .setTrackSelector(trackSelector)
             .build()
             .apply { playWhenReady = true }
     }
@@ -60,6 +78,16 @@ class Media3VideoPlayer(
     private var currentChannelLine = ChannelLine()
     private val contentTypeAttempts = mutableMapOf<Int, Boolean>()
     private var updatePositionJob: Job? = null
+
+    private val onCuesListeners = mutableListOf<(ImmutableList<Cue>) -> Unit>()
+
+    private fun triggerCues(cues: ImmutableList<Cue>) {
+        onCuesListeners.forEach { it(cues) }
+    }
+
+    fun onCues(listener: (ImmutableList<Cue>) -> Unit) {
+        onCuesListeners.add(listener)
+    }
 
     private fun getDataSourceFactory(): DefaultDataSource.Factory {
         return DefaultDataSource.Factory(
@@ -223,6 +251,87 @@ class Media3VideoPlayer(
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             triggerIsPlayingChanged(isPlaying)
         }
+
+        override fun onTracksChanged(tracks: Tracks) {
+            metadata = metadata.copy(
+                videoTracks = emptyList(),
+                audioTracks = emptyList(),
+                subtitleTracks = emptyList()
+            )
+            triggerMetadata(metadata)
+
+            val videoFormats = videoPlayer.currentTracks.groups
+                .filter { it.mediaTrackGroup.type == C.TRACK_TYPE_VIDEO }
+                .flatMap { group ->
+                    List(group.mediaTrackGroup.length) { trackIndex ->
+                        group.mediaTrackGroup
+                            .getFormat(trackIndex)
+                            .toVideoMetadata()
+                            .copy(isSelected = group.isTrackSelected(trackIndex))
+                    }
+                }
+                .mapIndexed { index, metadata ->
+                    metadata.copy(index = index)
+                }
+
+            metadata = metadata.copy(videoTracks = videoFormats)
+
+            val audioFormats = videoPlayer.currentTracks.groups
+                .filter { it.mediaTrackGroup.type == C.TRACK_TYPE_AUDIO }
+                .flatMap { group ->
+                    List(group.mediaTrackGroup.length) { trackIndex ->
+                        group.mediaTrackGroup
+                            .getFormat(trackIndex)
+                            .toAudioMetadata()
+                            .copy(isSelected = group.isTrackSelected(trackIndex))
+                    }
+                }
+                .mapIndexed { index, metadata ->
+                    metadata.copy(index = index)
+                }
+
+            metadata = metadata.copy(audioTracks = audioFormats)
+
+            val subtitleFormats = videoPlayer.currentTracks.groups
+                .filter { it.mediaTrackGroup.type == C.TRACK_TYPE_TEXT }
+                .flatMap { group ->
+                    List(group.mediaTrackGroup.length) { trackIndex ->
+                        group.mediaTrackGroup
+                            .getFormat(trackIndex)
+                            .takeIf { it.roleFlags == C.ROLE_FLAG_SUBTITLE }
+                            ?.toSubtitleMetadata()
+                            ?.copy(isSelected = group.isTrackSelected(trackIndex))
+                    }
+                }
+                .mapNotNull { it }
+                .mapIndexed { index, metadata ->
+                    metadata.copy(index = index)
+                }
+
+            metadata = metadata.copy(subtitleTracks = subtitleFormats)
+
+            triggerMetadata(metadata)
+        }
+
+        override fun onCues(cueGroup: CueGroup) {
+            triggerCues(cueGroup.cues)
+        }
+    }
+
+    private fun Int.fromIndexFindTrack(type: @C.TrackType Int): Pair<TrackGroup, Int> {
+        val groups = videoPlayer.currentTracks.groups
+            .filter { group -> group.mediaTrackGroup.type == type }
+            .map { it.mediaTrackGroup }
+
+        var trackCount = 0
+        val group = groups.first { group ->
+            trackCount += group.length
+            this < trackCount
+        }
+
+        val trackIndex = this - (trackCount - group.length)
+
+        return Pair(group, trackIndex)
     }
 
     private fun Format.toVideoMetadata(video: Metadata.Video? = null): Metadata.Video {
@@ -244,33 +353,16 @@ class Media3VideoPlayer(
             sampleRate = sampleRate,
             bitrate = bitrate,
             mimeType = sampleMimeType,
+            language = language,
         )
     }
 
-    private fun getVideoTrackGroup(): TrackGroup? {
-        return videoPlayer.currentTracks.groups.firstOrNull { it.type == C.TRACK_TYPE_VIDEO }?.mediaTrackGroup
-    }
-
-    private fun getAudioTrackGroup(): TrackGroup? {
-        return videoPlayer.currentTracks.groups.firstOrNull { it.type == C.TRACK_TYPE_AUDIO }?.mediaTrackGroup
-    }
-
-    private fun getVideoTracks(): List<Metadata.Video> {
-        val group = getVideoTrackGroup() ?: return emptyList()
-
-        return (0..<group.length).map { index ->
-            val format = group.getFormat(index)
-            format.toVideoMetadata().copy(index = index)
-        }
-    }
-
-    private fun getAudioTracks(): List<Metadata.Audio> {
-        val group = getAudioTrackGroup() ?: return emptyList()
-
-        return (0..<group.length).map { index ->
-            val format = group.getFormat(index)
-            format.toAudioMetadata().copy(index = index)
-        }
+    private fun Format.toSubtitleMetadata(subtitle: Metadata.Subtitle? = null): Metadata.Subtitle {
+        return (subtitle ?: Metadata.Subtitle()).copy(
+            bitrate = bitrate,
+            mimeType = sampleMimeType,
+            language = language,
+        )
     }
 
     private val metadataListener = object : AnalyticsListener {
@@ -279,10 +371,7 @@ class Media3VideoPlayer(
             format: Format,
             decoderReuseEvaluation: DecoderReuseEvaluation?,
         ) {
-            metadata = metadata.copy(
-                video = format.toVideoMetadata(metadata.video),
-                videoTracks = getVideoTracks(),
-            )
+            metadata = metadata.copy(video = format.toVideoMetadata(metadata.video))
             triggerMetadata(metadata)
         }
 
@@ -304,10 +393,7 @@ class Media3VideoPlayer(
             format: Format,
             decoderReuseEvaluation: DecoderReuseEvaluation?,
         ) {
-            metadata = metadata.copy(
-                audio = format.toAudioMetadata(metadata.audio),
-                audioTracks = getAudioTracks(),
-            )
+            metadata = metadata.copy(audio = format.toAudioMetadata(metadata.audio))
             triggerMetadata(metadata)
         }
 
@@ -335,6 +421,7 @@ class Media3VideoPlayer(
     }
 
     override fun release() {
+        onCuesListeners.clear()
         videoPlayer.removeListener(playerListener)
         videoPlayer.removeAnalyticsListener(metadataListener)
         videoPlayer.removeAnalyticsListener(eventLogger)
@@ -375,21 +462,58 @@ class Media3VideoPlayer(
         super.stop()
     }
 
-    override fun selectVideoTrack(index: Int) {
-        val group = getVideoTrackGroup() ?: return
+    override fun selectVideoTrack(track: Metadata.Video?) {
+        if (track?.index == null) {
+            videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
+                .buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, true)
+                .build()
+
+            return
+        }
+
+        val (group, trackIndex) = track.index.fromIndexFindTrack(C.TRACK_TYPE_VIDEO)
 
         videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
             .buildUpon()
-            .setOverrideForType(TrackSelectionOverride(group, index))
+            .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+            .setOverrideForType(TrackSelectionOverride(group, trackIndex))
             .build()
     }
 
-    override fun selectAudioTrack(index: Int) {
-        val group = getAudioTrackGroup() ?: return
+    override fun selectAudioTrack(track: Metadata.Audio?) {
+        if (track?.index == null) {
+            videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
+                .buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
+                .build()
+
+            return
+        }
+
+        val (group, trackIndex) = track.index.fromIndexFindTrack(C.TRACK_TYPE_AUDIO)
 
         videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
             .buildUpon()
-            .setOverrideForType(TrackSelectionOverride(group, index))
+            .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+            .setOverrideForType(TrackSelectionOverride(group, trackIndex))
+            .build()
+    }
+
+    override fun selectSubtitleTrack(track: Metadata.Subtitle?) {
+        if (track?.language == null) {
+            videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
+                .buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                .build()
+
+            return
+        }
+
+        videoPlayer.trackSelectionParameters = videoPlayer.trackSelectionParameters
+            .buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+            .setPreferredTextLanguages(track.language)
             .build()
     }
 

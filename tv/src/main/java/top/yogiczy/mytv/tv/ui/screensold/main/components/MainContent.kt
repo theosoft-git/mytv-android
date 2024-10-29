@@ -36,6 +36,7 @@ import top.yogiczy.mytv.tv.ui.screensold.epg.EpgProgrammeProgressScreen
 import top.yogiczy.mytv.tv.ui.screensold.epg.EpgScreen
 import top.yogiczy.mytv.tv.ui.screensold.epgreverse.EpgReverseScreen
 import top.yogiczy.mytv.tv.ui.screensold.quickop.QuickOpScreen
+import top.yogiczy.mytv.tv.ui.screensold.subtitletracks.SubtitleTracksScreen
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.VideoPlayerScreen
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.player.VideoPlayer
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.rememberVideoPlayerState
@@ -314,9 +315,8 @@ fun MainContent(
     ) {
         VideoTracksScreen(
             trackListProvider = { videoPlayerState.metadata.videoTracks },
-            currentTrackProvider = { videoPlayerState.metadata.video },
             onTrackChanged = {
-                videoPlayerState.selectVideoTrack(it.index ?: 0)
+                videoPlayerState.selectVideoTrack(it)
                 mainContentState.isVideoTracksScreenVisible = false
             },
             onClose = { mainContentState.isVideoTracksScreenVisible = false },
@@ -329,12 +329,25 @@ fun MainContent(
     ) {
         AudioTracksScreen(
             trackListProvider = { videoPlayerState.metadata.audioTracks },
-            currentTrackProvider = { videoPlayerState.metadata.audio },
             onTrackChanged = {
-                videoPlayerState.selectAudioTrack(it.index ?: 0)
+                videoPlayerState.selectAudioTrack(it)
                 mainContentState.isAudioTracksScreenVisible = false
             },
             onClose = { mainContentState.isAudioTracksScreenVisible = false },
+        )
+    }
+
+    PopupContent(
+        visibleProvider = { mainContentState.isSubtitleTracksScreenVisible },
+        onDismissRequest = { mainContentState.isSubtitleTracksScreenVisible = false },
+    ) {
+        SubtitleTracksScreen(
+            trackListProvider = { videoPlayerState.metadata.subtitleTracks },
+            onTrackChanged = {
+                videoPlayerState.selectSubtitleTrack(it)
+                mainContentState.isSubtitleTracksScreenVisible = false
+            },
+            onClose = { mainContentState.isSubtitleTracksScreenVisible = false },
         )
     }
 
@@ -374,6 +387,10 @@ fun MainContent(
             onShowAudioTracks = {
                 mainContentState.isQuickOpScreenVisible = false
                 mainContentState.isAudioTracksScreenVisible = true
+            },
+            onShowSubtitleTracks = {
+                mainContentState.isQuickOpScreenVisible = false
+                mainContentState.isSubtitleTracksScreenVisible = true
             },
             toSettingsScreen = {
                 mainContentState.isQuickOpScreenVisible = false

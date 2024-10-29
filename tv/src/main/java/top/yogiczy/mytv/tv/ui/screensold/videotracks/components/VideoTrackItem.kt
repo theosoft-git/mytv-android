@@ -20,21 +20,19 @@ import top.yogiczy.mytv.tv.ui.utils.ifElse
 fun VideoTrackItem(
     modifier: Modifier = Modifier,
     trackProvider: () -> VideoPlayer.Metadata.Video = { VideoPlayer.Metadata.Video() },
-    isSelectedProvider: () -> Boolean = { false },
     onSelected: () -> Unit = {},
 ) {
     val track = trackProvider()
-    val isSelected = isSelectedProvider()
 
     ListItem(
         modifier = modifier
-            .ifElse(isSelected, Modifier.focusOnLaunchedSaveable())
+            .ifElse(track.isSelected == true, Modifier.focusOnLaunchedSaveable())
             .handleKeyEvents(onSelect = onSelected),
         selected = false,
         onClick = {},
         headlineContent = { Text(track.shortLabel) },
         trailingContent = {
-            RadioButton(selected = isSelected, onClick = {})
+            RadioButton(selected = track.isSelected == true, onClick = {})
         },
     )
 }
@@ -56,7 +54,6 @@ private fun VideoTrackItemPreview() {
                         frameRate = 50f,
                     )
                 },
-                isSelectedProvider = { true },
             )
 
             VideoTrackItem(
@@ -65,6 +62,7 @@ private fun VideoTrackItemPreview() {
                         width = 1920,
                         height = 1080,
                         bitrate = 0,
+                        isSelected = true,
                     )
                 },
             )
