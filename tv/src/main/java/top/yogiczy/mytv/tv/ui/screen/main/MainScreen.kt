@@ -14,7 +14,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelFavorite
-import top.yogiczy.mytv.core.data.entities.channel.ChannelFavorite.Companion.isSame
 import top.yogiczy.mytv.core.data.entities.channel.ChannelFavoriteList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.chanelGroup
@@ -76,20 +75,21 @@ fun MainScreen(
     fun onChannelFavoriteToggle(channel: Channel) {
         if (!settingsViewModel.iptvChannelFavoriteEnable) return
 
-        val favoriteChannel = ChannelFavorite(
-            channel = channel,
-            iptvSourceName = settingsViewModel.iptvSourceCurrent.name,
-            groupName = filteredChannelGroupListProvider().chanelGroup(channel).name,
-        )
 
-        if (settingsViewModel.iptvChannelFavoriteList.any { it.isSame(favoriteChannel) }) {
+        if (settingsViewModel.iptvChannelFavoriteList.any { it.channel == channel }) {
             settingsViewModel.iptvChannelFavoriteList =
                 ChannelFavoriteList(settingsViewModel.iptvChannelFavoriteList.filter {
-                    !it.isSame(favoriteChannel)
+                    it.channel != channel
                 })
 
             Snackbar.show("取消收藏：${channel.name}")
         } else {
+            val favoriteChannel = ChannelFavorite(
+                channel = channel,
+                iptvSourceName = settingsViewModel.iptvSourceCurrent.name,
+                groupName = filteredChannelGroupListProvider().chanelGroup(channel).name,
+            )
+
             settingsViewModel.iptvChannelFavoriteList =
                 ChannelFavoriteList(settingsViewModel.iptvChannelFavoriteList + favoriteChannel)
 
