@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,6 +58,7 @@ import top.yogiczy.mytv.tv.ui.screensold.videoplayer.player.VideoPlayer
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.theme.SAFE_AREA_VERTICAL_PADDING
 import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
+import top.yogiczy.mytv.tv.ui.utils.gridColumns
 import kotlin.math.max
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -99,8 +102,10 @@ fun ClassicChannelScreen(
     var epgListVisible by remember { mutableStateOf(false) }
 
     var groupWidth by remember { mutableIntStateOf(0) }
+    var channelListWidth by remember { mutableIntStateOf(0) }
+    var epgListIsFocused by remember { mutableStateOf(false) }
     val offsetXPx by animateIntAsState(
-        targetValue = if (epgListVisible) -groupWidth else 0,
+        targetValue = if (epgListVisible) if (epgListIsFocused) -groupWidth - channelListWidth else -groupWidth else 0,
         animationSpec = tween(),
         label = "",
     )
@@ -122,7 +127,10 @@ fun ClassicChannelScreen(
                     if (channelFavoriteListVisible)
                         ClassicPanelScreenFavoriteChannelGroup
                     else
-                        channelGroupList[max(0, channelGroupList.channelGroupIdx(currentChannelProvider()))]
+                        channelGroupList[max(
+                            0,
+                            channelGroupList.channelGroupIdx(currentChannelProvider())
+                        )]
                 },
                 onChannelGroupFocused = {
                     focusedChannelGroup = it
@@ -133,6 +141,7 @@ fun ClassicChannelScreen(
 
             ClassicChannelItemList(
                 modifier = Modifier
+                    .onSizeChanged { channelListWidth = it.width }
                     .focusProperties {
                         exit = {
                             if (epgListVisible && it == FocusDirection.Left) {
@@ -166,6 +175,10 @@ fun ClassicChannelScreen(
 
             Visibility({ epgListVisible }) {
                 ClassicEpgItemList(
+                    modifier = Modifier
+                        .onFocusChanged { epgListIsFocused = it.hasFocus || it.hasFocus },
+                    programmeListModifier = Modifier
+                        .width(if (epgListIsFocused) 5.gridColumns() else 4.gridColumns()),
                     epgProvider = { epgListProvider().match(focusedChannel) },
                     epgProgrammeReserveListProvider = {
                         EpgProgrammeReserveList(

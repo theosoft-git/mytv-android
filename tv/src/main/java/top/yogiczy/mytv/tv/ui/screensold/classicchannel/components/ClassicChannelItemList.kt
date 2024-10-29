@@ -37,7 +37,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.ListItem
+import androidx.tv.material3.DenseListItem
 import androidx.tv.material3.ListItemDefaults
 import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.MaterialTheme
@@ -120,7 +120,7 @@ fun ClassicChannelItemList(
             ),
         state = listState,
         contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         itemsIndexed(channelList, key = { _, channel -> channel.hashCode() }) { index, channel ->
             val isSelected by remember { derivedStateOf { channel == focusedChannel } }
@@ -229,7 +229,7 @@ private fun ClassicChannelItem(
         }
 
         Box(modifier = modifier.clip(ListItemDefaults.shape().shape)) {
-            ListItem(
+            DenseListItem(
                 modifier = Modifier
                     .focusRequester(focusRequester)
                     .onFocusChanged {
@@ -278,7 +278,7 @@ private fun ClassicChannelItem(
     }
 }
 
-@Preview
+@Preview(device = "id:Android TV (720p)")
 @Composable
 private fun ClassicChannelItemListPreview() {
     MyTvTheme {
@@ -293,7 +293,7 @@ private fun ClassicChannelItemListPreview() {
     }
 }
 
-@Preview
+@Preview(device = "id:Android TV (720p)")
 @Composable
 private fun ClassicChannelItemListWithChannelLogoPreview() {
     MyTvTheme {
