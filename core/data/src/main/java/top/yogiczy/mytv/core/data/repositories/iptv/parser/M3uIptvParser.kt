@@ -70,6 +70,10 @@ class M3uIptvParser : IptvParser {
                 ?.split(",")
                 ?.firstOrNull()
                 ?.trim()
+                ?: Regex("url-tvg=\"(.*?)\"").find(defLine)?.groupValues?.get(1)
+                    ?.split(",")
+                    ?.firstOrNull()
+                    ?.trim()
         }
     }
 }

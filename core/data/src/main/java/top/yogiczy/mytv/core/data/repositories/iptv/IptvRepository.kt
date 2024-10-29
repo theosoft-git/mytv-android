@@ -99,7 +99,7 @@ class IptvRepository(private val source: IptvSource) :
 
     suspend fun getEpgUrl(): String? {
         return runCatching {
-            val sourceData = getOrRefresh(Long.MAX_VALUE) { "" }
+            val sourceData = rawRepository.getRaw(Long.MAX_VALUE)
             val parser = IptvParser.instances.first { it.isSupport(source.url, sourceData) }
             parser.getEpgUrl(sourceData)
         }.getOrNull()
@@ -124,8 +124,8 @@ private class IptvRawRepository(private val source: IptvSource) : FileCacheRepos
 
     private val log = Logger.create("IptvRawRepository")
 
-    suspend fun getRaw(): String {
-        return getOrRefresh(if (source.isLocal) Long.MAX_VALUE else 0) {
+    suspend fun getRaw(cacheTime: Long = 0): String {
+        return getOrRefresh(if (source.isLocal) Long.MAX_VALUE else cacheTime) {
             log.d("获取直播源: $source")
 
             try {
