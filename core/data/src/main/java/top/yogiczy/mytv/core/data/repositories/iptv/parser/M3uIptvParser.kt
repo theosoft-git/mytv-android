@@ -48,19 +48,14 @@ class M3uIptvParser : IptvParser {
                     if (line.startsWith("#KODIPROP:inputstream.adaptive.manifest_type")) {
                         addedChannels =
                             addedChannels.map { it.copy(manifestType = line.split("=").last()) }
-                    }
-                    else if (line.startsWith("#KODIPROP:inputstream.adaptive.license_type")) {
+                    } else if (line.startsWith("#KODIPROP:inputstream.adaptive.license_type")) {
                         addedChannels =
                             addedChannels.map { it.copy(licenseType = line.split("=").last()) }
-                    }
-                    else if (line.startsWith("#KODIPROP:inputstream.adaptive.license_key")) {
+                    } else if (line.startsWith("#KODIPROP:inputstream.adaptive.license_key")) {
                         addedChannels =
                             addedChannels.map { it.copy(licenseKey = line.split("=").last()) }
-                    }
-                    else {
-                        addedChannels = addedChannels.map { it.copy(url = line.trim()) }
-                        channelList.addAll(addedChannels)
-                        addedChannels = listOf()
+                    } else {
+                        channelList.addAll(addedChannels.map { it.copy(url = line.trim()) })
                     }
                 }
             }
