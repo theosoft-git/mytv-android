@@ -10,9 +10,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.tv.material3.MaterialTheme
 import top.yogiczy.mytv.tv.ui.utils.backHandler
@@ -64,6 +66,7 @@ fun Modifier.popupable() = composed {
     focusRequester(focusRequester).focusable()
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PopupContent(
     modifier: Modifier = Modifier,
@@ -80,6 +83,7 @@ fun PopupContent(
             .popupable()
             .clickableNoIndication { onDismissRequest?.invoke() }
             .backHandler { onDismissRequest?.invoke() }
+            .focusProperties { exit = { FocusRequester.Cancel } }
             .ifElse(
                 withBackground,
                 Modifier.background(MaterialTheme.colorScheme.background.copy(0.5f)),

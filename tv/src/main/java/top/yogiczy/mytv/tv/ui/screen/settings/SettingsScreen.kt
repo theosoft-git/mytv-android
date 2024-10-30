@@ -5,16 +5,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSourceList
+import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
+import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.screen.components.AppScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsAppScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.categories.SettingsCloudSyncScreen
@@ -61,6 +65,8 @@ fun SettingsScreen(
     onReload: () -> Unit = {},
     onBackPressed: () -> Unit = {},
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         while (true) {
             settingsViewModel.refresh()
@@ -211,7 +217,7 @@ fun SettingsScreen(
                     SettingsIptvSourceScreen(
                         currentIptvSourceProvider = { settingsViewModel.iptvSourceCurrent },
                         iptvSourceListProvider = { settingsViewModel.iptvSourceList },
-                        onIptvSourceSelected = {
+                        onSetCurrent = {
                             if (settingsViewModel.iptvSourceCurrent != it) {
                                 settingsViewModel.iptvSourceCurrent = it
                                 settingsViewModel.iptvChannelGroupHiddenList = emptySet()
@@ -219,9 +225,15 @@ fun SettingsScreen(
                             }
                             onReload()
                         },
-                        onIptvSourceDelete = {
+                        onDelete = {
                             settingsViewModel.iptvSourceList =
                                 IptvSourceList(settingsViewModel.iptvSourceList - it)
+                        },
+                        onClearCache = {
+                            coroutineScope.launch {
+                                IptvRepository(it).clearCache()
+                                Snackbar.show("缓存已删除")
+                            }
                         },
                         onBackPressed = {
                             if (!navController.navigateUp()) onBackPressed()

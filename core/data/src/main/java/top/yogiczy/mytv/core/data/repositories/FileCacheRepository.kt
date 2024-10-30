@@ -96,7 +96,7 @@ abstract class FileCacheRepository(
         return data
     }
 
-    open suspend fun clearCache() {
+    open suspend fun clearCache() = withContext(Dispatchers.IO) {
         try {
             getCacheFile().delete()
         } catch (ex: Exception) {
