@@ -205,15 +205,19 @@ class MainViewModel : ViewModel() {
             val channelGroupList = (_uiState.value as MainUiState.Ready).channelGroupList
 
             flow {
-                val epgSource = if (Configs.epgSourceFollowIptv) {
-                    val iptvRepository = IptvRepository(Configs.iptvSourceCurrent)
-                    iptvRepository.getEpgUrl()?.let { epgUrl -> EpgSource(url = epgUrl) }
-                        ?: Configs.epgSourceCurrent
-                } else Configs.epgSourceCurrent
+                val epgSource = Configs.epgSourceFollowIptv
+                    .takeIf { it }
+                    ?.let {
+                        val iptvRepository = IptvRepository(Configs.iptvSourceCurrent)
+                        iptvRepository.getEpgUrl()?.let { epgUrl ->
+                            EpgSource(
+                                name = Configs.iptvSourceCurrent.name,
+                                url = epgUrl,
+                            )
+                        }
+                    } ?: Configs.epgSourceCurrent
 
-                emit(
-                    EpgRepository(epgSource).getEpgList()
-                )
+                emit(EpgRepository(epgSource).getEpgList())
             }
                 .retryWhen { e, attempt ->
                     if (attempt >= Constants.NETWORK_RETRY_COUNT) return@retryWhen false

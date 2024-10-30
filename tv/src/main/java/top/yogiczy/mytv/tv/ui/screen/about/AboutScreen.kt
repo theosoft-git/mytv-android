@@ -137,15 +137,6 @@ fun AboutScreen(
 
             item {
                 ListItem(
-                    headlineContent = { Text("技术交流 QQ") },
-                    trailingContent = { Text(Constants.GROUP_QQ) },
-                    selected = false,
-                    onClick = {},
-                )
-            }
-
-            item {
-                ListItem(
                     headlineContent = { Text("设备名称") },
                     trailingContent = { Text(Globals.deviceName) },
                     selected = false,
