@@ -17,6 +17,7 @@ import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
 import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSourceList
+import top.yogiczy.mytv.core.data.repositories.epg.EpgRepository
 import top.yogiczy.mytv.core.data.repositories.iptv.IptvRepository
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.screen.components.AppScreen
@@ -232,7 +233,7 @@ fun SettingsScreen(
                         onClearCache = {
                             coroutineScope.launch {
                                 IptvRepository(it).clearCache()
-                                Snackbar.show("缓存已删除")
+                                Snackbar.show("缓存已清除")
                             }
                         },
                         onBackPressed = {
@@ -283,13 +284,19 @@ fun SettingsScreen(
                     SettingsEpgSourceScreen(
                         currentEpgSourceProvider = { settingsViewModel.epgSourceCurrent },
                         epgSourceListProvider = { settingsViewModel.epgSourceList },
-                        onEpgSourceSelected = {
+                        onSetCurrent = {
                             settingsViewModel.epgSourceCurrent = it
                             onReload()
                         },
-                        onEpgSourceDelete = {
+                        onDelete = {
                             settingsViewModel.epgSourceList =
                                 EpgSourceList(settingsViewModel.epgSourceList - it)
+                        },
+                        onClearCache = {
+                            coroutineScope.launch {
+                                EpgRepository(it).clearCache()
+                                Snackbar.show("缓存已清除")
+                            }
                         },
                         onBackPressed = { navController.navigateUp() },
                     )

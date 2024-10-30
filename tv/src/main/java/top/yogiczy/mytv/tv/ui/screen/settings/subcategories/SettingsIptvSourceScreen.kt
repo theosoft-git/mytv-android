@@ -293,7 +293,10 @@ private fun IptvSourceItem(
         SettingsIptvSourceActions(
             iptvSourceProvider = { iptvSource },
             onDismissRequest = { actionsVisible = false },
-            onSetCurrent = { onSetCurrent() },
+            onSetCurrent = {
+                onSetCurrent()
+                actionsVisible = false
+            },
             onDelete = {
                 onDelete()
                 actionsVisible = false
