@@ -156,7 +156,7 @@ class Media3VideoPlayer(
                             .onFailure {
                                 triggerError(
                                     PlaybackException(
-                                        "ERROR_CODE_DRM_LICENSE_EXPIRED",
+                                        "MEDIA3_ERROR_DRM_LICENSE_EXPIRED",
                                         androidx.media3.common.PlaybackException.ERROR_CODE_DRM_LICENSE_EXPIRED
                                     )
                                 )
@@ -228,7 +228,12 @@ class Media3VideoPlayer(
                 }
 
                 else -> {
-                    triggerError(PlaybackException(ex.errorCodeName, ex.errorCode))
+                    triggerError(
+                        PlaybackException(
+                            ex.errorCodeName.replace("ERROR_CODE_", "MEDIA3_ERROR"),
+                            ex.errorCode
+                        )
+                    )
                 }
             }
         }

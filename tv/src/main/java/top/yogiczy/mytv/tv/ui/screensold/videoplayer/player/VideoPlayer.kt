@@ -182,8 +182,8 @@ abstract class VideoPlayer(
     data class PlaybackException(val errorCodeName: String, val errorCode: Int) :
         Exception(errorCodeName) {
         companion object {
-            val UNSUPPORTED_TYPE = PlaybackException("UNSUPPORTED_TYPE", 10002)
-            val LOAD_TIMEOUT = PlaybackException("LOAD_TIMEOUT", 10003)
+            val UNSUPPORTED_TYPE = PlaybackException("ERROR_UNSUPPORTED_TYPE", 10002)
+            val LOAD_TIMEOUT = PlaybackException("ERROR_LOAD_TIMEOUT", 10003)
         }
     }
 

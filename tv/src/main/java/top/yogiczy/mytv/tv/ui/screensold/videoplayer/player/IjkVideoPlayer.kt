@@ -268,7 +268,7 @@ class IjkVideoPlayer(
     }
 
     override fun onError(player: IMediaPlayer, what: Int, extra: Int): Boolean {
-        triggerError(PlaybackException("IJK_PLAYER_ERROR_$what: $extra", what))
+        triggerError(PlaybackException("IJK_ERROR_WHAT_$what", extra))
         return true
     }
 
