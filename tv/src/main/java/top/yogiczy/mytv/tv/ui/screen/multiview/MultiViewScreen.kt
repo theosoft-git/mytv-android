@@ -88,4 +88,4 @@ fun MultiViewScreen(
     }
 }
 
-const val MULTI_VIEW_MAX_COUNT = 9
+const val MULTI_VIEW_MAX_COUNT = 10

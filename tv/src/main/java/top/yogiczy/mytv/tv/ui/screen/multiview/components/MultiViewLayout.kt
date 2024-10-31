@@ -3,7 +3,9 @@ package top.yogiczy.mytv.tv.ui.screen.multiview.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,18 +17,19 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Text
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 @Composable
@@ -37,8 +40,6 @@ fun MultiViewLayout(
     zoomInIndex: Int? = null,
     content: @Composable BoxScope.(Int) -> Unit = { PreviewMultiViewLayoutItem(index = it) },
 ) {
-    val gridSize = ceil(sqrt(count.toFloat())).toInt()
-
     Box(modifier = modifier.fillMaxSize()) {
         Layout(
             modifier = Modifier.align(Alignment.Center),
@@ -51,7 +52,9 @@ fun MultiViewLayout(
                                 .ifElse(zoomInIndex == index, Modifier.layoutId("zoomInItem")),
                         ) {
                             val scaleRatio =
-                                calculateScaleRatio(count, zoomInIndex, gridSize, index)
+                                if (zoomInIndex != null)
+                                    calculateScaleRatioWithZoomIn(count, index == zoomInIndex)
+                                else calculateScaleRatio(count)
 
                             CompositionLocalProvider(
                                 LocalDensity provides Density(
@@ -68,42 +71,69 @@ fun MultiViewLayout(
         ) { measurables, constraints ->
             val zoomInItem = measurables.find { it.layoutId == "zoomInItem" }
             if (zoomInItem == null) {
-                handleGridLayout(measurables, constraints, gridSize, count)
+                handleGridLayout(measurables, constraints, count)
             } else {
-                handleZoomLayout(measurables, constraints, zoomInItem, count)
+                handleGridLayoutWithZoomIn(measurables, constraints, count, zoomInItem)
             }
         }
     }
 }
 
-private fun calculateScaleRatio(
-    count: Int,
-    zoomInIndex: Int?,
-    gridSize: Int,
-    index: Int
-): Float {
-    return if (zoomInIndex == null) {
-        min(2 / 3f, 1 / gridSize.toFloat())
+@Composable
+private fun calculateScaleRatio(count: Int): Float {
+    val configuration = LocalConfiguration.current
+    val maxWidth = configuration.screenWidthDp
+    val maxHeight = configuration.screenHeightDp
+
+    val columns = ceil(sqrt(count.toFloat())).toInt()
+    val itemWidth: Int
+    val itemHeight: Int
+    if (maxWidth / maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
+        itemWidth = maxWidth / columns
+        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
     } else {
-        when {
-            count == 9 -> if (index == zoomInIndex) 3 / 5f else 1 / 5f
-            else -> if (index == zoomInIndex) 3 / 4f else 1 / 4f
-        }
+        itemHeight = maxHeight / columns
     }
+
+    val rows =
+        max(1, ceil(maxHeight / itemHeight.toFloat() + 0.001f).toInt() - 1)
+
+    val scale = min(
+        columns / ceil((count / rows.toFloat())),
+        maxHeight / (itemHeight * rows).toFloat()
+    )
+
+    return (1f / rows) * scale
 }
 
 private fun MeasureScope.handleGridLayout(
     measurables: List<Measurable>,
     constraints: Constraints,
-    gridSize: Int,
     count: Int
 ): MeasureResult {
-    val scale = calculateScaleRatio(count, null, gridSize, 0)
-    val itemWidth = (constraints.maxWidth * scale).roundToInt()
-    val itemHeight = (constraints.maxHeight * scale).roundToInt()
+    var columns = ceil(sqrt(count.toFloat())).toInt()
+    var itemWidth: Int
+    var itemHeight: Int
+    if (constraints.maxWidth / constraints.maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
+        itemWidth = constraints.maxWidth / columns
+        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
+    } else {
+        itemHeight = constraints.maxHeight / columns
+        itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
+    }
 
-    val width = itemWidth * ceil(count / gridSize.toFloat()).toInt()
-    val height = itemHeight * gridSize
+    val rows = min(columns, ceil(constraints.maxHeight / itemHeight.toFloat()).toInt())
+
+    val scale = min(
+        columns / ceil((count / rows.toFloat())),
+        constraints.maxHeight / (itemHeight * rows).toFloat()
+    )
+    itemWidth = (itemWidth * scale).toInt()
+    itemHeight = (itemHeight * scale).toInt()
+    columns = ceil(count / rows.toFloat()).toInt()
+
+    val horizontalPadding = abs(constraints.maxWidth - itemWidth * columns) / 2
+    val verticalPadding = abs(constraints.maxHeight - itemHeight * rows) / 2
 
     val placeables = measurables.map { measurable ->
         measurable.measure(
@@ -111,104 +141,140 @@ private fun MeasureScope.handleGridLayout(
         )
     }
 
-    return layout(width, height) {
+    return layout(constraints.maxWidth, constraints.maxHeight) {
         placeables.forEachIndexed { index, placeable ->
             placeable.placeRelative(
-                x = (index / gridSize) * itemWidth,
-                y = (index % gridSize) * itemHeight,
+                x = (index / rows) * itemWidth + horizontalPadding,
+                y = (index % rows) * itemHeight + verticalPadding,
             )
         }
     }
 }
 
-private fun MeasureScope.handleZoomLayout(
-    measurables: List<Measurable>,
-    constraints: Constraints,
-    zoomInItem: Measurable,
-    count: Int
-): MeasureResult {
-    val zoomInItemScale = calculateScaleRatio(count, 0, 0, 0)
-    val zoomInItemPlaceable = zoomInItem.measure(
-        Constraints(
-            maxWidth = (constraints.maxWidth * zoomInItemScale).roundToInt(),
-            maxHeight = (constraints.maxHeight * zoomInItemScale).roundToInt(),
-        )
+@Composable
+private fun calculateScaleRatioWithZoomIn(count: Int, isZoomIn: Boolean): Float {
+    val configuration = LocalConfiguration.current
+    val maxWidth = configuration.screenWidthDp
+    val maxHeight = configuration.screenHeightDp
+
+    val gridSize = ceil(sqrt(count.toFloat()) + 0.001f).toInt() + 1
+
+    val itemWidth: Int
+    val itemHeight: Int
+    if (maxWidth / maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
+        itemWidth = maxWidth / gridSize
+        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
+    } else {
+        itemHeight = maxHeight / gridSize
+        itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
+    }
+
+    val contentMaxWidth =
+        itemWidth * (gridSize - 1) + if (count - 1 > gridSize - 1) itemWidth else 0
+    val contentMaxHeight = gridSize * itemHeight
+
+    val scale = min(
+        maxWidth / contentMaxWidth.toFloat(),
+        maxHeight / contentMaxHeight.toFloat(),
     )
 
-    val itemScale = calculateScaleRatio(count, -1, 0, 0)
-    val itemWidth = (constraints.maxWidth * itemScale).roundToInt()
-    val itemHeight = (constraints.maxHeight * itemScale).roundToInt()
+    return 1f / gridSize * (if (isZoomIn) (gridSize - 1) else 1) * scale
+}
+
+private fun MeasureScope.handleGridLayoutWithZoomIn(
+    measurables: List<Measurable>,
+    constraints: Constraints,
+    count: Int,
+    zoomInItem: Measurable,
+): MeasureResult {
+    val gridSize = ceil(sqrt(count.toFloat()) + 0.001f).toInt() + 1
+    var itemWidth: Int
+    var itemHeight: Int
+    if (constraints.maxWidth / constraints.maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
+        itemWidth = constraints.maxWidth / gridSize
+        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
+    } else {
+        itemHeight = constraints.maxHeight / gridSize
+        itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
+    }
+
+    var zoomInItemWidth = itemWidth * (gridSize - 1)
+    var zoomInItemHeight = itemHeight * (gridSize - 1)
+
+    var contentMaxWidth = zoomInItemWidth + if (count - 1 > gridSize - 1) itemWidth else 0
+    var contentMaxHeight = gridSize * itemHeight
+
+    val scale = min(
+        constraints.maxWidth / contentMaxWidth.toFloat(),
+        constraints.maxHeight / contentMaxHeight.toFloat(),
+    )
+    itemWidth = (itemWidth * scale).toInt()
+    itemHeight = (itemHeight * scale).toInt()
+    zoomInItemWidth = (zoomInItemWidth * scale).toInt()
+    zoomInItemHeight = (zoomInItemHeight * scale).toInt()
+
+    contentMaxWidth = zoomInItemWidth + if (count - 1 > gridSize - 1) itemWidth else 0
+    contentMaxHeight = gridSize * itemHeight
+
+    val horizontalPadding = abs(constraints.maxWidth - contentMaxWidth) / 2
+    val verticalPadding = abs(constraints.maxHeight - contentMaxHeight) / 2
+
+    val zoomInItemPlaceable =
+        zoomInItem.measure(Constraints(maxWidth = zoomInItemWidth, maxHeight = zoomInItemHeight))
 
     val placeables = measurables
         .filter { it.layoutId != "zoomInItem" }
         .map { measurable ->
-            measurable.measure(Constraints(maxWidth = itemWidth, maxHeight = itemHeight))
+            measurable.measure(
+                Constraints(maxWidth = itemWidth, maxHeight = itemHeight)
+            )
         }
 
     return layout(constraints.maxWidth, constraints.maxHeight) {
-        if (count <= 5) {
-            zoomInItemPlaceable.placeRelative(
-                x = (constraints.maxWidth - zoomInItemPlaceable.width) / 2,
-                y = 0,
-            )
-        } else if (count <= 8) {
-            zoomInItemPlaceable.placeRelative(x = 0, y = 0)
-        } else {
-            zoomInItemPlaceable.placeRelative(
-                x = (constraints.maxWidth - zoomInItemPlaceable.width) / 2,
-                y = itemHeight,
-            )
-        }
+        zoomInItemPlaceable.placeRelative(
+            x = horizontalPadding,
+            y = verticalPadding,
+        )
 
         placeables.forEachIndexed { index, placeable ->
-            if (count <= 8) {
-                if (index < 4) {
-                    val startX = (constraints.maxWidth - itemWidth * (min(4, count - 1))) / 2
-                    placeable.placeRelative(
-                        x = startX + index * itemWidth,
-                        y = itemHeight * 3,
-                    )
-                } else {
-                    placeable.placeRelative(
-                        x = itemWidth * 3,
-                        y = (index - 4) * itemHeight,
-                    )
-                }
+            if (index < gridSize - 1) {
+                placeable.placeRelative(
+                    x = (index % gridSize) * itemWidth + horizontalPadding,
+                    y = verticalPadding + zoomInItemHeight,
+                )
             } else {
-                if (index < 4) {
-                    val startX = (constraints.maxWidth - itemWidth * 4) / 2
-                    placeable.placeRelative(
-                        x = startX + index * itemWidth,
-                        y = 0,
-                    )
-                } else {
-                    val startX = (constraints.maxWidth - itemWidth * 4) / 2
-                    placeable.placeRelative(
-                        x = startX + (index - 4) * itemWidth,
-                        y = itemHeight * 4,
-                    )
-                }
+                placeable.placeRelative(
+                    x = horizontalPadding + zoomInItemWidth,
+                    y = ((index - (gridSize - 1)) % gridSize) * itemHeight + verticalPadding,
+                )
             }
         }
     }
 }
+
+private const val DEFAULT_ASPECT_RATIO = 16f / 9
 
 @Composable
 fun PreviewMultiViewLayoutItem(modifier: Modifier = Modifier, index: Int) {
     Box(
         modifier = modifier
             .fillMaxSize()
+            .fillMaxWidth()
+            .aspectRatio(16f / 9)
             .background(MaterialTheme.colorScheme.onSurface.copy(0.2f))
     ) {
-        Text(
-            "Screen${index + 1}",
-            modifier = Modifier.align(Alignment.Center),
-            style = MaterialTheme.typography.titleLarge,
-        )
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                .fillMaxSize(0.8f)
+                .background(MaterialTheme.colorScheme.onSurface.copy(0.1f))
+        ) {}
     }
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout1Preview() {
     MyTvTheme {
@@ -217,6 +283,8 @@ private fun MultiViewLayout1Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout2Preview() {
     MyTvTheme {
@@ -225,6 +293,8 @@ private fun MultiViewLayout2Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout3Preview() {
     MyTvTheme {
@@ -233,6 +303,8 @@ private fun MultiViewLayout3Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout4Preview() {
     MyTvTheme {
@@ -241,6 +313,8 @@ private fun MultiViewLayout4Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout5Preview() {
     MyTvTheme {
@@ -249,6 +323,8 @@ private fun MultiViewLayout5Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout6Preview() {
     MyTvTheme {
@@ -257,6 +333,8 @@ private fun MultiViewLayout6Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout7Preview() {
     MyTvTheme {
@@ -265,6 +343,8 @@ private fun MultiViewLayout7Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout8Preview() {
     MyTvTheme {
@@ -273,6 +353,8 @@ private fun MultiViewLayout8Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout9Preview() {
     MyTvTheme {
@@ -281,6 +363,18 @@ private fun MultiViewLayout9Preview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
+@Composable
+private fun MultiViewLayout10Preview() {
+    MyTvTheme {
+        MultiViewLayout(count = 10)
+    }
+}
+
+@Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout2ScalePreview() {
     MyTvTheme {
@@ -289,6 +383,8 @@ private fun MultiViewLayout2ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout3ScalePreview() {
     MyTvTheme {
@@ -297,6 +393,8 @@ private fun MultiViewLayout3ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout4ScalePreview() {
     MyTvTheme {
@@ -305,6 +403,8 @@ private fun MultiViewLayout4ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout5ScalePreview() {
     MyTvTheme {
@@ -313,6 +413,8 @@ private fun MultiViewLayout5ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout6ScalePreview() {
     MyTvTheme {
@@ -321,6 +423,8 @@ private fun MultiViewLayout6ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout7ScalePreview() {
     MyTvTheme {
@@ -329,6 +433,8 @@ private fun MultiViewLayout7ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout8ScalePreview() {
     MyTvTheme {
@@ -337,9 +443,21 @@ private fun MultiViewLayout8ScalePreview() {
 }
 
 @Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
 @Composable
 private fun MultiViewLayout9ScalePreview() {
     MyTvTheme {
         MultiViewLayout(count = 9, zoomInIndex = 0)
+    }
+}
+
+@Preview(device = "id:Android TV (720p)")
+@Preview(device = "spec:width=2560px,height=1920px,dpi=320")
+@Preview(device = "spec:parent=pixel_9_pro,orientation=landscape")
+@Composable
+private fun MultiViewLayout10ScalePreview() {
+    MyTvTheme {
+        MultiViewLayout(count = 10, zoomInIndex = 0)
     }
 }

@@ -66,7 +66,6 @@ fun Modifier.popupable() = composed {
     focusRequester(focusRequester).focusable()
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PopupContent(
     modifier: Modifier = Modifier,
@@ -83,7 +82,6 @@ fun PopupContent(
             .popupable()
             .clickableNoIndication { onDismissRequest?.invoke() }
             .backHandler { onDismissRequest?.invoke() }
-            .focusProperties { exit = { FocusRequester.Cancel } }
             .ifElse(
                 withBackground,
                 Modifier.background(MaterialTheme.colorScheme.background.copy(0.5f)),
@@ -93,6 +91,7 @@ fun PopupContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SimplePopup(
     modifier: Modifier = Modifier,
@@ -110,7 +109,8 @@ fun SimplePopup(
                 key = key,
                 composableReference = {
                     PopupContent(
-                        modifier = modifier,
+                        modifier = modifier
+                            .focusProperties { exit = { FocusRequester.Cancel } },
                         visibleProvider = visibleProvider,
                         onDismissRequest = onDismissRequest,
                         withBackground = true,
