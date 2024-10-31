@@ -129,28 +129,38 @@ class Media3VideoPlayer(
                         if (!(currentChannelLine.manifestType == "mpd" && currentChannelLine.licenseType == "clearkey" && currentChannelLine.licenseKey != null))
                             return@apply
 
-                        val (drmKeyId, drmKey) = currentChannelLine.licenseKey!!.split(":")
-                        val encodedDrmKey = Base64.encodeToString(
-                            drmKey.chunked(2).map { it.toInt(16).toByte() }.toByteArray(),
-                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
-                        )
-                        val encodedDrmKeyId = Base64.encodeToString(
-                            drmKeyId.chunked(2).map { it.toInt(16).toByte() }.toByteArray(),
-                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
-                        )
-                        val drmBody =
-                            "{\"keys\":[{\"kty\":\"oct\",\"k\":\"${encodedDrmKey}\",\"kid\":\"${encodedDrmKeyId}\"}],\"type\":\"temporary\"}"
-
-                        val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
-                        val drmSessionManager = DefaultDrmSessionManager.Builder()
-                            .setMultiSession(true)
-                            .setUuidAndExoMediaDrmProvider(
-                                C.CLEARKEY_UUID,
-                                FrameworkMediaDrm.DEFAULT_PROVIDER
+                        runCatching {
+                            val (drmKeyId, drmKey) = currentChannelLine.licenseKey!!.split(":")
+                            val encodedDrmKey = Base64.encodeToString(
+                                drmKey.chunked(2).map { it.toInt(16).toByte() }.toByteArray(),
+                                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
                             )
-                            .build(drmCallback)
+                            val encodedDrmKeyId = Base64.encodeToString(
+                                drmKeyId.chunked(2).map { it.toInt(16).toByte() }.toByteArray(),
+                                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                            )
+                            val drmBody =
+                                "{\"keys\":[{\"kty\":\"oct\",\"k\":\"${encodedDrmKey}\",\"kid\":\"${encodedDrmKeyId}\"}],\"type\":\"temporary\"}"
 
-                        setDrmSessionManagerProvider { drmSessionManager }
+                            val drmCallback = LocalMediaDrmCallback(drmBody.toByteArray())
+                            val drmSessionManager = DefaultDrmSessionManager.Builder()
+                                .setMultiSession(true)
+                                .setUuidAndExoMediaDrmProvider(
+                                    C.CLEARKEY_UUID,
+                                    FrameworkMediaDrm.DEFAULT_PROVIDER
+                                )
+                                .build(drmCallback)
+
+                            setDrmSessionManagerProvider { drmSessionManager }
+                        }
+                            .onFailure {
+                                triggerError(
+                                    PlaybackException(
+                                        "ERROR_CODE_DRM_LICENSE_EXPIRED",
+                                        androidx.media3.common.PlaybackException.ERROR_CODE_DRM_LICENSE_EXPIRED
+                                    )
+                                )
+                            }
                     }
                     .createMediaSource(mediaItem)
             }

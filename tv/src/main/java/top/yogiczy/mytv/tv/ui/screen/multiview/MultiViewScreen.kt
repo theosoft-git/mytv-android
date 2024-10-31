@@ -7,8 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
-import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelList
+import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList.Companion.channelFirstOrNull
 import top.yogiczy.mytv.core.data.entities.epg.EpgList
 import top.yogiczy.mytv.tv.ui.material.Snackbar
 import top.yogiczy.mytv.tv.ui.screen.components.AppScreen
@@ -23,7 +24,9 @@ fun MultiViewScreen(
     onBackPressed: () -> Unit = {},
 ) {
     val channelList =
-        remember { mutableStateListOf(channelGroupListProvider().channelList.first()) }
+        remember {
+            mutableStateListOf(channelGroupListProvider().channelFirstOrNull() ?: Channel.EMPTY)
+        }
     var zoomInIndex by remember { mutableStateOf<Int?>(null) }
 
     AppScreen(

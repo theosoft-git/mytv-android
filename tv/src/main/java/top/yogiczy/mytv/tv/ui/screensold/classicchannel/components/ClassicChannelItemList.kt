@@ -116,7 +116,11 @@ fun ClassicChannelItemList(
             .background(MaterialTheme.colorScheme.surface.copy(0.8f))
             .ifElse(
                 settingsVM.uiFocusOptimize,
-                Modifier.focusRestorer { itemFocusRequesterList[channelList.indexOf(focusedChannel)] },
+                Modifier.focusRestorer {
+                    itemFocusRequesterList.getOrElse(channelList.indexOf(focusedChannel)) {
+                        FocusRequester.Default
+                    }
+                },
             ),
         state = listState,
         contentPadding = PaddingValues(8.dp),

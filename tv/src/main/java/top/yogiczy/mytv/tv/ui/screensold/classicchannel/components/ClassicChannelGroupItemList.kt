@@ -78,7 +78,7 @@ fun ClassicChannelGroupItemList(
             .ifElse(
                 settingsVM.uiFocusOptimize,
                 Modifier.focusRestorer {
-                    itemFocusRequesterList[channelGroupList.indexOf(focusedChannelGroup)]
+                    itemFocusRequesterList.getOrElse(channelGroupList.indexOf(focusedChannelGroup)) { FocusRequester.Default}
                 },
             ),
         state = listState,

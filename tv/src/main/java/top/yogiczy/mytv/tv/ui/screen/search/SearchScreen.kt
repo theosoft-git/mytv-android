@@ -67,7 +67,7 @@ fun SearchScreen(
                         ChannelList(channelList.filter { channel ->
                             Pinyin.toPinyin(channel.name, ",")
                                 .split(",")
-                                .joinToString("") { it.first().lowercase() }
+                                .joinToString("") { it.firstOrNull()?.lowercase() ?: "" }
                                 .contains(key.lowercase())
                         })
                     }

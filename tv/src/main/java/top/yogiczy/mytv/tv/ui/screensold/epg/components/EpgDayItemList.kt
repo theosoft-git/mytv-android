@@ -48,7 +48,7 @@ fun EpgDayItemList(
     LazyColumn(
         modifier = modifier.ifElse(
             settingsVM.uiFocusOptimize,
-            Modifier.focusRestorer { itemFocusRequesterList[dayList.indexOf(currentDay)] },
+            Modifier.focusRestorer { itemFocusRequesterList.getOrElse(dayList.indexOf(currentDay)) { FocusRequester.Default } },
         ),
         state = listState,
         contentPadding = PaddingValues(vertical = 8.dp),
