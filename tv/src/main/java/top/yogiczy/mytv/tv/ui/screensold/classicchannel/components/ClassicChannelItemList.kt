@@ -260,7 +260,7 @@ private fun ClassicChannelItem(
                 },
                 supportingContent = {
                     Text(
-                        text = recentEpgProgramme?.now?.title ?: "精彩节目",
+                        text = recentEpgProgramme?.now?.title ?: "",
                         maxLines = 1,
                         modifier = Modifier.ifElse(isFocused, Modifier.basicMarquee()),
                     )

@@ -3,7 +3,6 @@ package top.yogiczy.mytv.core.data.entities.epg
 import kotlinx.serialization.Serializable
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.utils.Logger
-import java.util.Calendar
 import kotlin.time.measureTimedValue
 
 /**
@@ -71,31 +70,9 @@ data class Epg(
         }
 
         fun empty(channel: Channel): Epg {
-            val dayStart = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-
-            val dayEnd = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 23)
-                set(Calendar.MINUTE, 59)
-                set(Calendar.SECOND, 59)
-                set(Calendar.MILLISECOND, 999)
-            }
-
             return Epg(
                 channelList = listOf(channel.epgName),
-                programmeList = EpgProgrammeList(
-                    listOf(
-                        EpgProgramme(
-                            title = "暂无节目",
-                            startAt = dayStart.timeInMillis,
-                            endAt = dayEnd.timeInMillis,
-                        )
-                    )
-                )
+                programmeList = EpgProgrammeList(listOf(EpgProgramme.EMPTY))
             )
         }
     }
