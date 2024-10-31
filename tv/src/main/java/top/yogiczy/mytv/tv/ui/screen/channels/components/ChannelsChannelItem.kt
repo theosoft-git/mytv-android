@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -261,6 +262,7 @@ private fun ChannelsChannelItemContent(
         Text(
             recentEpgProgramme?.now?.title ?: "",
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier
                 .alpha(0.8f)

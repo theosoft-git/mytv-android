@@ -3,6 +3,7 @@ package top.yogiczy.mytv.tv.ui.screensold.classicchannel.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ fun ClassicEpgItemList(
 
     Row(
         modifier = modifier
+            .fillMaxHeight()
             .background(MaterialTheme.colorScheme.surface.copy(0.7f))
             .padding(start = 12.dp, end = 12.dp)
             .onFocusChanged {
@@ -60,7 +62,7 @@ fun ClassicEpgItemList(
         EpgProgrammeItemList(
             modifier = programmeListModifier,
             epgProgrammeListProvider = {
-                EpgProgrammeList(programDayGroup.getOrElse(currentDay) { emptyList() })
+                EpgProgrammeList(programDayGroup.getOrElse(currentDay) { listOf(EpgProgramme.EMPTY) })
             },
             epgProgrammeReserveListProvider = epgProgrammeReserveListProvider,
             supportPlaybackProvider = supportPlaybackProvider,
