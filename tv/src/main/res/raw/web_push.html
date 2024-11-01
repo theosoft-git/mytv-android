@@ -172,6 +172,7 @@
                                     <van-radio name="GITEE_GIST">Gitee 代码片段</van-radio>
                                     <van-radio name="NETWORK_URL">网络链接</van-radio>
                                     <van-radio name="LOCAL_FILE">本地文件</van-radio>
+                                    <van-radio name="WEBDAV">WebDAV</van-radio>
                                 </van-radio-group>
                             </template>
                         </van-cell>
@@ -216,6 +217,26 @@
                             <van-cell title="本地文件路径">
                                 <template #label>
                                     <van-field class="!p-0" v-model="configs.cloudSyncLocalFilePath"></van-field>
+                                </template>
+                            </van-cell>
+                        </template>
+
+                        <template v-if="configs.cloudSyncProvider === 'WEBDAV'">
+                            <van-cell title="WebDAV 地址">
+                                <template #label>
+                                    <van-field class="!p-0" v-model="configs.cloudSyncWebDavUrl"></van-field>
+                                </template>
+                            </van-cell>
+
+                            <van-cell title="WebDAV 用户名">
+                                <template #label>
+                                    <van-field class="!p-0" v-model="configs.cloudSyncWebDavUsername"></van-field>
+                                </template>
+                            </van-cell>
+
+                            <van-cell title="WebDAV 密码">
+                                <template #label>
+                                    <van-field class="!p-0" v-model="configs.cloudSyncWebDavPassword"></van-field>
                                 </template>
                             </van-cell>
                         </template>
