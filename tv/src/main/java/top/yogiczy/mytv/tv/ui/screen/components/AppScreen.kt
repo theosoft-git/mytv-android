@@ -1,8 +1,11 @@
 package top.yogiczy.mytv.tv.ui.screen.components
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -45,6 +49,7 @@ import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import coil.compose.SubcomposeAsyncImage
 import kotlinx.serialization.Serializable
 import top.yogiczy.mytv.tv.ui.material.CircularProgressIndicator
 import top.yogiczy.mytv.tv.ui.rememberChildPadding
@@ -204,9 +209,6 @@ data class AppThemeDef(
     val textureAlpha: Float? = null,
 )
 
-/**
- * 地海蔚蓝
- */
 @Composable
 fun AppThemeWrapper(
     appThemeDef: AppThemeDef? = settingsVM.themeAppCurrent,
@@ -227,14 +229,14 @@ fun AppThemeWrapper(
                 )
         )
     } else {
-        AsyncImageEnhance(
+        AppThemeWrapperImage(
             model = appThemeDef.background,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
 
         appThemeDef.texture?.let { nnTexture ->
-            AsyncImageEnhance(
+            AppThemeWrapperImage(
                 model = nnTexture,
                 modifier = Modifier
                     .fillMaxSize()
@@ -251,6 +253,35 @@ fun AppThemeWrapper(
     }
 
     content()
+}
+
+@Composable
+private fun AppThemeWrapperImage(
+    model: String,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit,
+) {
+    if (model.startsWith("http") || model.startsWith("file")) {
+        SubcomposeAsyncImage(
+            model = model,
+            modifier = modifier,
+            contentScale = contentScale,
+            contentDescription = null,
+        )
+    } else {
+        runCatching {
+            val imageBytes = Base64.decode(model, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            val imageBitmap = bitmap.asImageBitmap()
+
+            Image(
+                bitmap = imageBitmap,
+                contentScale = contentScale,
+                modifier = modifier,
+                contentDescription = null,
+            )
+        }
+    }
 }
 
 @Preview(device = "id:Android TV (720p)")
