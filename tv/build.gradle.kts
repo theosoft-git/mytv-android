@@ -128,7 +128,6 @@ dependencies {
         implementation(libs.androidx.media3.ui)
     }
 
-
     // 二维码
     implementation(libs.qrose)
 

@@ -12,6 +12,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -24,9 +25,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.ifElse
-import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -79,31 +80,60 @@ fun MultiViewLayout(
     }
 }
 
+private data class GridLayoutCalc(
+    val count: Int,
+    val maxWidth: Int,
+    val maxHeight: Int,
+) {
+    var rows: Int
+    var columns: Int
+    var itemWidth: Int
+    var itemHeight: Int
+    var scale: Float
+    var itemScale: Float
+    private var horizontalPadding: Int
+    private var verticalPadding: Int
+
+    init {
+        val gridSize = ceil(sqrt(count.toFloat())).toInt()
+
+        val aspectRatio = maxWidth / maxHeight.toFloat()
+        if (aspectRatio <= DEFAULT_ASPECT_RATIO) {
+            itemWidth = maxWidth / gridSize
+            itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
+        } else {
+            itemHeight = maxHeight / gridSize
+            itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
+        }
+
+        rows = min(gridSize, ceil(maxHeight / itemHeight.toFloat()).toInt())
+        columns = ceil(count / rows.toFloat()).toInt()
+
+        scale = min(gridSize / columns.toFloat(), maxHeight / (itemHeight * rows).toFloat())
+        itemScale = 1f / max(rows, columns) * scale
+        itemWidth = (itemWidth * scale).toInt()
+        itemHeight = (itemHeight * scale).toInt()
+
+        horizontalPadding = (maxWidth - itemWidth * columns) / 2
+        verticalPadding = (maxHeight - itemHeight * rows) / 2
+    }
+
+    fun placeRelative(index: Int): Pair<Int, Int> {
+        return Pair(
+            horizontalPadding + (index / rows) * itemWidth,
+            verticalPadding + (index % rows) * itemHeight,
+        )
+    }
+}
+
 @Composable
 private fun calculateScaleRatio(count: Int): Float {
     val configuration = LocalConfiguration.current
     val maxWidth = configuration.screenWidthDp
     val maxHeight = configuration.screenHeightDp
 
-    val columns = ceil(sqrt(count.toFloat())).toInt()
-    val itemWidth: Int
-    val itemHeight: Int
-    if (maxWidth / maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
-        itemWidth = maxWidth / columns
-        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
-    } else {
-        itemHeight = maxHeight / columns
-    }
-
-    val rows =
-        max(1, ceil(maxHeight / itemHeight.toFloat() + 0.001f).toInt() - 1)
-
-    val scale = min(
-        columns / ceil((count / rows.toFloat())),
-        maxHeight / (itemHeight * rows).toFloat()
-    )
-
-    return (1f / rows) * scale
+    val calc = GridLayoutCalc(count, maxWidth, maxHeight)
+    return calc.itemScale
 }
 
 private fun MeasureScope.handleGridLayout(
@@ -111,43 +141,87 @@ private fun MeasureScope.handleGridLayout(
     constraints: Constraints,
     count: Int
 ): MeasureResult {
-    var columns = ceil(sqrt(count.toFloat())).toInt()
-    var itemWidth: Int
-    var itemHeight: Int
-    if (constraints.maxWidth / constraints.maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
-        itemWidth = constraints.maxWidth / columns
-        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
-    } else {
-        itemHeight = constraints.maxHeight / columns
-        itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
-    }
-
-    val rows = min(columns, ceil(constraints.maxHeight / itemHeight.toFloat()).toInt())
-
-    val scale = min(
-        columns / ceil((count / rows.toFloat())),
-        constraints.maxHeight / (itemHeight * rows).toFloat()
-    )
-    itemWidth = (itemWidth * scale).toInt()
-    itemHeight = (itemHeight * scale).toInt()
-    columns = ceil(count / rows.toFloat()).toInt()
-
-    val horizontalPadding = abs(constraints.maxWidth - itemWidth * columns) / 2
-    val verticalPadding = abs(constraints.maxHeight - itemHeight * rows) / 2
+    val calc = GridLayoutCalc(count, constraints.maxWidth, constraints.maxHeight)
 
     val placeables = measurables.map { measurable ->
         measurable.measure(
-            Constraints(maxWidth = itemWidth, maxHeight = itemHeight)
+            Constraints(maxWidth = calc.itemWidth, maxHeight = calc.itemHeight)
         )
     }
 
     return layout(constraints.maxWidth, constraints.maxHeight) {
         placeables.forEachIndexed { index, placeable ->
-            placeable.placeRelative(
-                x = (index / rows) * itemWidth + horizontalPadding,
-                y = (index % rows) * itemHeight + verticalPadding,
+            calc.placeRelative(index).let { (x, y) ->
+                placeable.placeRelative(x, y)
+            }
+        }
+    }
+}
+
+private data class GridLayoutWithZoomIn(
+    val count: Int,
+    val maxWidth: Int,
+    val maxHeight: Int,
+) {
+    var gridSize: Int = ceil(sqrt(count.toFloat()) + 0.001f).toInt() + 1
+    var itemWidth: Int
+    var itemHeight: Int
+    var zoomInItemWidth: Int
+    var zoomInItemHeight: Int
+    var scale: Float
+    var itemScale: Float
+    var zoomInItemScale: Float
+    private var horizontalPadding: Int
+    private var verticalPadding: Int
+
+    init {
+
+        val aspectRatio = maxWidth / maxHeight.toFloat()
+        if (aspectRatio < DEFAULT_ASPECT_RATIO) {
+            itemWidth = maxWidth / gridSize
+            itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
+        } else {
+            itemHeight = maxHeight / gridSize
+            itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
+        }
+
+        zoomInItemWidth = itemWidth * (gridSize - 1)
+        zoomInItemHeight = itemHeight * (gridSize - 1)
+
+        var contentMaxWidth = zoomInItemWidth + if (count - 1 > gridSize - 1) itemWidth else 0
+        var contentMaxHeight = gridSize * itemHeight
+
+        scale = min(maxWidth / contentMaxWidth.toFloat(), maxHeight / contentMaxHeight.toFloat())
+        itemScale = 1f / gridSize * scale
+        zoomInItemScale = itemScale * (gridSize - 1)
+        itemWidth = (itemWidth * scale).toInt()
+        itemHeight = (itemHeight * scale).toInt()
+        zoomInItemWidth = (zoomInItemWidth * scale).toInt()
+        zoomInItemHeight = (zoomInItemHeight * scale).toInt()
+
+        contentMaxWidth = zoomInItemWidth + if (count - 1 > gridSize - 1) itemWidth else 0
+        contentMaxHeight = gridSize * itemHeight
+
+        horizontalPadding = (maxWidth - contentMaxWidth) / 2
+        verticalPadding = (maxHeight - contentMaxHeight) / 2
+    }
+
+    fun placeRelativeZoomIn(): Pair<Int, Int> {
+        return Pair(horizontalPadding, verticalPadding)
+    }
+
+    fun placeRelative(index: Int): Pair<Int, Int> {
+        if (index < gridSize - 1) {
+            return Pair(
+                (index % gridSize) * itemWidth + horizontalPadding,
+                verticalPadding + zoomInItemHeight
             )
         }
+
+        return Pair(
+            horizontalPadding + zoomInItemWidth,
+            ((index - (gridSize - 1)) % gridSize) * itemHeight + verticalPadding,
+        )
     }
 }
 
@@ -157,28 +231,8 @@ private fun calculateScaleRatioWithZoomIn(count: Int, isZoomIn: Boolean): Float 
     val maxWidth = configuration.screenWidthDp
     val maxHeight = configuration.screenHeightDp
 
-    val gridSize = ceil(sqrt(count.toFloat()) + 0.001f).toInt() + 1
-
-    val itemWidth: Int
-    val itemHeight: Int
-    if (maxWidth / maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
-        itemWidth = maxWidth / gridSize
-        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
-    } else {
-        itemHeight = maxHeight / gridSize
-        itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
-    }
-
-    val contentMaxWidth =
-        itemWidth * (gridSize - 1) + if (count - 1 > gridSize - 1) itemWidth else 0
-    val contentMaxHeight = gridSize * itemHeight
-
-    val scale = min(
-        maxWidth / contentMaxWidth.toFloat(),
-        maxHeight / contentMaxHeight.toFloat(),
-    )
-
-    return 1f / gridSize * (if (isZoomIn) (gridSize - 1) else 1) * scale
+    val calc = GridLayoutWithZoomIn(count, maxWidth, maxHeight)
+    return if (isZoomIn) calc.zoomInItemScale else calc.itemScale
 }
 
 private fun MeasureScope.handleGridLayoutWithZoomIn(
@@ -187,66 +241,29 @@ private fun MeasureScope.handleGridLayoutWithZoomIn(
     count: Int,
     zoomInItem: Measurable,
 ): MeasureResult {
-    val gridSize = ceil(sqrt(count.toFloat()) + 0.001f).toInt() + 1
-    var itemWidth: Int
-    var itemHeight: Int
-    if (constraints.maxWidth / constraints.maxHeight.toFloat() < DEFAULT_ASPECT_RATIO) {
-        itemWidth = constraints.maxWidth / gridSize
-        itemHeight = (itemWidth / DEFAULT_ASPECT_RATIO).toInt()
-    } else {
-        itemHeight = constraints.maxHeight / gridSize
-        itemWidth = (itemHeight * DEFAULT_ASPECT_RATIO).toInt()
-    }
-
-    var zoomInItemWidth = itemWidth * (gridSize - 1)
-    var zoomInItemHeight = itemHeight * (gridSize - 1)
-
-    var contentMaxWidth = zoomInItemWidth + if (count - 1 > gridSize - 1) itemWidth else 0
-    var contentMaxHeight = gridSize * itemHeight
-
-    val scale = min(
-        constraints.maxWidth / contentMaxWidth.toFloat(),
-        constraints.maxHeight / contentMaxHeight.toFloat(),
-    )
-    itemWidth = (itemWidth * scale).toInt()
-    itemHeight = (itemHeight * scale).toInt()
-    zoomInItemWidth = (zoomInItemWidth * scale).toInt()
-    zoomInItemHeight = (zoomInItemHeight * scale).toInt()
-
-    contentMaxWidth = zoomInItemWidth + if (count - 1 > gridSize - 1) itemWidth else 0
-    contentMaxHeight = gridSize * itemHeight
-
-    val horizontalPadding = abs(constraints.maxWidth - contentMaxWidth) / 2
-    val verticalPadding = abs(constraints.maxHeight - contentMaxHeight) / 2
+    val calc = GridLayoutWithZoomIn(count, constraints.maxWidth, constraints.maxHeight)
 
     val zoomInItemPlaceable =
-        zoomInItem.measure(Constraints(maxWidth = zoomInItemWidth, maxHeight = zoomInItemHeight))
+        zoomInItem.measure(
+            Constraints(maxWidth = calc.zoomInItemWidth, maxHeight = calc.zoomInItemHeight)
+        )
 
     val placeables = measurables
         .filter { it.layoutId != "zoomInItem" }
         .map { measurable ->
             measurable.measure(
-                Constraints(maxWidth = itemWidth, maxHeight = itemHeight)
+                Constraints(maxWidth = calc.itemWidth, maxHeight = calc.itemHeight)
             )
         }
 
     return layout(constraints.maxWidth, constraints.maxHeight) {
-        zoomInItemPlaceable.placeRelative(
-            x = horizontalPadding,
-            y = verticalPadding,
-        )
+        calc.placeRelativeZoomIn().let { (x, y) ->
+            zoomInItemPlaceable.placeRelative(x, y)
+        }
 
         placeables.forEachIndexed { index, placeable ->
-            if (index < gridSize - 1) {
-                placeable.placeRelative(
-                    x = (index % gridSize) * itemWidth + horizontalPadding,
-                    y = verticalPadding + zoomInItemHeight,
-                )
-            } else {
-                placeable.placeRelative(
-                    x = horizontalPadding + zoomInItemWidth,
-                    y = ((index - (gridSize - 1)) % gridSize) * itemHeight + verticalPadding,
-                )
+            calc.placeRelative(index).let { (x, y) ->
+                placeable.placeRelative(x, y)
             }
         }
     }
@@ -268,7 +285,13 @@ fun PreviewMultiViewLayoutItem(modifier: Modifier = Modifier, index: Int) {
                 .align(Alignment.Center)
                 .fillMaxSize(0.8f)
                 .background(MaterialTheme.colorScheme.onSurface.copy(0.1f))
-        ) {}
+        ) {
+            Text(
+                "Screen $index", modifier = Modifier
+                    .align(Alignment.Center)
+                    .scale(5f)
+            )
+        }
     }
 }
 
