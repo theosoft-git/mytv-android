@@ -51,15 +51,19 @@ suspend fun <T> String.request(
     builder: (Request.Builder) -> Request.Builder = { it -> it },
     action: suspend CoroutineScope.(Response, Request) -> T,
 ): T {
-    val client = OkHttpClient()
-    val request = Request.Builder()
-        .url(this)
-        .let(builder)
-        .build()
+    val url = this
 
-    val response = client.newCall(request).await()
+    return withContext(Dispatchers.IO) {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .let(builder)
+            .build()
 
-    if (!response.isSuccessful) throw Exception("${response.code}: ${response.message}")
+        val response = client.newCall(request).await()
 
-    return withContext(Dispatchers.IO) { action(response, response.request) }
+        if (!response.isSuccessful) throw Exception("${response.code}: ${response.message}")
+
+        action(response, response.request)
+    }
 }

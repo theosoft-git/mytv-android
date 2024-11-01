@@ -1,7 +1,5 @@
 package top.yogiczy.mytv.tv.sync.repositories
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
@@ -17,9 +15,9 @@ class GithubGistSyncRepository(
     private val gistId: String,
     private val token: String,
 ) : CloudSyncRepository, Loggable("GithubGistSyncRepository") {
-    override suspend fun push(data: CloudSyncData) = withContext(Dispatchers.IO) {
+    override suspend fun push(data: CloudSyncData): Boolean {
         try {
-            return@withContext "https://api.github.com/gists/${gistId}".request({ builder ->
+            return "https://api.github.com/gists/${gistId}".request({ builder ->
                 builder
                     .header("Authorization", "Bearer $token")
                     .header("X-GitHub-Api-Version", "2022-11-28")
@@ -41,9 +39,9 @@ class GithubGistSyncRepository(
         }
     }
 
-    override suspend fun pull() = withContext(Dispatchers.IO) {
+    override suspend fun pull(): CloudSyncData {
         try {
-            return@withContext "https://api.github.com/gists/${gistId}".request({ builder ->
+            return "https://api.github.com/gists/${gistId}".request({ builder ->
                 builder
                     .header("Authorization", "Bearer $token")
                     .header("X-GitHub-Api-Version", "2022-11-28")

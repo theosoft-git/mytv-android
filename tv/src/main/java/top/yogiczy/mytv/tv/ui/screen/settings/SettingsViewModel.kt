@@ -534,7 +534,30 @@ class SettingsViewModel : ViewModel() {
         set(value) {
             _cloudSyncLocalFilePath = value
             Configs.cloudSyncLocalFilePath = value
-            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _cloudSyncWebDavUrl by mutableStateOf("")
+    var cloudSyncWebDavUrl: String
+        get() = _cloudSyncWebDavUrl
+        set(value) {
+            _cloudSyncWebDavUrl = value
+            Configs.cloudSyncWebDavUrl = value
+        }
+
+    private var _cloudSyncWebDavUsername by mutableStateOf("")
+    var cloudSyncWebDavUsername: String
+        get() = _cloudSyncWebDavUsername
+        set(value) {
+            _cloudSyncWebDavUsername = value
+            Configs.cloudSyncWebDavUsername = value
+        }
+
+    private var _cloudSyncWebDavPassword by mutableStateOf("")
+    var cloudSyncWebDavPassword: String
+        get() = _cloudSyncWebDavPassword
+        set(value) {
+            _cloudSyncWebDavPassword = value
+            Configs.cloudSyncWebDavPassword = value
         }
 
     private fun afterSetWhenCloudSyncAutoPull() {
@@ -611,6 +634,9 @@ class SettingsViewModel : ViewModel() {
         _cloudSyncGiteeGistToken = Configs.cloudSyncGiteeGistToken
         _cloudSyncNetworkUrl = Configs.cloudSyncNetworkUrl
         _cloudSyncLocalFilePath = Configs.cloudSyncLocalFilePath
+        _cloudSyncWebDavUrl = Configs.cloudSyncWebDavUrl
+        _cloudSyncWebDavUsername = Configs.cloudSyncWebDavUsername
+        _cloudSyncWebDavPassword = Configs.cloudSyncWebDavPassword
     }
 
     companion object {

@@ -5,13 +5,19 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.data.utils.Loggable
+import top.yogiczy.mytv.core.util.utils.ensureSuffix
 import top.yogiczy.mytv.tv.sync.CloudSyncData
 import java.io.File
 
 class LocalFileSyncRepository(
     private val path: String
 ) : CloudSyncRepository, Loggable("LocalFileSyncRepository") {
-    val file by lazy { File(path.substringAfter("file://")) }
+
+    val file by lazy {
+        val hasFileName = path.split("/").last().contains(".")
+        if (hasFileName) File(path.substringAfter("file://"))
+        else File(path.substringAfter("file://").ensureSuffix("/") + "all_configs.json")
+    }
 
     override suspend fun push(data: CloudSyncData): Boolean = withContext(Dispatchers.IO) {
         try {

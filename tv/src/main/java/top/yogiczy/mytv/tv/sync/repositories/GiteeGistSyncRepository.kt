@@ -1,7 +1,5 @@
 package top.yogiczy.mytv.tv.sync.repositories
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonObject
@@ -17,9 +15,9 @@ class GiteeGistSyncRepository(
     private val gistId: String,
     private val token: String,
 ) : CloudSyncRepository, Loggable("GiteeGistSyncRepository") {
-    override suspend fun push(data: CloudSyncData) = withContext(Dispatchers.IO) {
+    override suspend fun push(data: CloudSyncData): Boolean {
         try {
-            return@withContext "https://gitee.com/api/v5/gists/${gistId}".request({ builder ->
+            return "https://gitee.com/api/v5/gists/${gistId}".request({ builder ->
                 val body = "{ \"access_token\": \"$token\", \"files\": { \"all_configs.json\": ${
                     Globals.json.encodeToString(mapOf("content" to Globals.json.encodeToString(data)))
                 }}}"
@@ -34,9 +32,9 @@ class GiteeGistSyncRepository(
         }
     }
 
-    override suspend fun pull() = withContext(Dispatchers.IO) {
+    override suspend fun pull(): CloudSyncData {
         try {
-            return@withContext "https://gitee.com/api/v5/gists/${gistId}?access_token=${token}".request { body ->
+            return "https://gitee.com/api/v5/gists/${gistId}?access_token=${token}".request { body ->
                 val res = Globals.json.parseToJsonElement(body.string()).jsonObject
                 val file = res["files"]?.jsonObject?.get("all_configs.json")?.jsonObject
 

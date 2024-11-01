@@ -124,3 +124,7 @@ fun String.humanizeLanguage(): String {
         else -> this
     }
 }
+
+fun String.ensureSuffix(suffix: String): String {
+    return if (endsWith(suffix)) this else "$this$suffix"
+}

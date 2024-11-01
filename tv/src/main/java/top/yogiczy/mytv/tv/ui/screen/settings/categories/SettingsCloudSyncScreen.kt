@@ -224,6 +224,32 @@ fun SettingsCloudSyncScreen(
                     )
                 }
             }
+
+            CloudSyncProvider.WEBDAV -> {
+                item {
+                    SettingsListItem(
+                        headlineContent = "WebDAV 地址",
+                        trailingContent = settingsViewModel.cloudSyncWebDavUrl,
+                        remoteConfig = true,
+                    )
+                }
+
+                item {
+                    SettingsListItem(
+                        headlineContent = "WebDAV 用户名",
+                        trailingContent = settingsViewModel.cloudSyncWebDavUsername,
+                        remoteConfig = true,
+                    )
+                }
+
+                item {
+                    SettingsListItem(
+                        headlineContent = "WebDAV 密码",
+                        trailingContent = settingsViewModel.cloudSyncWebDavPassword,
+                        remoteConfig = true,
+                    )
+                }
+            }
         }
     }
 }

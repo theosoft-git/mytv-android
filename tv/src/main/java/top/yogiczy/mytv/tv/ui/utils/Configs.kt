@@ -203,6 +203,15 @@ object Configs {
 
         /** 云同步 本地文件 */
         CLOUD_SYNC_LOCAL_FILE,
+
+        /** 云同步 webdav url */
+        CLOUD_SYNC_WEBDAV_URL,
+
+        /** 云同步 webdav 用户名 */
+        CLOUD_SYNC_WEBDAV_USERNAME,
+
+        /** 云同步 webdav 密码 */
+        CLOUD_SYNC_WEBDAV_PASSWORD,
     }
 
     /** ==================== 应用 ==================== */
@@ -554,6 +563,22 @@ object Configs {
         get() = SP.getString(KEY.CLOUD_SYNC_LOCAL_FILE.name, "")
         set(value) = SP.putString(KEY.CLOUD_SYNC_LOCAL_FILE.name, value)
 
+    /** 云同步 webdav url */
+    var cloudSyncWebDavUrl: String
+        get() = SP.getString(KEY.CLOUD_SYNC_WEBDAV_URL.name, "")
+        set(value) = SP.putString(KEY.CLOUD_SYNC_WEBDAV_URL.name, value)
+
+    /** 云同步 webdav 用户名 */
+    // CLOUD_SYNC_WEBDAV_USERNAME,
+    var cloudSyncWebDavUsername: String
+        get() = SP.getString(KEY.CLOUD_SYNC_WEBDAV_USERNAME.name, "")
+        set(value) = SP.putString(KEY.CLOUD_SYNC_WEBDAV_USERNAME.name, value)
+
+    /** 云同步 webdav 密码 */
+    var cloudSyncWebDavPassword: String
+        get() = SP.getString(KEY.CLOUD_SYNC_WEBDAV_PASSWORD.name, "")
+        set(value) = SP.putString(KEY.CLOUD_SYNC_WEBDAV_PASSWORD.name, value)
+
     enum class UiTimeShowMode(val value: Int, val label: String) {
         /** 隐藏 */
         HIDDEN(0, "隐藏"),
@@ -679,6 +704,9 @@ object Configs {
             cloudSyncGiteeGistToken = cloudSyncGiteeGistToken,
             cloudSyncNetworkUrl = cloudSyncNetworkUrl,
             cloudSyncLocalFilePath = cloudSyncLocalFilePath,
+            cloudSyncWebDavUrl = cloudSyncWebDavUrl,
+            cloudSyncWebDavUsername = cloudSyncWebDavUsername,
+            cloudSyncWebDavPassword = cloudSyncWebDavPassword
         )
     }
 
@@ -743,6 +771,9 @@ object Configs {
         configs.cloudSyncGiteeGistToken?.let { cloudSyncGiteeGistToken = it }
         configs.cloudSyncNetworkUrl?.let { cloudSyncNetworkUrl = it }
         configs.cloudSyncLocalFilePath?.let { cloudSyncLocalFilePath = it }
+        configs.cloudSyncWebDavUrl?.let { cloudSyncWebDavUrl = it }
+        configs.cloudSyncWebDavUsername?.let { cloudSyncWebDavUsername = it }
+        configs.cloudSyncWebDavPassword?.let { cloudSyncWebDavPassword = it }
     }
 
     @Serializable
@@ -805,6 +836,9 @@ object Configs {
         val cloudSyncGiteeGistToken: String? = null,
         val cloudSyncNetworkUrl: String? = null,
         val cloudSyncLocalFilePath: String? = null,
+        val cloudSyncWebDavUrl: String? = null,
+        val cloudSyncWebDavUsername: String? = null,
+        val cloudSyncWebDavPassword: String? = null
     ) {
         fun desensitized() = copy(
             cloudSyncAutoPull = null,
@@ -815,6 +849,9 @@ object Configs {
             cloudSyncGiteeGistToken = null,
             cloudSyncNetworkUrl = null,
             cloudSyncLocalFilePath = null,
+            cloudSyncWebDavUrl = null,
+            cloudSyncWebDavUsername = null,
+            cloudSyncWebDavPassword = null,
         )
     }
 }
