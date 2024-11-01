@@ -200,6 +200,9 @@ object Configs {
 
         /** 云同步 网络链接 */
         CLOUD_SYNC_NETWORK_URL,
+
+        /** 云同步 本地文件 */
+        CLOUD_SYNC_LOCAL_FILE,
     }
 
     /** ==================== 应用 ==================== */
@@ -546,6 +549,11 @@ object Configs {
         get() = SP.getString(KEY.CLOUD_SYNC_NETWORK_URL.name, "")
         set(value) = SP.putString(KEY.CLOUD_SYNC_NETWORK_URL.name, value)
 
+    /** 云同步 本地文件 */
+    var cloudSyncLocalFilePath: String
+        get() = SP.getString(KEY.CLOUD_SYNC_LOCAL_FILE.name, "")
+        set(value) = SP.putString(KEY.CLOUD_SYNC_LOCAL_FILE.name, value)
+
     enum class UiTimeShowMode(val value: Int, val label: String) {
         /** 隐藏 */
         HIDDEN(0, "隐藏"),
@@ -670,6 +678,7 @@ object Configs {
             cloudSyncGiteeGistId = cloudSyncGiteeGistId,
             cloudSyncGiteeGistToken = cloudSyncGiteeGistToken,
             cloudSyncNetworkUrl = cloudSyncNetworkUrl,
+            cloudSyncLocalFilePath = cloudSyncLocalFilePath,
         )
     }
 
@@ -733,6 +742,7 @@ object Configs {
         configs.cloudSyncGiteeGistId?.let { cloudSyncGiteeGistId = it }
         configs.cloudSyncGiteeGistToken?.let { cloudSyncGiteeGistToken = it }
         configs.cloudSyncNetworkUrl?.let { cloudSyncNetworkUrl = it }
+        configs.cloudSyncLocalFilePath?.let { cloudSyncLocalFilePath = it }
     }
 
     @Serializable
@@ -794,6 +804,7 @@ object Configs {
         val cloudSyncGiteeGistId: String? = null,
         val cloudSyncGiteeGistToken: String? = null,
         val cloudSyncNetworkUrl: String? = null,
+        val cloudSyncLocalFilePath: String? = null,
     ) {
         fun desensitized() = copy(
             cloudSyncAutoPull = null,
@@ -803,6 +814,7 @@ object Configs {
             cloudSyncGiteeGistId = null,
             cloudSyncGiteeGistToken = null,
             cloudSyncNetworkUrl = null,
+            cloudSyncLocalFilePath = null,
         )
     }
 }

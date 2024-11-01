@@ -171,6 +171,7 @@
                                     <van-radio name="GITHUB_GIST">GitHub Gist</van-radio>
                                     <van-radio name="GITEE_GIST">Gitee 代码片段</van-radio>
                                     <van-radio name="NETWORK_URL">网络链接</van-radio>
+                                    <van-radio name="LOCAL_FILE">本地文件</van-radio>
                                 </van-radio-group>
                             </template>
                         </van-cell>
@@ -207,6 +208,14 @@
                             <van-cell title="网络链接">
                                 <template #label>
                                     <van-field class="!p-0" v-model="configs.cloudSyncNetworkUrl"></van-field>
+                                </template>
+                            </van-cell>
+                        </template>
+
+                        <template v-if="configs.cloudSyncProvider === 'LOCAL_FILE'">
+                            <van-cell title="本地文件路径">
+                                <template #label>
+                                    <van-field class="!p-0" v-model="configs.cloudSyncLocalFilePath"></van-field>
                                 </template>
                             </van-cell>
                         </template>

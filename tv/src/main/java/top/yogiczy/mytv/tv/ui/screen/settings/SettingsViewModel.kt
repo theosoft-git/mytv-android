@@ -528,6 +528,15 @@ class SettingsViewModel : ViewModel() {
             Configs.cloudSyncNetworkUrl = value
         }
 
+    private var _cloudSyncLocalFilePath by mutableStateOf("")
+    var cloudSyncLocalFilePath: String
+        get() = _cloudSyncLocalFilePath
+        set(value) {
+            _cloudSyncLocalFilePath = value
+            Configs.cloudSyncLocalFilePath = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
     private fun afterSetWhenCloudSyncAutoPull() {
         // if (_cloudSyncAutoPull) Snackbar.show("云同步：自动拉取已启用")
     }
@@ -601,6 +610,7 @@ class SettingsViewModel : ViewModel() {
         _cloudSyncGiteeGistId = Configs.cloudSyncGiteeGistId
         _cloudSyncGiteeGistToken = Configs.cloudSyncGiteeGistToken
         _cloudSyncNetworkUrl = Configs.cloudSyncNetworkUrl
+        _cloudSyncLocalFilePath = Configs.cloudSyncLocalFilePath
     }
 
     companion object {

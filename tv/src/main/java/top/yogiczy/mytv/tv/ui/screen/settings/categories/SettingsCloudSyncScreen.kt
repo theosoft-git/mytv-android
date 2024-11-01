@@ -214,6 +214,16 @@ fun SettingsCloudSyncScreen(
                     )
                 }
             }
+
+            CloudSyncProvider.LOCAL_FILE -> {
+                item {
+                    SettingsListItem(
+                        headlineContent = "本地文件路径",
+                        trailingContent = settingsViewModel.cloudSyncLocalFilePath,
+                        remoteConfig = true,
+                    )
+                }
+            }
         }
     }
 }

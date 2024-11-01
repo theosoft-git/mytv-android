@@ -228,7 +228,7 @@ private fun IptvSourceItem(
                     ),
                 )
 
-                if (iptvSource.transformJs != null) {
+                if (!iptvSource.transformJs.isNullOrEmpty()) {
                     Tag(
                         "转换JS",
                         colors = TagDefaults.colors(

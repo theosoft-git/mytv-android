@@ -10,6 +10,7 @@ import top.yogiczy.mytv.tv.BuildConfig
 import top.yogiczy.mytv.tv.sync.repositories.CloudSyncRepository
 import top.yogiczy.mytv.tv.sync.repositories.GiteeGistSyncRepository
 import top.yogiczy.mytv.tv.sync.repositories.GithubGistSyncRepository
+import top.yogiczy.mytv.tv.sync.repositories.LocalFileSyncRepository
 import top.yogiczy.mytv.tv.sync.repositories.NetworkUrlSyncRepository
 import top.yogiczy.mytv.tv.ui.utils.Configs
 import java.io.File
@@ -27,9 +28,8 @@ object CloudSync : Loggable("CloudSync") {
                 Configs.cloudSyncGiteeGistToken,
             )
 
-            CloudSyncProvider.NETWORK_URL -> NetworkUrlSyncRepository(
-                Configs.cloudSyncNetworkUrl,
-            )
+            CloudSyncProvider.NETWORK_URL -> NetworkUrlSyncRepository(Configs.cloudSyncNetworkUrl)
+            CloudSyncProvider.LOCAL_FILE -> LocalFileSyncRepository(Configs.cloudSyncLocalFilePath)
         }
     }
 
@@ -98,7 +98,9 @@ enum class CloudSyncProvider(
 ) {
     GITHUB_GIST(0, "GitHub Gist", true, true),
     GITEE_GIST(1, "Gitee 代码片段", true, true),
-    NETWORK_URL(2, "网络链接", true, false);
+    NETWORK_URL(2, "网络链接", true, false),
+    LOCAL_FILE(3, "本地文件", true, true);
+    // WEBDAV(4, "WebDAV", true, true);
 
     companion object {
         fun fromValue(value: Int): CloudSyncProvider {
