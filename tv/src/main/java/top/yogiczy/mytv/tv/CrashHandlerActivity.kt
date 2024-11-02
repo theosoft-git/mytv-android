@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import top.yogiczy.mytv.tv.ui.screen.crash.CrashHandlerScreen
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
+import top.yogiczy.mytv.tv.utlis.HttpServer
 import kotlin.system.exitProcess
 
 class CrashHandlerActivity : ComponentActivity() {
@@ -51,6 +52,11 @@ class CrashHandlerActivity : ComponentActivity() {
             }
         }
 
-        applicationContext.startService(Intent(applicationContext, HttpServerService::class.java))
+        HttpServer.startService(applicationContext)
+    }
+
+    override fun onDestroy() {
+        HttpServer.stopService(applicationContext)
+        super.onDestroy()
     }
 }

@@ -1,6 +1,7 @@
 package top.yogiczy.mytv.tv.utlis
 
 import android.content.Context
+import android.content.Intent
 import com.koushikdutta.async.AsyncServer
 import com.koushikdutta.async.http.body.JSONObjectBody
 import com.koushikdutta.async.http.body.MultipartFormDataBody
@@ -27,6 +28,7 @@ import top.yogiczy.mytv.core.data.utils.Loggable
 import top.yogiczy.mytv.core.data.utils.Logger
 import top.yogiczy.mytv.core.util.utils.ApkInstaller
 import top.yogiczy.mytv.tv.BuildConfig
+import top.yogiczy.mytv.tv.HttpServerService
 import top.yogiczy.mytv.tv.R
 import top.yogiczy.mytv.tv.sync.CloudSync
 import top.yogiczy.mytv.tv.sync.CloudSyncData
@@ -352,7 +354,7 @@ object HttpServer : Loggable("HttpServer") {
     ) {
         val body = request.getBody<JSONObjectBody>().get()
         val data = Globals.json.decodeFromString<CloudSyncData>(body.toString())
-        runBlocking{ data.apply() }
+        runBlocking { data.apply() }
 
         responseSuccess(response)
     }
@@ -461,6 +463,18 @@ object HttpServer : Loggable("HttpServer") {
             log.e("IP Address: ${ex.message}", ex)
             return defaultIp
         }
+    }
+
+    fun startService(context: Context) {
+        runCatching {
+            context.startService(Intent(context, HttpServerService::class.java))
+        }.onFailure { it.printStackTrace() }
+    }
+
+    fun stopService(context: Context) {
+        runCatching {
+            context.stopService(Intent(context, HttpServerService::class.java))
+        }.onFailure { it.printStackTrace() }
     }
 }
 
