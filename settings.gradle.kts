@@ -30,6 +30,6 @@ include(":ijkplayer-java")
 
 val mediaSettingsFile = file("../media/core_settings.gradle")
 if (mediaSettingsFile.exists()) {
-    (gradle as ExtensionAware).extra["androidxMediaModulePrefix"] = "media3-"
+    (gradle as ExtensionAware).extra["androidxMediaModulePrefix"] = "media3:"
     apply(from = mediaSettingsFile)
 }
