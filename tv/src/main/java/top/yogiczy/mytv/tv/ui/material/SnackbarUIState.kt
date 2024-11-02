@@ -55,6 +55,8 @@ class SnackbarUIState(
     companion object {
         // TODO 这种方法可能违反了 Compose 的规则
         lateinit var I: SnackbarUIState
+
+        fun isInitialized() = ::I.isInitialized
     }
 }
 
@@ -97,6 +99,8 @@ data class SnackbarColorData(
 
 object Snackbar {
     fun show(text: String, data: SnackbarData) {
+        if (!SnackbarUIState.isInitialized()) return
+
         SnackbarUIState.I.show(text, data)
     }
 
@@ -112,6 +116,8 @@ object Snackbar {
         duration: Long = 2300,
         id: String = UUID.randomUUID().toString(),
     ) {
+        if (!SnackbarUIState.isInitialized()) return
+
         SnackbarUIState.I.show(
             text = text,
             data = SnackbarData(

@@ -73,11 +73,11 @@ fun App(
         SnackbarUI()
         Visibility({ settingsViewModel.debugShowFps }) { MonitorPopup() }
         Visibility({ settingsViewModel.debugShowLayoutGrids }) { PreviewWithLayoutGrids { } }
+    }
 
-        if (settingsViewModel.iptvSourceCurrent.needExternalStoragePermission()) {
-            val (hasPermission, requestPermission) = rememberReadExternalStoragePermission()
-            LaunchedEffect(Unit) { if (!hasPermission) requestPermission() }
-        }
+    if (settingsViewModel.iptvSourceCurrent.needExternalStoragePermission()) {
+        val (hasPermission, requestPermission) = rememberReadExternalStoragePermission()
+        LaunchedEffect(Unit) { if (!hasPermission) requestPermission() }
     }
 }
 
