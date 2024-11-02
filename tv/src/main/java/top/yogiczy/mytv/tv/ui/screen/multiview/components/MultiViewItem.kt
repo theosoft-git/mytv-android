@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,7 +68,7 @@ fun MultiViewItem(
 
     var channelInfoVisible by remember { mutableStateOf(false) }
     var isFocused by remember { mutableStateOf(false) }
-    val closeState =
+    val channelInfoHide =
         rememberDebounceState(Constants.UI_TEMP_CHANNEL_SCREEN_SHOW_DURATION) {
             channelInfoVisible = false
         }
@@ -80,16 +79,23 @@ fun MultiViewItem(
     var searchAndAddChannelVisible by remember { mutableStateOf(false) }
     var changeChannelVisible by remember { mutableStateOf(false) }
 
-    val playerState = rememberVideoPlayerState()
-    playerState.onReady { closeState.send() }
+    val player = rememberVideoPlayerState()
+    player.onReady { channelInfoHide.send() }
+    player.onIsBuffering { isBuffering ->
+        if (isBuffering) channelInfoVisible = true
+        channelInfoHide.send()
+    }
+
     LaunchedEffect(channel) {
         channelInfoVisible = true
-        playerState.prepare(line)
+        player.prepare(line)
     }
 
     LaunchedEffect(isFocused) {
         if (isFocused) channelInfoVisible = true
-        closeState.send()
+        channelInfoHide.send()
+
+        player.volume = if (isFocused) 1f else 0f
     }
 
     Surface(
@@ -106,32 +112,25 @@ fun MultiViewItem(
         ),
         border = ClickableSurfaceDefaults.border(
             focusedBorder = Border(
-                BorderStroke(4.dp, MaterialTheme.colorScheme.onSurface),
+                BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface),
+                inset = 2.dp
             )
         ),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
     ) {
-        VideoPlayerScreen(state = playerState)
+        VideoPlayerScreen(state = player)
 
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(childPadding.paddingValues),
+                .padding(childPadding.top),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (!playerState.isPlaying) {
-                Icon(
-                    Icons.Filled.PauseCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(60.dp),
-                )
-            }
-
-            if (playerState.volume == 0f) {
+            if (player.volume == 0f) {
                 Icon(
                     Icons.AutoMirrored.Filled.VolumeOff,
                     contentDescription = null,
-                    modifier = Modifier.size(60.dp),
+                    modifier = Modifier.size(50.dp),
                 )
             }
         }
@@ -141,7 +140,7 @@ fun MultiViewItem(
                 channelProvider = channelProvider,
                 channelLineIdxProvider = { channel.lineList.indexOf(line) },
                 recentEpgProgrammeProvider = { epgListProvider().recentProgramme(channel) },
-                playerMetadataProvider = { playerState.metadata },
+                playerMetadataProvider = { player.metadata },
             )
         }
     }
@@ -156,8 +155,8 @@ fun MultiViewItem(
             viewIndexProvider = viewIndexProvider,
             viewCountProvider = viewCountProvider,
             isZoomInProvider = { zoomInIndexProvider() == viewIndexProvider() },
-            isPlayingProvider = { playerState.isPlaying },
-            isMutedProvider = { playerState.volume == 0f },
+            isPlayingProvider = { player.isPlaying },
+            isMutedProvider = { player.volume == 0f },
             onAddChannel = {
                 addChannelVisible = true
                 actionsVisible = false
@@ -183,23 +182,23 @@ fun MultiViewItem(
                 actionsVisible = false
             },
             onVideoPlayerPlay = {
-                playerState.play()
+                player.play()
                 actionsVisible = false
             },
             onVideoPlayerPause = {
-                playerState.pause()
+                player.pause()
                 actionsVisible = false
             },
             onVideoPlayerMute = {
-                playerState.volume = 0f
+                player.volume = 0f
                 actionsVisible = false
             },
             onVideoPlayerUnMute = {
-                playerState.volume = 1f
+                player.volume = 1f
                 actionsVisible = false
             },
             onVideoPlayerReload = {
-                playerState.prepare(line)
+                player.prepare(line)
                 actionsVisible = false
             },
         )
