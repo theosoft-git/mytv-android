@@ -17,6 +17,7 @@ import top.yogiczy.mytv.core.data.entities.epgsource.EpgSourceList
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSourceList
 import top.yogiczy.mytv.tv.sync.CloudSyncProvider
+import top.yogiczy.mytv.tv.ui.screen.Screens
 import top.yogiczy.mytv.tv.ui.screen.components.AppThemeDef
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.VideoPlayerDisplayMode
 import top.yogiczy.mytv.tv.ui.utils.Configs
@@ -55,6 +56,15 @@ class SettingsViewModel : ViewModel() {
         set(value) {
             _appAgreementAgreed = value
             Configs.appAgreementAgreed = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
+    private var _appStartupScreen by mutableStateOf(Screens.Dashboard.name)
+    var appStartupScreen: String
+        get() = _appStartupScreen
+        set(value) {
+            _appStartupScreen = value
+            Configs.appStartupScreen = value
             afterSetWhenCloudSyncAutoPull()
         }
 
@@ -580,6 +590,7 @@ class SettingsViewModel : ViewModel() {
         _appPipEnable = Configs.appPipEnable
         _appLastLatestVersion = Configs.appLastLatestVersion
         _appAgreementAgreed = Configs.appAgreementAgreed
+        _appStartupScreen = Configs.appStartupScreen
         _debugDeveloperMode = Configs.debugDeveloperMode
         _debugShowFps = Configs.debugShowFps
         _debugShowVideoPlayerMetadata = Configs.debugShowVideoPlayerMetadata

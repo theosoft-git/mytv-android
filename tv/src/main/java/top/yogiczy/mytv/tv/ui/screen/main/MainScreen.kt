@@ -156,7 +156,7 @@ fun MainScreen(
                     mainUiState = uiState,
                     toDashboardScreen = {
                         navController.navigateUp()
-                        navController.navigateSingleTop(Screens.Dashboard())
+                        navController.navigateSingleTop(settingsViewModel.appStartupScreen)
                         checkUpdate()
                     },
                     toSettingsScreen = { navController.navigateSingleTop(Screens.Settings()) },
@@ -204,11 +204,15 @@ fun MainScreen(
                         }
                     },
                     onBackPressed = {
-                        if (doubleBackPressedExitState.allowExit) {
-                            navController.navigateUp()
+                        if (settingsViewModel.appStartupScreen == Screens.Live.name) {
+                            onBackPressed()
                         } else {
-                            doubleBackPressedExitState.backPress()
-                            Snackbar.show("再按一次退出直播")
+                            if (doubleBackPressedExitState.allowExit) {
+                                navController.navigateUp()
+                            } else {
+                                doubleBackPressedExitState.backPress()
+                                Snackbar.show("再按一次退出直播")
+                            }
                         }
                     },
                 )

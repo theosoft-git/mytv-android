@@ -13,6 +13,7 @@ import top.yogiczy.mytv.core.data.utils.Constants
 import top.yogiczy.mytv.core.data.utils.Globals
 import top.yogiczy.mytv.core.data.utils.SP
 import top.yogiczy.mytv.tv.sync.CloudSyncProvider
+import top.yogiczy.mytv.tv.ui.screen.Screens
 import top.yogiczy.mytv.tv.ui.screen.components.AppThemeDef
 import top.yogiczy.mytv.tv.ui.screensold.videoplayer.VideoPlayerDisplayMode
 
@@ -33,6 +34,9 @@ object Configs {
 
         /** 协议已同意 */
         APP_AGREEMENT_AGREED,
+
+        /** 打开直接进入直播 */
+        APP_STARTUP_SCREEN,
 
         /** ==================== 调式 ==================== */
         /** 开发者模式 */
@@ -234,6 +238,11 @@ object Configs {
     var appAgreementAgreed: Boolean
         get() = SP.getBoolean(KEY.APP_AGREEMENT_AGREED.name, false)
         set(value) = SP.putBoolean(KEY.APP_AGREEMENT_AGREED.name, value)
+
+    /** 起始界面 */
+    var appStartupScreen: String
+        get() = SP.getString(KEY.APP_STARTUP_SCREEN.name, Screens.Dashboard.name)
+        set(value) = SP.putString(KEY.APP_STARTUP_SCREEN.name, value)
 
     /** ==================== 调式 ==================== */
     /** 开发者模式 */
@@ -650,6 +659,7 @@ object Configs {
             appPipEnable = appPipEnable,
             appLastLatestVersion = appLastLatestVersion,
             appAgreementAgreed = appAgreementAgreed,
+            appStartupScreen = appStartupScreen,
             debugDeveloperMode = debugDeveloperMode,
             debugShowFps = debugShowFps,
             debugShowVideoPlayerMetadata = debugShowVideoPlayerMetadata,
@@ -715,6 +725,7 @@ object Configs {
         configs.appPipEnable?.let { appPipEnable = it }
         configs.appLastLatestVersion?.let { appLastLatestVersion = it }
         configs.appAgreementAgreed?.let { appAgreementAgreed = it }
+        configs.appStartupScreen?.let { appStartupScreen = it }
         configs.debugDeveloperMode?.let { debugDeveloperMode = it }
         configs.debugShowFps?.let { debugShowFps = it }
         configs.debugShowVideoPlayerMetadata?.let { debugShowVideoPlayerMetadata = it }
@@ -782,6 +793,7 @@ object Configs {
         val appPipEnable: Boolean? = null,
         val appLastLatestVersion: String? = null,
         val appAgreementAgreed: Boolean? = null,
+        val appStartupScreen: String? = null,
         val debugDeveloperMode: Boolean? = null,
         val debugShowFps: Boolean? = null,
         val debugShowVideoPlayerMetadata: Boolean? = null,

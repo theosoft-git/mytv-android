@@ -20,6 +20,7 @@ import top.yogiczy.mytv.core.data.utils.SP
 import top.yogiczy.mytv.core.util.utils.FsUtil
 import top.yogiczy.mytv.core.util.utils.humanizeBytes
 import top.yogiczy.mytv.tv.ui.material.Snackbar
+import top.yogiczy.mytv.tv.ui.screen.Screens
 import top.yogiczy.mytv.tv.ui.screen.settings.SettingsViewModel
 import top.yogiczy.mytv.tv.ui.screen.settings.components.SettingsCategoryScreen
 import top.yogiczy.mytv.tv.ui.screen.settings.components.SettingsListItem
@@ -50,6 +51,20 @@ fun SettingsAppScreen(
                 },
                 onSelect = {
                     settingsViewModel.appBootLaunch = !settingsViewModel.appBootLaunch
+                },
+            )
+        }
+
+        item {
+            SettingsListItem(
+                headlineContent = "打开直接进入直播",
+                trailingContent = {
+                    Switch(settingsViewModel.appStartupScreen == Screens.Live.name, null)
+                },
+                onSelect = {
+                    settingsViewModel.appStartupScreen =
+                        if (settingsViewModel.appStartupScreen == Screens.Live.name) Screens.Dashboard.name
+                        else Screens.Live.name
                 },
             )
         }
