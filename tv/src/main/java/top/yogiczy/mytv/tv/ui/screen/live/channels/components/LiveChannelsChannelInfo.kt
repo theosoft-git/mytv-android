@@ -397,6 +397,7 @@ fun LiveChannelsChannelInfoNetSpeed(
         text = if (netSpeed < 1024 * 999) "${netSpeed / 1024}KB/s"
         else "${DecimalFormat("#.#").format(netSpeed / 1024 / 1024f)}MB/s",
         modifier = modifier.sizeIn(minWidth = 60.dp),
+        maxLines = 1,
     )
 }
 
@@ -428,6 +429,7 @@ private fun rememberNetSpeed(): Long {
 private fun LiveChannelsChannelInfoPreview() {
     MyTvTheme {
         LiveChannelsChannelInfo(
+            modifier = Modifier.width(800.dp),
             channelProvider = { Channel.EXAMPLE.copy(name = "CCTV-1 法治与法治".repeat(3)) },
             channelLineIdxProvider = { 1 },
             recentEpgProgrammeProvider = {
