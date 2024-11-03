@@ -27,6 +27,7 @@ include(":core:designsystem")
 include(":tv")
 include(":mobile")
 include(":ijkplayer-java")
+include(":allinone")
 
 val mediaSettingsFile = file("../media/core_settings.gradle")
 if (mediaSettingsFile.exists()) {

@@ -25,6 +25,14 @@ object Constants {
     const val GROUP_TELEGRAM = "https://t.me/mytv_android"
 
     /**
+     * 直播源 肥羊AllInOne 本地
+     */
+    val IPTV_SOURCE_FEIYANG_ALLINONE = IptvSource(
+        name = "肥羊AllInOne 本地",
+        url = "http://127.0.0.1:35455/tv.m3u"
+    )
+
+    /**
      * 直播源
      */
     val IPTV_SOURCE_LIST = IptvSourceList(
@@ -37,6 +45,7 @@ object Constants {
                 name = "默认直播源 YanG-1989（电视）",
                 url = "https://tv.iill.top/m3u/Gather",
             ),
+            IPTV_SOURCE_FEIYANG_ALLINONE,
         )
     )
 
