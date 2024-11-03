@@ -28,7 +28,7 @@ fun AudioTracksScreen(
         modifier = modifier.backHandler { onClose() },
         onDismissRequest = onClose,
         position = DrawerPosition.End,
-        header = { Text("视轨") },
+        header = { Text("音轨") },
     ) {
         AudioTrackItemList(
             modifier = Modifier.width(4.5f.gridColumns()),
