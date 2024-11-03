@@ -230,7 +230,7 @@ class Media3VideoPlayer(
                 else -> {
                     triggerError(
                         PlaybackException(
-                            ex.errorCodeName.replace("ERROR_CODE_", "MEDIA3_ERROR"),
+                            ex.errorCodeName.replace("ERROR_CODE", "MEDIA3_ERROR"),
                             ex.errorCode
                         )
                     )
