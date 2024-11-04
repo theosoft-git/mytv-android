@@ -39,14 +39,14 @@ class MyTVApplication : Application(), ImageLoaderFactory {
             .memoryCachePolicy(CachePolicy.ENABLED)
             .memoryCache {
                 MemoryCache.Builder(this)
-                    .maxSizePercent(0.25)
+                    // .maxSizePercent(0.25)
                     .build()
             }
             .diskCachePolicy(CachePolicy.ENABLED)
             .diskCache {
                 DiskCache.Builder()
                     .directory(cacheDir.resolve("image_cache"))
-                    .maxSizeBytes(1024 * 1024 * 100)
+                    // .maxSizeBytes(1024 * 1024 * 100)
                     .build()
             }
             .build()
@@ -63,9 +63,7 @@ class MyTVApplication : Application(), ImageLoaderFactory {
 
                     if (BuildConfig.DEBUG) return@BeforeSendCallback null
                     if (SentryLevel.ERROR != event.level && SentryLevel.FATAL != event.level) return@BeforeSendCallback null
-                    if (event.exceptions?.any { ex ->
-                            ex.type?.contains("HttpException") == true || ex.type?.contains("HttpClientException") == true
-                        } == true) return@BeforeSendCallback null
+                    if (event.exceptions?.any { ex -> ex.type?.contains("Http") == true } == true) return@BeforeSendCallback null
 
                     event
                 }

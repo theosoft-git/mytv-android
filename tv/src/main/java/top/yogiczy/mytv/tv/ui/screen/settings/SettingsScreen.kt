@@ -219,11 +219,9 @@ fun SettingsScreen(
                         currentIptvSourceProvider = { settingsViewModel.iptvSourceCurrent },
                         iptvSourceListProvider = { settingsViewModel.iptvSourceList },
                         onSetCurrent = {
-                            if (settingsViewModel.iptvSourceCurrent != it) {
-                                settingsViewModel.iptvSourceCurrent = it
-                                settingsViewModel.iptvChannelGroupHiddenList = emptySet()
-                                settingsViewModel.iptvChannelLastPlay = Channel.EMPTY
-                            }
+                            settingsViewModel.iptvSourceCurrent = it
+                            settingsViewModel.iptvChannelGroupHiddenList = emptySet()
+                            settingsViewModel.iptvChannelLastPlay = Channel.EMPTY
                             onReload()
                         },
                         onDelete = {
