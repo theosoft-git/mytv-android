@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.debounce
 import top.yogiczy.mytv.allinone.AllInOne
 import top.yogiczy.mytv.core.data.entities.iptvsource.IptvSource.Companion.needExternalStoragePermission
-import top.yogiczy.mytv.core.data.utils.Constants
 import top.yogiczy.mytv.tv.ui.material.Padding
 import top.yogiczy.mytv.tv.ui.material.PopupHandleableApplication
 import top.yogiczy.mytv.tv.ui.material.Snackbar
@@ -41,6 +40,7 @@ import top.yogiczy.mytv.tv.ui.theme.SAFE_AREA_HORIZONTAL_PADDING
 import top.yogiczy.mytv.tv.ui.theme.SAFE_AREA_VERTICAL_PADDING
 import top.yogiczy.mytv.tv.ui.tooling.PreviewWithLayoutGrids
 import top.yogiczy.mytv.tv.ui.utils.rememberReadExternalStoragePermission
+import java.io.File
 
 @Composable
 fun App(
@@ -86,9 +86,10 @@ fun App(
     }
 
     LaunchedEffect(settingsViewModel.iptvSourceCurrent) {
-        if (settingsViewModel.iptvSourceCurrent == Constants.IPTV_SOURCE_FEIYANG_ALLINONE) {
+        if (settingsViewModel.iptvSourceCurrent.url.startsWith("http://127.0.0.1:35455")) {
             AllInOne.start(
                 context,
+                File(settingsViewModel.feiyangAllInOneFilePath),
                 onFail = {
                     Snackbar.show("肥羊AllInOne 启动失败", type = SnackbarType.ERROR)
                 },

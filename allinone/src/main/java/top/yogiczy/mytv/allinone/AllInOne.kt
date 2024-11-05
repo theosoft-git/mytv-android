@@ -14,6 +14,7 @@ object AllInOne {
 
     suspend fun start(
         context: Context,
+        allinoneBin: File,
         onFail: () -> Unit = {},
         onUnsupported: () -> Unit = {},
     ) {
@@ -23,11 +24,19 @@ object AllInOne {
             runCatching {
                 val proot = File(context.applicationInfo.nativeLibraryDir, "libproot.so")
                 val loader = File(context.applicationInfo.nativeLibraryDir, "libloader.so")
-                val allinone = File(context.applicationInfo.nativeLibraryDir, "liballinone.so")
+                val libTermuxExec =
+                    File(context.applicationInfo.nativeLibraryDir, "libtermux-exec.so")
 
-                if (!proot.exists() || !loader.exists() || !allinone.exists()) {
+                if (!proot.exists()) {
                     onUnsupported()
                     return@runCatching
+                }
+
+                val allinone = File(context.filesDir, "allinone").apply {
+                    if (allinoneBin.lastModified() > lastModified()) {
+                        allinoneBin.copyTo(this, true)
+                        setExecutable(true)
+                    }
                 }
 
                 val prootDir = File(context.filesDir, "proot").apply { mkdirs() }
@@ -52,6 +61,7 @@ object AllInOne {
                     listOf(
                         "export PROOT_LOADER=${loader.absolutePath}",
                         "&& export PROOT_TMP_DIR=${tmpDir.absolutePath}",
+                        "&& export LD_PRELOAD=${libTermuxExec.absolutePath}",
                         "&& ${proot.absolutePath}",
                         "-b ${etcResolvConf.absolutePath}:/etc/resolv.conf",
                         "-b ${etcSsl}:/etc/ssl",

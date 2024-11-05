@@ -32,18 +32,6 @@ data class IptvSource(
     fun cacheFileName(ext: String) =
         "${cacheDir.name}/iptv_source_${hashCode().toUInt().toString(16)}.$ext"
 
-    override fun equals(other: Any?): Boolean {
-        if (other !is IptvSource) return false
-
-        return name == other.name && url == other.url
-    }
-
-    override fun hashCode(): Int {
-        var result = name.hashCode()
-        result = 31 * result + url.hashCode()
-        return result
-    }
-
     companion object {
         val cacheDir by lazy { File(Globals.cacheDir, "iptv_source_cache") }
 
