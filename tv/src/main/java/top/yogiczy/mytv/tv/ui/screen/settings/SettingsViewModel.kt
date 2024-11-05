@@ -473,6 +473,15 @@ class SettingsViewModel : ViewModel() {
             afterSetWhenCloudSyncAutoPull()
         }
 
+    private var _videoPlayerForceAudioSoftDecode by mutableStateOf(false)
+    var videoPlayerForceAudioSoftDecode: Boolean
+        get() = _videoPlayerForceAudioSoftDecode
+        set(value) {
+            _videoPlayerForceAudioSoftDecode = value
+            Configs.videoPlayerForceAudioSoftDecode = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
     private var _themeAppCurrent by mutableStateOf<AppThemeDef?>(null)
     var themeAppCurrent: AppThemeDef?
         get() = _themeAppCurrent
@@ -645,6 +654,7 @@ class SettingsViewModel : ViewModel() {
         _videoPlayerHeaders = Configs.videoPlayerHeaders
         _videoPlayerLoadTimeout = Configs.videoPlayerLoadTimeout
         _videoPlayerDisplayMode = Configs.videoPlayerDisplayMode
+        _videoPlayerForceAudioSoftDecode = Configs.videoPlayerForceAudioSoftDecode
         _themeAppCurrent = Configs.themeAppCurrent
         _cloudSyncAutoPull = Configs.cloudSyncAutoPull
         _cloudSyncProvider = Configs.cloudSyncProvider

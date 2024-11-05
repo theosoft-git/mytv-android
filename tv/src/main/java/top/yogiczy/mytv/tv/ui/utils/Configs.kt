@@ -179,6 +179,9 @@ object Configs {
         /** 播放器 显示模式 */
         VIDEO_PLAYER_DISPLAY_MODE,
 
+        /** 播放器 强制音频软解 */
+        VIDEO_PLAYER_FORCE_AUDIO_SOFT_DECODE,
+
         /** ==================== 主题 ==================== */
         /** 当前应用主题 */
         THEME_APP_CURRENT,
@@ -522,6 +525,11 @@ object Configs {
         )
         set(value) = SP.putInt(KEY.VIDEO_PLAYER_DISPLAY_MODE.name, value.value)
 
+    /** 播放器 强制音频软解 */
+    var videoPlayerForceAudioSoftDecode: Boolean
+        get() = SP.getBoolean(KEY.VIDEO_PLAYER_FORCE_AUDIO_SOFT_DECODE.name, false)
+        set(value) = SP.putBoolean(KEY.VIDEO_PLAYER_FORCE_AUDIO_SOFT_DECODE.name, value)
+
     /** ==================== 主题 ==================== */
     /** 当前应用主题 */
     var themeAppCurrent: AppThemeDef?
@@ -713,6 +721,7 @@ object Configs {
             videoPlayerHeaders = videoPlayerHeaders,
             videoPlayerLoadTimeout = videoPlayerLoadTimeout,
             videoPlayerDisplayMode = videoPlayerDisplayMode,
+            videoPlayerForceAudioSoftDecode = videoPlayerForceAudioSoftDecode,
             themeAppCurrent = themeAppCurrent,
             cloudSyncAutoPull = cloudSyncAutoPull,
             cloudSyncProvider = cloudSyncProvider,
@@ -782,6 +791,7 @@ object Configs {
         configs.videoPlayerHeaders?.let { videoPlayerHeaders = it }
         configs.videoPlayerLoadTimeout?.let { videoPlayerLoadTimeout = it }
         configs.videoPlayerDisplayMode?.let { videoPlayerDisplayMode = it }
+        configs.videoPlayerForceAudioSoftDecode?.let { videoPlayerForceAudioSoftDecode = it }
         configs.themeAppCurrent?.let { themeAppCurrent = it }
         configs.cloudSyncAutoPull?.let { cloudSyncAutoPull = it }
         configs.cloudSyncProvider?.let { cloudSyncProvider = it }
@@ -849,6 +859,7 @@ object Configs {
         val videoPlayerHeaders: String? = null,
         val videoPlayerLoadTimeout: Long? = null,
         val videoPlayerDisplayMode: VideoPlayerDisplayMode? = null,
+        val videoPlayerForceAudioSoftDecode: Boolean? = null,
         val themeAppCurrent: AppThemeDef? = null,
         val cloudSyncAutoPull: Boolean? = null,
         val cloudSyncProvider: CloudSyncProvider? = null,

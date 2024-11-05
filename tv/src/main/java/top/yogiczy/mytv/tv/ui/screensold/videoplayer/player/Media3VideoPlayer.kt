@@ -23,7 +23,6 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.dash.DashMediaSource
@@ -53,7 +52,11 @@ class Media3VideoPlayer(
     private val videoPlayer by lazy {
         val renderersFactory =
             DefaultRenderersFactory(context)
-                .setExtensionRendererMode(EXTENSION_RENDERER_MODE_ON)
+                .setExtensionRendererMode(
+                    if (Configs.videoPlayerForceAudioSoftDecode)
+                        DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
+                    else DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
+                )
                 .setEnableDecoderFallback(true)
 
         val trackSelector = DefaultTrackSelector(context).apply {

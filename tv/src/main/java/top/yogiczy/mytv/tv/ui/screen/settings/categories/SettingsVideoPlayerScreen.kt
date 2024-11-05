@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
 import top.yogiczy.mytv.core.util.utils.headersValid
 import top.yogiczy.mytv.core.util.utils.humanizeMs
@@ -46,6 +47,19 @@ fun SettingsVideoPlayerScreen(
                 trailingContent = settingsViewModel.videoPlayerRenderMode.label,
                 onSelect = toVideoPlayerRenderModeScreen,
                 link = true,
+            )
+        }
+
+        item {
+            SettingsListItem(
+                headlineContent = "强制音频软解",
+                trailingContent = {
+                    Switch(settingsViewModel.videoPlayerForceAudioSoftDecode, null)
+                },
+                onSelect = {
+                    settingsViewModel.videoPlayerForceAudioSoftDecode =
+                        !settingsViewModel.videoPlayerForceAudioSoftDecode
+                },
             )
         }
 
