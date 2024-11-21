@@ -886,6 +886,9 @@ object Configs {
             cloudSyncWebDavUrl = null,
             cloudSyncWebDavUsername = null,
             cloudSyncWebDavPassword = null,
+            iptvChannelLastPlay = null,
+            iptvChannelLinePlayableHostList = null,
+            iptvChannelLinePlayableUrlList = null,
         )
     }
 }
