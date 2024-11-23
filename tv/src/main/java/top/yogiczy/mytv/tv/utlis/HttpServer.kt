@@ -496,7 +496,11 @@ object HttpServer : Loggable("HttpServer") {
                 while (enumIpAddr.hasMoreElements()) {
                     val inetAddress = enumIpAddr.nextElement()
                     if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                        return inetAddress.hostAddress ?: defaultIp
+                        val ip = inetAddress.hostAddress ?: defaultIp
+                        if ((ip.startsWith("192.168.") || ip.startsWith("10."))
+                            && !ip.endsWith(".1") && !ip.endsWith(".0")
+                        )
+                            return ip
                     }
                 }
             }
