@@ -22,7 +22,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +39,7 @@ import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.focusOnLaunchedSaveable
 import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
 import kotlin.math.max
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -77,8 +77,8 @@ fun ClassicChannelGroupItemList(
             .background(MaterialTheme.colorScheme.surface.copy(0.9f))
             .ifElse(
                 settingsVM.uiFocusOptimize,
-                Modifier.focusRestorer {
-                    itemFocusRequesterList.getOrElse(channelGroupList.indexOf(focusedChannelGroup)) { FocusRequester.Default}
+                Modifier.saveFocusRestorer {
+                    itemFocusRequesterList.getOrElse(channelGroupList.indexOf(focusedChannelGroup)) { FocusRequester.Default }
                 },
             ),
         state = listState,

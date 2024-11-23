@@ -28,7 +28,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +55,7 @@ import top.yogiczy.mytv.tv.ui.utils.focusOnLaunched
 import top.yogiczy.mytv.tv.ui.utils.gridColumns
 import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -85,7 +85,7 @@ fun SettingsEpgSourceScreen(
             modifier = Modifier
                 .ifElse(
                     settingsVM.uiFocusOptimize,
-                    Modifier.focusRestorer { firstItemFocusRequester }
+                    Modifier.saveFocusRestorer { firstItemFocusRequester }
                 )
                 .padding(top = 10.dp),
             state = listState,

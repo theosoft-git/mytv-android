@@ -13,7 +13,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroup
@@ -22,6 +21,7 @@ import top.yogiczy.mytv.tv.ui.rememberChildPadding
 import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -38,15 +38,10 @@ fun ChannelsChannelGroupList(
 
     if (channelGroupList.size <= 1) return
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .ifElse(
-                settingsVM.uiFocusOptimize,
-                Modifier.focusRestorer { firstItemFocusRequester }
-            ),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = modifier
+        .fillMaxWidth()
+        .ifElse(settingsVM.uiFocusOptimize, Modifier.saveFocusRestorer { firstItemFocusRequester }),
+        contentAlignment = Alignment.Center) {
         LazyRow(
             contentPadding = PaddingValues(start = childPadding.start, end = childPadding.end),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -54,8 +49,7 @@ fun ChannelsChannelGroupList(
             itemsIndexed(channelGroupList) { index, channelGroup ->
                 ChannelsChannelGroupItem(
                     modifier = Modifier.ifElse(
-                        index == 0,
-                        Modifier.focusRequester(firstItemFocusRequester)
+                        index == 0, Modifier.focusRequester(firstItemFocusRequester)
                     ),
                     channelGroupProvider = { channelGroup },
                     isSelectedProvider = { channelGroup == currentChannelGroup },
@@ -70,9 +64,7 @@ fun ChannelsChannelGroupList(
 @Composable
 private fun ChannelsChannelGroupListPreview() {
     MyTvTheme {
-        ChannelsChannelGroupList(
-            channelGroupListProvider = { ChannelGroupList.EXAMPLE },
-            currentChannelGroupProvider = { ChannelGroupList.EXAMPLE.first() }
-        )
+        ChannelsChannelGroupList(channelGroupListProvider = { ChannelGroupList.EXAMPLE },
+            currentChannelGroupProvider = { ChannelGroupList.EXAMPLE.first() })
     }
 }

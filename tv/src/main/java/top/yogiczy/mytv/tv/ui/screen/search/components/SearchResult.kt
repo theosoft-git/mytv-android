@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +33,8 @@ import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.backHandler
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
+import top.yogiczy.mytv.tv.ui.utils.saveRequestFocus
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -60,7 +61,7 @@ fun SearchResult(
                 if (!isFirstItemFocused) {
                     coroutineScope.launch {
                         gridState.scrollToItem(0)
-                        firstItemFocusRequester.requestFocus()
+                        firstItemFocusRequester.saveRequestFocus()
                     }
                 } else {
                     focusManager.moveFocus(FocusDirection.Left)
@@ -68,7 +69,7 @@ fun SearchResult(
             }
             .ifElse(
                 settingsVM.uiFocusOptimize,
-                Modifier.focusRestorer { firstItemFocusRequester },
+                Modifier.saveFocusRestorer { firstItemFocusRequester },
             ),
         state = gridState,
         columns = GridCells.Fixed(3),

@@ -5,6 +5,7 @@ import android.view.KeyEvent
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,11 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -41,7 +44,7 @@ fun Modifier.ifElse(
 fun Modifier.focusOnLaunched(key: Any = Unit): Modifier = composed {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(key) {
-        focusRequester.requestFocus()
+        focusRequester.saveRequestFocus()
     }
     focusRequester(focusRequester)
 }
@@ -51,7 +54,7 @@ fun Modifier.focusOnLaunchedSaveable(key: Any = Unit): Modifier = composed {
     var hasFocused by rememberSaveable(key) { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasFocused) {
-            focusRequester.requestFocus()
+            focusRequester.saveRequestFocus()
             hasFocused = true
         }
     }
@@ -249,18 +252,18 @@ fun Modifier.handleKeyEvents(
     onSettings: (() -> Unit)? = null,
     onNumber: ((Int) -> Unit)? = null,
 ) = handleKeyEvents(
-    onLeft = onLeft?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onLongLeft = onLongLeft?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onRight = onRight?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onLongRight = onLongRight?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onUp = onUp?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onLongUp = onLongUp?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onDown = onDown?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onLongDown = onLongDown?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onSelect = onSelect?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onLongSelect = onLongSelect?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onSettings = onSettings?.let { { if (isFocused()) it() else focusRequester.requestFocus() } },
-    onNumber = onNumber?.let { { num -> if (isFocused()) it(num) else focusRequester.requestFocus() } },
+    onLeft = onLeft?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onLongLeft = onLongLeft?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onRight = onRight?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onLongRight = onLongRight?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onUp = onUp?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onLongUp = onLongUp?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onDown = onDown?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onLongDown = onLongDown?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onSelect = onSelect?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onLongSelect = onLongSelect?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onSettings = onSettings?.let { { if (isFocused()) it() else focusRequester.saveRequestFocus() } },
+    onNumber = onNumber?.let { { num -> if (isFocused()) it(num) else focusRequester.saveRequestFocus() } },
 )
 
 fun Modifier.backHandler(onBackPressed: () -> Unit) = this.onPreviewKeyEvent {
@@ -295,3 +298,21 @@ fun NavHostController.navigateSingleTop(route: String) {
         launchSingleTop = true
     }
 }
+
+@Composable
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.saveFocusRestorer(onRestoreFailed: (() -> FocusRequester)? = null): Modifier {
+    if (!Configs.uiFocusOptimize) return this
+
+    return focusRestorer {
+        if (onRestoreFailed == null) return@focusRestorer FocusRequester.Default
+
+        val result = onRestoreFailed()
+        runCatching {
+            result.requestFocus()
+            result
+        }.getOrElse { FocusRequester.Default }
+    }
+}
+
+fun FocusRequester.saveRequestFocus() = runCatching { requestFocus() }

@@ -42,7 +42,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -65,6 +64,7 @@ import top.yogiczy.mytv.tv.ui.utils.focusOnLaunched
 import top.yogiczy.mytv.tv.ui.utils.gridColumns
 import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -88,7 +88,7 @@ fun SettingsCategoriesScreen(
         LazyVerticalGrid(
             modifier = Modifier.ifElse(
                 settingsVM.uiFocusOptimize,
-                Modifier.focusRestorer { firstItemFocusRequester },
+                Modifier.saveFocusRestorer { firstItemFocusRequester },
             ),
             columns = GridCells.Fixed(6),
             contentPadding = childPadding.copy(top = 10.dp).paddingValues,

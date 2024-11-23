@@ -32,7 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,6 +58,8 @@ import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
 import top.yogiczy.mytv.tv.ui.utils.handleKeyEvents
 import top.yogiczy.mytv.tv.ui.utils.ifElse
+import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
+import top.yogiczy.mytv.tv.ui.utils.saveRequestFocus
 import kotlin.math.max
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -116,7 +117,7 @@ fun ClassicChannelItemList(
             .background(MaterialTheme.colorScheme.surface.copy(0.8f))
             .ifElse(
                 settingsVM.uiFocusOptimize,
-                Modifier.focusRestorer {
+                Modifier.saveFocusRestorer {
                     itemFocusRequesterList.getOrElse(channelList.indexOf(focusedChannel)) {
                         FocusRequester.Default
                     }
@@ -190,7 +191,7 @@ private fun ClassicChannelItem(
     LaunchedEffect(Unit) {
         if (initialFocusedProvider()) {
             onInitialFocused()
-            focusRequester.requestFocus()
+            focusRequester.saveRequestFocus()
         }
     }
 
