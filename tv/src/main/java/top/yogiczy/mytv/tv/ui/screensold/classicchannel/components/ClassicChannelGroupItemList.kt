@@ -125,6 +125,7 @@ private fun ClassicChannelGroupItem(
             .handleKeyEvents(
                 isFocused = { isFocused },
                 focusRequester = focusRequester,
+                onSelect = {},
             ),
         colors = ListItemDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.onSurface,
