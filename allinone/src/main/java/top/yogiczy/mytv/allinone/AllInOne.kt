@@ -7,9 +7,6 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
-import java.net.Inet4Address
-import java.net.NetworkInterface
-import java.net.SocketException
 
 object AllInOne {
     private const val TAG = "AllInOne"
@@ -49,13 +46,7 @@ object AllInOne {
 
                 val etcResolvConf = File(rootfsDir, "etc/resolv.conf").apply {
                     parentFile?.mkdirs()
-                    context.assets.open("resolv.conf").reader().readLines().let {
-                        val localDnsServerList =
-                            getLocalGatewayList().map { gateway -> "nameserver $gateway" }
-
-                        Log.d(TAG, "resolv.conf: ${(localDnsServerList + it).joinToString()}")
-                        writeText((localDnsServerList + it).joinToString("\n"))
-                    }
+                    context.assets.open("resolv.conf").copyTo(outputStream())
                 }
                 val etcSsl = File(rootfsDir, "etc/ssl").apply {
                     mkdirs()
@@ -104,41 +95,6 @@ object AllInOne {
         withContext(Dispatchers.IO) {
             process?.destroy()
             process = null
-        }
-    }
-
-    private fun getLocalIpAddressList(): List<String> {
-        val localIpList = mutableListOf<String>()
-
-        try {
-            val en = NetworkInterface.getNetworkInterfaces()
-            while (en.hasMoreElements()) {
-                val intf = en.nextElement()
-                val enumIpAddr = intf.inetAddresses
-                while (enumIpAddr.hasMoreElements()) {
-                    val inetAddress = enumIpAddr.nextElement()
-                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                        inetAddress.hostAddress?.let { localIpList.add(it) }
-                    }
-                }
-            }
-
-            return localIpList
-        } catch (ex: SocketException) {
-            return localIpList
-        }
-    }
-
-    private fun getLocalGatewayList(): List<String> {
-        try {
-            val localIpList = getLocalIpAddressList()
-
-            return localIpList.map {
-                val nnIp = it.split(".").subList(0, 3).joinToString(".")
-                "$nnIp.1"
-            }
-        } catch (ex: SocketException) {
-            return emptyList()
         }
     }
 }
