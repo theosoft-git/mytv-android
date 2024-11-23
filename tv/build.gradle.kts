@@ -128,6 +128,9 @@ dependencies {
         implementation(libs.androidx.media3.ui)
     }
 
+    implementation("com.github.CarGuo.GSYVideoPlayer:gsyvideoplayer-java:v10.0.0")
+    implementation("com.github.CarGuo.GSYVideoPlayer:gsyvideoplayer-ex_so:v10.0.0")
+
     // 二维码
     implementation(libs.qrose)
 
@@ -142,7 +145,6 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:util"))
-    implementation(project(":ijkplayer-java"))
     implementation(project(":allinone"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 

@@ -216,8 +216,6 @@ class IjkVideoPlayer(
                     IjkMediaMeta.AV_CH_LAYOUT_7POINT1_WIDE,
                     IjkMediaMeta.AV_CH_LAYOUT_7POINT1_WIDE_BACK,
                     IjkMediaMeta.AV_CH_LAYOUT_OCTAGONAL -> 8
-
-                    IjkMediaMeta.AV_CH_AV3A_LAYOUT_5POINT1POINT4 -> 10
                     else -> 0
                 },
                 channelsLabel = when (info.mMeta.mAudioStream?.mChannelLayout) {
@@ -242,7 +240,6 @@ class IjkVideoPlayer(
                     IjkMediaMeta.AV_CH_LAYOUT_HEXAGONAL -> "六角环绕声"
                     IjkMediaMeta.AV_CH_LAYOUT_OCTAGONAL -> "八角环绕声"
                     IjkMediaMeta.AV_CH_LAYOUT_STEREO_DOWNMIX -> "立体声下混音"
-                    IjkMediaMeta.AV_CH_AV3A_LAYOUT_5POINT1POINT4 -> "菁彩声"
                     else -> null
                 },
                 sampleRate = info.mMeta.mAudioStream?.mSampleRate,
