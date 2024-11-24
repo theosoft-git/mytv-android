@@ -3,6 +3,7 @@ package top.yogiczy.mytv.tv.ui.screen.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
@@ -191,31 +192,33 @@ fun MainScreen(
             composable(Screens.Live()) {
                 val doubleBackPressedExitState = rememberDoubleBackPressedExitState()
 
-                top.yogiczy.mytv.tv.ui.screensold.main.components.MainContent(
-                    filteredChannelGroupListProvider = filteredChannelGroupListProvider,
-                    favoriteChannelListProvider = favoriteChannelListProvider,
-                    epgListProvider = epgListProvider,
-                    onChannelFavoriteToggle = { onChannelFavoriteToggle(it) },
-                    toSettingsScreen = {
-                        if (it != null) {
-                            navController.navigateSingleTop(Screens.Settings.withArgs(it))
-                        } else {
-                            navController.navigateSingleTop(Screens.Settings())
-                        }
-                    },
-                    onBackPressed = {
-                        if (settingsViewModel.appStartupScreen == Screens.Live.name) {
-                            onBackPressed()
-                        } else {
-                            if (doubleBackPressedExitState.allowExit) {
-                                navController.navigateUp()
+                key(settingsViewModel.videoPlayerCore) {
+                    top.yogiczy.mytv.tv.ui.screensold.main.components.MainContent(
+                        filteredChannelGroupListProvider = filteredChannelGroupListProvider,
+                        favoriteChannelListProvider = favoriteChannelListProvider,
+                        epgListProvider = epgListProvider,
+                        onChannelFavoriteToggle = { onChannelFavoriteToggle(it) },
+                        toSettingsScreen = {
+                            if (it != null) {
+                                navController.navigateSingleTop(Screens.Settings.withArgs(it))
                             } else {
-                                doubleBackPressedExitState.backPress()
-                                Snackbar.show("再按一次退出直播")
+                                navController.navigateSingleTop(Screens.Settings())
                             }
-                        }
-                    },
-                )
+                        },
+                        onBackPressed = {
+                            if (settingsViewModel.appStartupScreen == Screens.Live.name) {
+                                onBackPressed()
+                            } else {
+                                if (doubleBackPressedExitState.allowExit) {
+                                    navController.navigateUp()
+                                } else {
+                                    doubleBackPressedExitState.backPress()
+                                    Snackbar.show("再按一次退出直播")
+                                }
+                            }
+                        },
+                    )
+                }
             }
 
             composable(Screens.Channels()) {
