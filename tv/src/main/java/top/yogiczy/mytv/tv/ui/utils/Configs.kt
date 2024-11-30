@@ -182,6 +182,9 @@ object Configs {
         /** 播放器 强制音频软解 */
         VIDEO_PLAYER_FORCE_AUDIO_SOFT_DECODE,
 
+        /** 播放器 停止上一媒体项 */
+        VIDEO_PLAYER_STOP_PREVIOUS_MEDIA_ITEM,
+
         /** ==================== 主题 ==================== */
         /** 当前应用主题 */
         THEME_APP_CURRENT,
@@ -530,6 +533,11 @@ object Configs {
         get() = SP.getBoolean(KEY.VIDEO_PLAYER_FORCE_AUDIO_SOFT_DECODE.name, false)
         set(value) = SP.putBoolean(KEY.VIDEO_PLAYER_FORCE_AUDIO_SOFT_DECODE.name, value)
 
+    /** 播放器 停止上一媒体项 */
+    var videoPlayerStopPreviousMediaItem: Boolean
+        get() = SP.getBoolean(KEY.VIDEO_PLAYER_STOP_PREVIOUS_MEDIA_ITEM.name, false)
+        set(value) = SP.putBoolean(KEY.VIDEO_PLAYER_STOP_PREVIOUS_MEDIA_ITEM.name, value)
+
     /** ==================== 主题 ==================== */
     /** 当前应用主题 */
     var themeAppCurrent: AppThemeDef?
@@ -722,6 +730,7 @@ object Configs {
             videoPlayerLoadTimeout = videoPlayerLoadTimeout,
             videoPlayerDisplayMode = videoPlayerDisplayMode,
             videoPlayerForceAudioSoftDecode = videoPlayerForceAudioSoftDecode,
+            videoPlayerStopPreviousMediaItem = videoPlayerStopPreviousMediaItem,
             themeAppCurrent = themeAppCurrent,
             cloudSyncAutoPull = cloudSyncAutoPull,
             cloudSyncProvider = cloudSyncProvider,
@@ -792,6 +801,7 @@ object Configs {
         configs.videoPlayerLoadTimeout?.let { videoPlayerLoadTimeout = it }
         configs.videoPlayerDisplayMode?.let { videoPlayerDisplayMode = it }
         configs.videoPlayerForceAudioSoftDecode?.let { videoPlayerForceAudioSoftDecode = it }
+        configs.videoPlayerStopPreviousMediaItem?.let { videoPlayerStopPreviousMediaItem = it }
         configs.themeAppCurrent?.let { themeAppCurrent = it }
         configs.cloudSyncAutoPull?.let { cloudSyncAutoPull = it }
         configs.cloudSyncProvider?.let { cloudSyncProvider = it }
@@ -860,6 +870,7 @@ object Configs {
         val videoPlayerLoadTimeout: Long? = null,
         val videoPlayerDisplayMode: VideoPlayerDisplayMode? = null,
         val videoPlayerForceAudioSoftDecode: Boolean? = null,
+        val videoPlayerStopPreviousMediaItem: Boolean? = null,
         val themeAppCurrent: AppThemeDef? = null,
         val cloudSyncAutoPull: Boolean? = null,
         val cloudSyncProvider: CloudSyncProvider? = null,

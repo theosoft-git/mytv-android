@@ -65,6 +65,19 @@ fun SettingsVideoPlayerScreen(
 
         item {
             SettingsListItem(
+                headlineContent = "停止上一媒体项",
+                trailingContent = {
+                    Switch(settingsViewModel.videoPlayerStopPreviousMediaItem, null)
+                },
+                onSelect = {
+                    settingsViewModel.videoPlayerStopPreviousMediaItem =
+                        !settingsViewModel.videoPlayerStopPreviousMediaItem
+                },
+            )
+        }
+
+        item {
+            SettingsListItem(
                 headlineContent = "全局显示模式",
                 trailingContent = settingsViewModel.videoPlayerDisplayMode.label,
                 onSelect = toVideoPlayerDisplayModeScreen,

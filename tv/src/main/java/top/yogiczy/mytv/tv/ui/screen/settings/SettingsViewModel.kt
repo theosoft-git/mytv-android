@@ -482,6 +482,15 @@ class SettingsViewModel : ViewModel() {
             afterSetWhenCloudSyncAutoPull()
         }
 
+    private var _videoPlayerStopPreviousMediaItem by mutableStateOf(false)
+    var videoPlayerStopPreviousMediaItem: Boolean
+        get() = _videoPlayerStopPreviousMediaItem
+        set(value) {
+            _videoPlayerStopPreviousMediaItem = value
+            Configs.videoPlayerStopPreviousMediaItem = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
     private var _themeAppCurrent by mutableStateOf<AppThemeDef?>(null)
     var themeAppCurrent: AppThemeDef?
         get() = _themeAppCurrent
@@ -655,6 +664,7 @@ class SettingsViewModel : ViewModel() {
         _videoPlayerLoadTimeout = Configs.videoPlayerLoadTimeout
         _videoPlayerDisplayMode = Configs.videoPlayerDisplayMode
         _videoPlayerForceAudioSoftDecode = Configs.videoPlayerForceAudioSoftDecode
+        _videoPlayerStopPreviousMediaItem = Configs.videoPlayerStopPreviousMediaItem
         _themeAppCurrent = Configs.themeAppCurrent
         _cloudSyncAutoPull = Configs.cloudSyncAutoPull
         _cloudSyncProvider = Configs.cloudSyncProvider

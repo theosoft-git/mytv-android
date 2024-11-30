@@ -489,6 +489,9 @@ class Media3VideoPlayer(
     }
 
     override fun prepare(line: ChannelLine) {
+        if (Configs.videoPlayerStopPreviousMediaItem)
+            videoPlayer.stop()
+
         contentTypeAttempts.clear()
         currentChannelLine = line
         prepare(null)
