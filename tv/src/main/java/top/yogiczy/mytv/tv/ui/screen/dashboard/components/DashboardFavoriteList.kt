@@ -49,7 +49,6 @@ fun DashboardFavoriteList(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(start = childPadding.start, end = childPadding.end),
-            backHandler = true,
         ) { runtime ->
             items(channelFavoriteList, runtime) { itemModifier, channelFavorite ->
                 val channel = channelFavorite.channel.copy(index = -1)

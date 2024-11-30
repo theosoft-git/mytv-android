@@ -42,7 +42,6 @@ fun DashboardModuleList(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(start = childPadding.start, end = childPadding.end),
-        backHandler = true,
     ) { runtime ->
         item {
             DashboardModuleItem(
