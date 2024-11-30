@@ -49,11 +49,32 @@ class Media3VideoPlayer(
     private val context: Context,
     private val coroutineScope: CoroutineScope,
 ) : VideoPlayer(coroutineScope) {
-    private val videoPlayer by lazy {
+
+    private var videoPlayer = getPlayer()
+
+    private var softDecode: Boolean? = null
+    private var surfaceView: SurfaceView? = null
+    private var textureView: TextureView? = null
+
+    private var currentChannelLine = ChannelLine()
+    private val contentTypeAttempts = mutableMapOf<Int, Boolean>()
+    private var updatePositionJob: Job? = null
+
+    private val onCuesListeners = mutableListOf<(ImmutableList<Cue>) -> Unit>()
+
+    private fun triggerCues(cues: ImmutableList<Cue>) {
+        onCuesListeners.forEach { it(cues) }
+    }
+
+    fun onCues(listener: (ImmutableList<Cue>) -> Unit) {
+        onCuesListeners.add(listener)
+    }
+
+    private fun getPlayer(): ExoPlayer {
         val renderersFactory =
             DefaultRenderersFactory(context)
                 .setExtensionRendererMode(
-                    if (Configs.videoPlayerForceAudioSoftDecode)
+                    if (softDecode ?: Configs.videoPlayerForceAudioSoftDecode)
                         DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
                     else DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
                 )
@@ -71,25 +92,30 @@ class Media3VideoPlayer(
         }
 
 
-        ExoPlayer.Builder(context)
+        return ExoPlayer.Builder(context)
             .setRenderersFactory(renderersFactory)
             .setTrackSelector(trackSelector)
             .build()
             .apply { playWhenReady = true }
     }
 
-    private var currentChannelLine = ChannelLine()
-    private val contentTypeAttempts = mutableMapOf<Int, Boolean>()
-    private var updatePositionJob: Job? = null
+    private fun reInitPlayer() {
+        onCuesListeners.clear()
+        videoPlayer.removeListener(playerListener)
+        videoPlayer.removeAnalyticsListener(metadataListener)
+        videoPlayer.removeAnalyticsListener(eventLogger)
+        videoPlayer.stop()
+        videoPlayer.release()
 
-    private val onCuesListeners = mutableListOf<(ImmutableList<Cue>) -> Unit>()
+        videoPlayer = getPlayer()
 
-    private fun triggerCues(cues: ImmutableList<Cue>) {
-        onCuesListeners.forEach { it(cues) }
-    }
+        videoPlayer.addListener(playerListener)
+        videoPlayer.addAnalyticsListener(metadataListener)
+        videoPlayer.addAnalyticsListener(eventLogger)
 
-    fun onCues(listener: (ImmutableList<Cue>) -> Unit) {
-        onCuesListeners.add(listener)
+        surfaceView?.let { setVideoSurfaceView(it) }
+        textureView?.let { setVideoTextureView(it) }
+        prepare()
     }
 
     private fun getDataSourceFactory(): DefaultDataSource.Factory {
@@ -227,6 +253,20 @@ class Media3VideoPlayer(
                         } else {
                             triggerError(PlaybackException.UNSUPPORTED_TYPE)
                         }
+                    }
+                }
+
+                androidx.media3.common.PlaybackException.ERROR_CODE_DECODER_INIT_FAILED -> {
+                    if (softDecode == true) {
+                        triggerError(
+                            PlaybackException(
+                                ex.errorCodeName.replace("ERROR_CODE", "MEDIA3_ERROR"),
+                                ex.errorCode
+                            )
+                        )
+                    } else {
+                        softDecode = true
+                        reInitPlayer()
                     }
                 }
 
@@ -536,10 +576,12 @@ class Media3VideoPlayer(
     }
 
     override fun setVideoSurfaceView(surfaceView: SurfaceView) {
+        this.surfaceView = surfaceView
         videoPlayer.setVideoSurfaceView(surfaceView)
     }
 
     override fun setVideoTextureView(textureView: TextureView) {
+        this.textureView = textureView
         videoPlayer.setVideoTextureView(textureView)
     }
 }
