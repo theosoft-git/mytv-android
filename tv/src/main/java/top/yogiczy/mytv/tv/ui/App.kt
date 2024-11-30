@@ -86,7 +86,7 @@ fun App(
     }
 
     LaunchedEffect(settingsViewModel.iptvSourceCurrent) {
-        if (settingsViewModel.iptvSourceCurrent.url.startsWith("http://127.0.0.1:35455")) {
+        if (settingsViewModel.feiyangAllInOneFilePath.isNotBlank()) {
             AllInOne.start(
                 context,
                 File(settingsViewModel.feiyangAllInOneFilePath),
