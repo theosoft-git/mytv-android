@@ -4,26 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroup
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroupList
+import top.yogiczy.mytv.tv.ui.material.LazyRow
+import top.yogiczy.mytv.tv.ui.material.items
 import top.yogiczy.mytv.tv.ui.rememberChildPadding
-import top.yogiczy.mytv.tv.ui.screen.settings.settingsVM
 import top.yogiczy.mytv.tv.ui.theme.MyTvTheme
-import top.yogiczy.mytv.tv.ui.utils.ifElse
-import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChannelsChannelGroupList(
     modifier: Modifier = Modifier,
@@ -34,23 +26,20 @@ fun ChannelsChannelGroupList(
     val channelGroupList = channelGroupListProvider()
     val currentChannelGroup = currentChannelGroupProvider()
     val childPadding = rememberChildPadding()
-    val firstItemFocusRequester = remember { FocusRequester() }
 
     if (channelGroupList.size <= 1) return
 
-    Box(modifier = modifier
-        .fillMaxWidth()
-        .ifElse(settingsVM.uiFocusOptimize, Modifier.saveFocusRestorer { firstItemFocusRequester }),
-        contentAlignment = Alignment.Center) {
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
         LazyRow(
             contentPadding = PaddingValues(start = childPadding.start, end = childPadding.end),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            itemsIndexed(channelGroupList) { index, channelGroup ->
+        ) { runtime ->
+            items(channelGroupList, runtime) { itemModifier, channelGroup ->
                 ChannelsChannelGroupItem(
-                    modifier = Modifier.ifElse(
-                        index == 0, Modifier.focusRequester(firstItemFocusRequester)
-                    ),
+                    modifier = itemModifier,
                     channelGroupProvider = { channelGroup },
                     isSelectedProvider = { channelGroup == currentChannelGroup },
                     onChannelGroupSelected = { onChannelGroupSelected(channelGroup) },

@@ -22,11 +22,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
@@ -44,6 +44,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import top.yogiczy.mytv.core.data.entities.channel.Channel
 import top.yogiczy.mytv.core.data.entities.channel.ChannelGroup
 import top.yogiczy.mytv.core.data.entities.channel.ChannelList
@@ -62,7 +63,6 @@ import top.yogiczy.mytv.tv.ui.utils.saveFocusRestorer
 import top.yogiczy.mytv.tv.ui.utils.saveRequestFocus
 import kotlin.math.max
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ClassicChannelItemList(
     modifier: Modifier = Modifier,
@@ -110,6 +110,23 @@ fun ClassicChannelItemList(
             }
     }
 
+    val coroutineScope = rememberCoroutineScope()
+    val firstFocusRequester = remember { FocusRequester() }
+    val lastFocusRequester = remember { FocusRequester() }
+    fun scrollToFirst() {
+        coroutineScope.launch {
+            listState.scrollToItem(0)
+            firstFocusRequester.saveRequestFocus()
+        }
+    }
+
+    fun scrollToLast() {
+        coroutineScope.launch {
+            listState.scrollToItem(channelList.lastIndex)
+            lastFocusRequester.saveRequestFocus()
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxHeight()
@@ -134,6 +151,19 @@ fun ClassicChannelItemList(
             }
 
             ClassicChannelItem(
+                modifier = Modifier
+                    .ifElse(
+                        index == 0,
+                        Modifier
+                            .focusRequester(firstFocusRequester)
+                            .handleKeyEvents(onUp = { scrollToLast() })
+                    )
+                    .ifElse(
+                        index == channelList.lastIndex,
+                        Modifier
+                            .focusRequester(lastFocusRequester)
+                            .handleKeyEvents(onDown = { scrollToFirst() })
+                    ),
                 channelProvider = { channel },
                 onChannelSelected = { onChannelSelected(channel) },
                 onChannelFavoriteToggle = {
