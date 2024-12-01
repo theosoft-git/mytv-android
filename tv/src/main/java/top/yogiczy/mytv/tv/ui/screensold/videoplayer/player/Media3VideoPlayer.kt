@@ -35,6 +35,7 @@ import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.util.EventLogger
+import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
 import com.google.common.collect.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -91,7 +92,8 @@ class Media3VideoPlayer(
                 .build()
         }
 
-
+        MediaCodecVideoRenderer.skipMultipleFramesOnSameVsync =
+            Configs.videoPlayerSkipMultipleFramesOnSameVSync
         return ExoPlayer.Builder(context)
             .setRenderersFactory(renderersFactory)
             .setTrackSelector(trackSelector)

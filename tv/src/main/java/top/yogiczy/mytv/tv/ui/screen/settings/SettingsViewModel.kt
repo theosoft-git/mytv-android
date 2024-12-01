@@ -491,6 +491,15 @@ class SettingsViewModel : ViewModel() {
             afterSetWhenCloudSyncAutoPull()
         }
 
+    private var _videoPlayerSkipMultipleFramesOnSameVSync by mutableStateOf(false)
+    var videoPlayerSkipMultipleFramesOnSameVSync: Boolean
+        get() = _videoPlayerSkipMultipleFramesOnSameVSync
+        set(value) {
+            _videoPlayerSkipMultipleFramesOnSameVSync = value
+            Configs.videoPlayerSkipMultipleFramesOnSameVSync = value
+            afterSetWhenCloudSyncAutoPull()
+        }
+
     private var _themeAppCurrent by mutableStateOf<AppThemeDef?>(null)
     var themeAppCurrent: AppThemeDef?
         get() = _themeAppCurrent
@@ -665,6 +674,7 @@ class SettingsViewModel : ViewModel() {
         _videoPlayerDisplayMode = Configs.videoPlayerDisplayMode
         _videoPlayerForceAudioSoftDecode = Configs.videoPlayerForceAudioSoftDecode
         _videoPlayerStopPreviousMediaItem = Configs.videoPlayerStopPreviousMediaItem
+        _videoPlayerSkipMultipleFramesOnSameVSync = Configs.videoPlayerSkipMultipleFramesOnSameVSync
         _themeAppCurrent = Configs.themeAppCurrent
         _cloudSyncAutoPull = Configs.cloudSyncAutoPull
         _cloudSyncProvider = Configs.cloudSyncProvider
