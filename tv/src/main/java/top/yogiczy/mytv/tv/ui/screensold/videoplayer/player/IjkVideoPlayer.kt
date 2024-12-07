@@ -16,7 +16,6 @@ import top.yogiczy.mytv.tv.ui.utils.Configs
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import tv.danmaku.ijk.media.player.IjkMediaMeta
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
-import java.io.File
 
 
 class IjkVideoPlayer(
@@ -47,19 +46,6 @@ class IjkVideoPlayer(
     private var cacheSurfaceView: SurfaceView? = null
     private var cacheSurfaceTexture: Surface? = null
     private var updateJob: Job? = null
-    private var av3aModel = File(context.cacheDir, "model.bin")
-
-    init {
-        if (!av3aModel.exists()) {
-            runCatching {
-                context.assets.open("model.bin").use { inputStream ->
-                    av3aModel.outputStream().use { outputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
-                }
-            }
-        }
-    }
 
     private fun setOption() {
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1)
@@ -69,11 +55,6 @@ class IjkVideoPlayer(
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1)
         player.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1)
-        player.setOption(
-            IjkMediaPlayer.OPT_CATEGORY_PLAYER,
-            "av3a_model_path",
-            av3aModel.absolutePath
-        )
     }
 
     override fun prepare(line: ChannelLine) {
@@ -216,6 +197,7 @@ class IjkVideoPlayer(
                     IjkMediaMeta.AV_CH_LAYOUT_7POINT1_WIDE,
                     IjkMediaMeta.AV_CH_LAYOUT_7POINT1_WIDE_BACK,
                     IjkMediaMeta.AV_CH_LAYOUT_OCTAGONAL -> 8
+
                     else -> 0
                 },
                 channelsLabel = when (info.mMeta.mAudioStream?.mChannelLayout) {
