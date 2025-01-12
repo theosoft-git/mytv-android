@@ -67,8 +67,8 @@ class Media3VideoPlayer(
             )
 
 
-        MediaCodecVideoRenderer.skipMultipleFramesOnSameVsync =
-            Configs.videoPlayerSkipMultipleFramesOnSameVSync
+//        MediaCodecVideoRenderer.skipMultipleFramesOnSameVsync =
+//            Configs.videoPlayerSkipMultipleFramesOnSameVSync
         return ExoPlayer
             .Builder(context)
             .setRenderersFactory(renderersFactory)
